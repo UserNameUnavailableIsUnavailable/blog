@@ -1,0 +1,14 @@
+{
+    "docsify.min.js": "cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js",
+    "tex-mml-chtml.js": "cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
+    "docsify-latex@0.js": "cdn.jsdelivr.net/npm/docsify-latex@0",
+    "emoji.min.js": "cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js",
+    "search.min.js": "cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js",
+    "prism-bash.js": "cdn.jsdelivr.net/npm/prismjs@latest/components/prism-bash.js",
+    "prism-python.js": "cdn.jsdelivr.net/npm/prismjs@latest/components/prism-python.js",
+    "docsify-pagination.min.js": "cdn.jsdelivr.net/npm/docsify-pagination@latest/dist/docsify-pagination.min.js",
+    "docsify-copy-code.js": "cdn.jsdelivr.net/npm/docsify-copy-code",
+    "zoom-image.min.js": "cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js",
+    "docsify-footer.min.js": "cdn.jsdelivr.net/npm/@alertbox/docsify-footer/dist/docsify-footer.min.js",
+    "countable.js": "unpkg.com/docsify-count/dist/countable.js",
+}

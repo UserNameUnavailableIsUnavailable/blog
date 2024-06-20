@@ -95,5 +95,7 @@ todo..
 
 [x64 ABI Conventions | Microsoft Learn](https://learn.microsoft.com/en-us/cpp/build/x64-software-conventions)
 
-[System V Application Binary Interface](https://macrohard.fun/docs/x86_64-system-v-abi-0.21.pdf)
+[System V Application Binary Interface (Intel386)](https://macrohard.fun/docs/System%20V%20ABI%20(Intel386).pdf)
+
+[System V Application Binary Interface (AMD64)](https://macrohard.fun/docs/System%20V%20ABI%20(AMD64).pdf)
 
