@@ -1,4 +1,4 @@
-- [..](../README)
 - [SimpleOS 设计与实现](SimpleOS-Implementation/README)
+    - [..](../README)
     - [编译、链接工具的使用](SimpleOS-Implementation/UsageOfCompilerAndLinker.md)
     - [应用程序二进制接口](SimpleOS-Implementation/About_ABI.md)

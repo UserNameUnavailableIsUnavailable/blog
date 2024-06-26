@@ -1,4 +1,8 @@
 {
+    "katex.min.js": "cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js",
+    "katex.min.css": "cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css",
+    "marked@4": "cdn.jsdelivr.net/npm/marked@4",
+    "docsify-katex.js": "cdn.jsdelivr.net/gh/upupming/docsify-katex@latest/dist/docsify-katex.js",
     "docsify.min.js": "cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js",
     "tex-mml-chtml.js": "cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js",
     "docsify-latex@0.js": "cdn.jsdelivr.net/npm/docsify-latex@0",
@@ -11,4 +15,6 @@
     "zoom-image.min.js": "cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js",
     "docsify-footer.min.js": "cdn.jsdelivr.net/npm/@alertbox/docsify-footer/dist/docsify-footer.min.js",
     "countable.js": "unpkg.com/docsify-count/dist/countable.js",
+    "theme-simple.css": "https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css",
+    "theme-simple-dark.css": "https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"
 }

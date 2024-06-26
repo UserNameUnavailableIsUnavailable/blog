@@ -1,4 +1,5 @@
-- [欢迎](./README)
+- [欢迎](/)
 - [SimpleOS 设计与实现](SimpleOS-Implementation/)
 - [Win32 开发](Win32/)
 - [LaTeX 入门](LaTeX/)
+- [CSKZ 教程](kz-guide/)

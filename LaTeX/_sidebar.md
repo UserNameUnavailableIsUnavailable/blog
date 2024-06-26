@@ -1,2 +1,2 @@
-- [..](../README)
 - [LaTeX 入门](LaTeX/README)
+    - [..](../README)

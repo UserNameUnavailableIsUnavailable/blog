@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh_cn">
 
@@ -14,8 +15,8 @@
     <!-- 默认主题 -->
     <!--<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">-->
     <!-- stylesheets -->
-    <link rel="stylesheet" href="static/themes/bright.css" disabled>
-    <link rel="stylesheet" href="static/themes/dark.css">
+    <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="static/theme-simple-dark.css" />
+    <link rel="stylesheet" media="(prefers-color-scheme: light)" href="static/theme-simple.css" />
 
 </head>
 
@@ -71,7 +72,8 @@
       }
     </script>
     <!-- Math -->
-    <script src="static/tex-mml-chtml.js"></script>
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.2/katex.min.js"></script>
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.2/katex.min.css" />
     <script src="static/docsify-latex@0.js"></script>
     <!-- docsify的js依赖 -->
     <script src="static/docsify.min.js"></script>

@@ -1,0 +1,5 @@
+- [KZ 教程](kz-guide/README)
+    - [..](../README)
+    - [准备工作](kz-guide/prepare)
+    - [关于“下蹲”你需要知道的事](kz-guide/about_duck)
+    - [KZ-RUSH 插件长跳数据](kz-guide/about_kzrush_addon)
