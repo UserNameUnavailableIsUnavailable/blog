@@ -6,7 +6,7 @@
 ><br />
 ><b>地速（prestrafe，简称 pre）</b>：起跳后进行空中加速（strafe）前的地面速度，后文如无特别说明，均将其简称为地速。
 ><br />
->*u/s*：<em>units/s</em>，CS 中使用的长度单位为 <em>unit</em>，该单位实际上是<em>英寸</em>。CS 为美国开发的游戏，美国惯用英制长度单位。
+><b>u/s</b>：<b>units/s</b>，CS 中使用的长度单位为 <b>unit</b>，该单位实际上是<b>英寸</b>。CS 为美国开发的游戏，美国惯用英制长度单位。
 
 ## 插件中的主要数据及加速数据
 
@@ -27,7 +27,7 @@
 
 ><b>译注</b>
 ><br />
->小跳和大跳均属于跳跃的范畴，有关小跳的原理参见文章 <a href='https://blog.macrohard.fun/#/kz-guide/about_duck'>译：关于“下蹲”你不知道的事</a>
+>小跳和大跳均属于跳跃的范畴，有关小跳的原理参见文章<a href='https://blog.macrohard.fun/#/kz-guide/about_duck'>译：关于“下蹲”你不知道的事</a>
 
 ![](assets/about_kzrush_addon/strafe-stats.png)
 
@@ -260,7 +260,7 @@ JumpOff 应该在哪种情况下显示在 HUD 中？
 - On：是
 - Off：否
 
-### 4. Always show Strafe Stats（默认：关闭)
+### 4. Always show Strafe Stats（默认：关闭）
 
 在什么情况下显示加速数据？
 
