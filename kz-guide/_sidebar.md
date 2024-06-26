@@ -2,5 +2,5 @@
     - [..](../README)
     - [准备工作](kz-guide/prepare)
     - [关于“下蹲”你需要知道的事](kz-guide/about_duck)
-    - [为什么要接狗跳？——CS 中的“耐力”机制](kz-guide/about-stamina)
+    - [落地为什么要接狗跳？——“耐力”机制](kz-guide/about_stamina)
     - [KZ-RUSH 插件长跳数据](kz-guide/about_kzrush_addon)
