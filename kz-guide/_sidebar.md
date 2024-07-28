@@ -1,6 +1,7 @@
 - [KZ 教程](kz-guide/README)
     - [..](../README)
     - [准备工作](kz-guide/prepare)
+    - [KZ-RUSH 插件长跳数据](kz-guide/about_kzrush_addon)
+    - [关于 FOG](kz-guide/about_fog)
     - [关于“下蹲”你需要知道的事](kz-guide/about_duck)
     - [落地为什么要接狗跳？——“耐力”机制](kz-guide/about_stamina)
-    - [KZ-RUSH 插件长跳数据](kz-guide/about_kzrush_addon)
