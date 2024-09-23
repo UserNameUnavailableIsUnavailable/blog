@@ -1,4 +1,5 @@
 - [欢迎](/)
+- [C++](cpp-notes/)
 - [SimpleOS 设计与实现](SimpleOS-Implementation/)
 - [Win32 开发](Win32/)
 - [LaTeX 入门](LaTeX/)

@@ -1,3 +1,3 @@
-- [C++](CPP/README)
+- [C++](cpp-notes/README)
     - [..](../README)
-    - [Value Categories](CPP/value_categories)
+    - [Value Categories](cpp-notes/value_categories)
