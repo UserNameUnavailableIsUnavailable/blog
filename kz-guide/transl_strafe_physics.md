@@ -1,0 +1,133 @@
+# 译：加速物理学
+
+本节我们将通过半条命已经开放的源码理解加速物理学。我们将着重分析这些文件：<a href="">input.cpp</a>、<a href="">pm_shared.c</a>、<a href="">pm_math.c</a>。
+
+**速度**是一个矢量。我们可以用三元组（在坐标系下的投影表示，即分量表示）或二元组（矢量的模及其方向（单位矢量））来表示一个矢量。
+
+当 $fps$ 为 $100$ 时，CS 引擎将按照每秒 $100$ 次的频率处理鼠标移动和键鼠按键点击事件。然后，引擎通过这些数据计算出玩家模型的行为方式。更确切地说，引擎不知道按下了什么按键，而是获取到诸如“向右走”、“蹲”、“跳”这样的命令。不过，为了讨论方便，我们还是按照按下的按键来进行讨论。
+
+我们将在每一个引擎时间（以帧为单位）按照下面的 5 个步骤来推导玩家的速度：
+
+1. 获取移动按键的状态（`W` `S` `A` `D`）
+
+2. 根据获取到的按键状态得到坐标系中与玩家绑定的速度 `wishful`（玩家期望得到的速度）。
+
+3. 在知道玩家朝向的情况下，找到玩家模型的坐标系与外部世界坐标系（即地图的坐标系）之间的关系（转换矩阵）。
+
+4. 在摩擦数显的情况下（例如在地面行走），则减少玩家当前速度 `current`。
+
+5. 根据步骤 3 中得到的转换矩阵，将 `wishful` 转换成在外部世界坐标系下进行表示。然后，将 `wishful` 以特定的方式加到 `current` 上。相加的方式根据在地面行走和在空中滑翔这些情况而有所不同。
+
+## 第 1 步
+
+首先，看到 **input.cpp** 中的这个函数。
+
+```C++
+/*
+===============
+CL_KeyState
+
+Returns 0.25 if a key was pressed and released during the frame,
+0.5 if it was pressed and held
+0 if held then released, and
+1.0 if held for the entire time
+===============
+*/
+float CL_KeyState (kbutton_t *key)
+{
+	float		val = 0.0;
+	int			impulsedown, impulseup, down;
+	
+	impulsedown = key->state & 2;
+	impulseup	= key->state & 4;
+	down		= key->state & 1;
+	
+	if ( impulsedown && !impulseup )
+	{
+		// pressed and held this frame?
+		val = down ? 0.5 : 0.0;
+	}
+
+	if ( impulseup && !impulsedown )
+	{
+		// released this frame?
+		val = down ? 0.0 : 0.0;
+	}
+
+	if ( !impulsedown && !impulseup )
+	{
+		// held the entire frame?
+		val = down ? 1.0 : 0.0;
+	}
+
+	if ( impulsedown && impulseup )
+	{
+		if ( down )
+		{
+			// released and re-pressed this frame
+			val = 0.75;	
+		}
+		else
+		{
+			// pressed and released this frame
+			val = 0.25;	
+		}
+	}
+
+	// clear impulses
+	key->state &= 1;		
+	return val;
+}
+```
+
+如你所见，该函数返回 'val'，它描述了一些按键的状态。比如，如果按键在上一帧按下并且在当前帧仍处于按下状态，`val` 等于 `1`；若按键在上一帧和当前帧都没有按下，则 `val` 等于 `0`。
+
+## 第 2 步
+
+现在，考查一段同样位于 **input.cpp** 中的代码，这段代码根据按下的按键推导出期望的速度值（`forwardmove`、`sidemove`、`upmove`），这本质上我们在当前帧想要移动的方向。在文章末尾就能搞清除在所有计算完成之后的最终移动方向。
+
+```C++
+		if ( in_strafe.state & 1 )
+		{
+			cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
+			cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
+		}
+
+		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright); // 向右移动命令 +moveright
+		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft); // 向左移动命令 +moveleft
+
+		cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up); // 上浮命令 +moveup
+		cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down); // 下潜命令 +movedown
+
+		if ( !(in_klook.state & 1 ) )
+		{	
+			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
+			cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
+		}	
+
+		// adjust for speed key
+		if ( in_speed.state & 1 )
+		{
+			cmd->forwardmove *= cl_movespeedkey->value;
+			cmd->sidemove *= cl_movespeedkey->value;
+			cmd->upmove *= cl_movespeedkey->value;
+		}
+
+		// clip to maxspeed
+		spd = gEngfuncs.GetClientMaxspeed();
+		if ( spd != 0.0 )
+		{
+			// scale the 3 speeds so that the total velocity is not > cl.maxspeed
+			float fmov = sqrt( (cmd->forwardmove*cmd->forwardmove) + (cmd->sidemove*cmd->sidemove) + (cmd->upmove*cmd->upmove) );
+
+			if ( fmov > spd )
+			{
+				float fratio = spd / fmov;
+				cmd->forwardmove *= fratio;
+				cmd->sidemove *= fratio;
+				cmd->upmove *= fratio;
+			}
+		}
+```
+
+为了得到期望速度的分量，我们使用 `cl_upspeed`（默认为 `320`）、`cl_forwardspeed`（`400`）、`cl_backspeed`（`400`）、cl_sidespeed（`400`）。但是，按下 `Shift` 键时，在半条命中我们得到的速度会乘以 `0.3`，在 CS 1.6 中则乘以 `0.52`。然后，若速度高于最大速度 `maxspeed`（USP/海豹短刀为 `250`），速度将被缩小到等于 `250`。
