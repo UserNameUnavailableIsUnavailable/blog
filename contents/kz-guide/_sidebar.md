@@ -1,5 +1,5 @@
-- [KZ 教程](kz-guide/README)
-    - [..](../README)
+- [KZ 教程](kz-guide/)
+    - [..](../)
     - [准备工作](kz-guide/prepare)
     - [KZ-RUSH 插件长跳数据](kz-guide/about_kzrush_addon)
     - [关于 FOG（上）](kz-guide/about_fog_1)

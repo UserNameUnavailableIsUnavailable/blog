@@ -1,3 +1,0 @@
-- [C++](cpp-notes/README)
-    - [..](../README)
-    - [Value Categories](cpp-notes/value_categories)
