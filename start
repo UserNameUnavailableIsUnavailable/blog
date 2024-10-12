@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-nohup docsify --port 32768 serve $(pwd) >/dev/null 2>&1 &
+nohup docsify --port 32768 serve $(pwd)/contents >/dev/null 2>&1 &
