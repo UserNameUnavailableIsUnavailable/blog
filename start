@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+nohup docsify serve $(pwd) > /dev/null 2>&1 &
