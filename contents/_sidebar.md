@@ -1,4 +1,4 @@
-- [欢迎](/)
+- [前言]()
 - [C++](cpp-notes/)
 - [SimpleOS 设计与实现](SimpleOS-Implementation/)
 - [Win32 开发](Win32/)
