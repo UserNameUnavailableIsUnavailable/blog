@@ -30,6 +30,9 @@ It is easy to get
 
 $$p_{X, Y}(x, y) = p_Y(y)p_{X|Y}(x|y) = p_X(x)p_{Y|X}(y|x).$$
 
+When $X$ and $Y$ are independent, we have $P(X = x, Y = y) = P(X = x) P(Y = y),$ and vice versa. Thus we conclude that $X$ and $Y$ are independent if and only if
+$p_{X, Y}(x, y) = p_X(x) p_Y(y).$
+
 Now let us delve into $p_{X|A}(x)$ by using total probability theorem.
 Given $B_i (i = 1, 2, \cdots, N)$ as a partition of $A$, then,
 
@@ -67,15 +70,15 @@ We define **conditional PDF** of $X$ as $f_{X|A}(x)$.
 
 Then we get
 
-$$P(\{X \in B\} | A) = \frac{\int_B f_{X|A}(x)dx}{P(A)}.$$
+$$P(\{X \in B\} | A) = \frac{\int_B f_{X|A}(x)\,\mathrm{d}x}{P(A)}.$$
 
 So, $\forall B \sub \Omega$, the following equation holds:
 
-$$\int_B f_{X|A}(x)dx = P(\{X \in B\} \cap A).$$
+$$\int_B f_{X|A}(x)\,\mathrm{d}x = P(\{X \in B\} \cap A).$$
 
 Let $B = (x, x + \delta)(\delta > 0)$,
 
-$$\lim_{\delta \rightarrow 0^+} \int_x^{x + \delta}f_{X|A}(x)dx = \lim_{\delta \rightarrow 0^+} f_{X|A}(x) \delta = \lim_{\delta \rightarrow 0^+} P(\{x \le X \le x + \delta\} | A);$$
+$$\lim_{\delta \rightarrow 0^+} \int_x^{x + \delta}f_{X|A}(x)\,\mathrm{d}x = \lim_{\delta \rightarrow 0^+} f_{X|A}(x) \delta = \lim_{\delta \rightarrow 0^+} P(\{x \le X \le x + \delta\} | A);$$
 
 Then we get
 
@@ -91,7 +94,7 @@ Since $P(A) \gt 0, \delta \gt 0$ and ${P(\{x \le X \le x + \delta\} \cap A)}$ is
 
 Let $B = (-\infin, +\infin)$, we see that
 
-$$\int_{-\infin}^{+\infin} f_{X|A}(x) dx = \frac{P(\{X \in (-\infin, +\infin)\} \cap A)}{P(A)} = \frac{P(\Omega \cap A)}{P(A)} = 1,$$ and thus $f_{X|A}(x)$ is legitimate.
+$$\int_{-\infin}^{+\infin} f_{X|A}(x) \,\mathrm{d}x = \frac{P(\{X \in (-\infin, +\infin)\} \cap A)}{P(A)} = \frac{P(\Omega \cap A)}{P(A)} = 1,$$ and thus $f_{X|A}(x)$ is legitimate.
 
 ### PDF conditioned on another continuous *r.v.*
 
@@ -113,10 +116,33 @@ P(\{x \le X \le x + \delta\} | \{Y = y\}) &= \lim_{\epsilon \rightarrow 0^+} \fr
 \end{split}
 $$
 
-Note that we've already known that $X$'s PDF conditioned on $A$:
+Note that we've alrea\,\mathrm{d}y known that $X$'s PDF conditioned on $A$:
 
 $$f_{X|A}(x) = \lim_{\delta \rightarrow 0^+} \frac{P(\{x \le X \le x + \delta\} | A)}{\delta}.$$
 
 We write $X$'s PDF conditioned on $Y$ as
 
 $$f_{X|Y}(x|y) = \lim_{\delta \rightarrow 0^+} \frac{\int_x^{x + \delta} f_{X, Y}(x, y)}{\delta f_Y(y)} = \frac{f_{X, Y}(x, y)}{f_Y(y)}.$$
+
+When $X$ and $Y$ are independent, we get
+
+$$P(\{x \le X \le x + \delta\} | \{Y = y\}) = P(\{x \le X \le x + \delta\}) = \frac{\int_x^{x + \delta} f_{X, Y}(x, y) \,\mathrm{d}x}{f_Y(y)}.$$
+
+Then we devide both side by $\delta$, and let $\delta \rightarrow 0^+.$
+
+$$f_X(x) = \lim_{\delta \rightarrow 0^+} \frac{P(x \le X \le x + \delta)}{\delta} = \lim_{\delta \rightarrow 0^+} \frac{f_{X, Y}(x, y) \, \delta}{f_Y(y) \, \delta} = \frac{f_{X, Y}(x, y)}{f_{Y}(y)}.$$
+
+That is, when $X$ and $Y$ are independent,
+
+$$f_{X, Y}(x, y) = f_X(x) f_Y(y).$$
+
+It is easy to verify that when we have $f_{X, Y}(x, y) = f_X(x) f_Y(y)$, $X$ and $Y$ are independent.
+
+$$\int_{x}^{x + \delta} \mathrm{d}x \int_{y}^{y + \epsilon} f_{X, Y}(x, y) \, \mathrm{d}y = \int_{x}^{x + \delta} f_X(x) \,\mathrm{d}x \int_{y}^{y + \epsilon} f_Y(y) \,\mathrm{d}y,$$
+
+i.e., for any $\delta, \epsilon \ge 0$
+
+$$P(\{X \in [x, x + \delta]\} \cap \{Y \in [y, y + \epsilon]\}) = P(X \in [x, x + \delta]) P(Y \in [y, y + \epsilon]).$$
+
+**Therefore, we can conclude that $X$ and $Y$ are independent if and only if
+$f_{X, Y}(x, y) = f_X(x) f_Y(y).$**
