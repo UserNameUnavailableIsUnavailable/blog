@@ -1,0 +1,3 @@
+# Vector Calculus Notes
+
+Most of the contents are from *Vector Calculus, Linear Algebra and Differential Forms — a Unified Approach*. To keep the contents precise and passingly practice my English writing, notes are taken in English, with some of very important terms annotated in Chinese.

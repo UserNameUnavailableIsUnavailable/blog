@@ -1,4 +1,0 @@
-- [SimpleOS 设计与实现](SimpleOS-Implementation/)
-    - [..](../)
-    - [编译、链接工具的使用](SimpleOS-Implementation/UsageOfCompilerAndLinker)
-    - [应用程序二进制接口](SimpleOS-Implementation/About_ABI)

@@ -1,5 +1,5 @@
 <hr />
-<a href="https://beian.miit.gov.cn" target="_blank">苏ICP备2023037770号-1</a>
+<a href="https://beian.miit.gov.cn" target="_blank">苏ICP备2023037770 号-1</a>
 &emsp;
 &emsp;
 <img src="https://macrohard.fun/assets/公安.png" />
