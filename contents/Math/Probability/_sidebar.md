@@ -1,3 +1,3 @@
 - [返回](/Math/)
-- [Probability](Math/Probability)
+- [Probability](Math/Probability/)
     - [Conditions](/Math/Probability/Conditions)
