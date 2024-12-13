@@ -1,0 +1,4 @@
+- [返回](/)
+- [Linux 备忘录](/LinuxMemo/)
+    - [设置 Ubuntu 默认终端](/LinuxMemo/SetUbuntuDefaultTerminal)
+    - [让 GNOME Nautilus 更像 Windows 11 Explorer](/LinuxMemo/CustomizeNautilusExtensions)
