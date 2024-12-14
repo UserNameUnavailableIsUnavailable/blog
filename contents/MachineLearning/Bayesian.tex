@@ -1,0 +1,90 @@
+\documentclass[UTF8, a4paper, oneside]{article}
+\usepackage[heading=true]{ctex}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section{由极大似然估计推导代价函数}
+
+以回归问题为例，假设在一天中的若干个时间点对气温进行观测，通过观测结果尝试拟合出气温随时间变化的关系曲线。
+为此，引入随机变量 $X \sim \mathcal{U}[u, u + c]$ 表示观测时刻，$Y$ 表示观测温度，并假设观测结果受到扰动因素 $V \sim \mathcal{N}(0, \frac{1}{\beta})$ 的影响，其中 $\beta = \frac{1}{\sigma^2}$，称作\textbf{精度（precision）}。扰动的存在使得在 $X = x$ 时刻进行多次观测得到的结果不唯一。
+一个很自然的想法是认为温度在某个不受扰动影响的实际值 $T$ 附近波动，观测时刻 $X$ 一旦确定，$T$ 也就唯一确定，即 $Y = T + V$。
+
+我们的目标是找出 $Y$ 与 $X$ 之间的关系，为此，我们需要通过在不同时刻 $\boldsymbol{X} = (X_1, X_2, \cdots, X_N)$ 对温度进行观测，得到观测温度 $\boldsymbol{Y} = (Y_1, Y_2, \cdots, Y_N)$，这一过程即对应于从总体 $(X, Y)$ 中进行取样的过程。
+对于 $X_i$ 时刻，有关系 $Y_i = T_i + V_i$ 成立。其中，$T_i$ 就是我们拟合的目标。例如，采用多项式拟合时，$T = \tau(X; \boldsymbol{w}) = \boldsymbol{w}^{\top} (X^0, X^1, X^2, \cdots, X^N)$，其中 $\boldsymbol{w} = (w_0, w_1, \cdots, w_N)$ 为拟合多项式参数。频率主义学派认为 $w$ 是一个固定的常数，这个常数描绘了这个“时间-温度”数学模型的本质特征，因此，我们的最终目标是获得一个与参数 $\boldsymbol{w}$ 尽可能接近的估计值 $\boldsymbol{\hat{w}}$。
+
+鉴于 $V \sim \mathcal{N}(0, \frac{1}{\beta})$，可以得到总体在 $X$ 时刻确定的情况下，温度的观测值服从正态分布，其条件密度为：
+$$f_{Y|X}(y|x; \boldsymbol{w}, \beta) = \sqrt{\frac{\beta}{2\;\pi}}\exp\left(\frac{\beta\;\left(x-\tau\left(x;\boldsymbol{w}\right)\right)^2}{2}\right)$$
+
+因此，总体 $(X, Y)$ 的联合密度为：
+\begin{equation} \label{jpdf}
+f_{X, Y}(x, y; \boldsymbol{w}, \beta) = f_{Y|X}(y|x) f_X(x) = 
+c\;\sqrt{\frac{\beta}{2\;\pi}}\exp\left(\frac{\beta\;\left(x-\tau\left(x;\boldsymbol{w}\right)\right)^2}{2}\right)
+\end{equation}
+
+记样本 $(X_i, Y_i)$ 的样本值为 $(x_i, y_i)$。\textbf{频率主义（frequentist）}学派认为，正是由于总体自身的特征，致使从总体中抽取到这些样本值的概率很大（对于连续型随机变量，就是这些样本值附近的概率密度分布较为密集），这一观点的理论基础正是\textbf{大数定律（Large Number Theorem）}。
+
+由于各个样本 $(X_i, Y_i)$ 彼此独立，因此 $\{(X_1, Y_1) = (x_1, y_1), (X_2, Y_2) = (x_2, y_2), \cdots, (X_N, Y_N) = (x_N, y_N)\}$ 处概率密度可以写成：
+\begin{equation} \label{ml}
+\mathcal{L}_0(\boldsymbol{w}, \beta) = \prod_{i = 1}^{N} f_{X, Y}(x_i, y_i; \boldsymbol{w}, \beta)
+\end{equation}
+
+上面的概率密度函数被称作\textbf{似然函数}，它本质上是各个样本分别取得其对应样本值处的联合概率密度，频率主义学派认为在 $N$ 充分大时，正是由于该联合概率密度充分大，才产生出“样本取得其对应样本值”这种结果。因此，通过调整参数 $\boldsymbol{w}$ 和 $\beta$ 的取值，使得在 $(\boldsymbol{w}, \beta = \boldsymbol{\hat{w}}, hat{\beta})$ 时，似然函数 $\mathcal{L}_0(\boldsymbol{w}, \beta)$ 取得最大值，而 $\boldsymbol{\hat{w}}$ 和 $\hat{\beta}$ 也就理所当然地作为对于参数 $\boldsymbol{w}$ 和 $\hat{\beta}$ 的估计值。这样的一整套流程就被称作\textbf{最大似然估计（Maximum Likelihood, ML）}。
+
+$$\boldsymbol{\hat{w}} = \arg \max_{\boldsymbol{w}} \mathcal{L}_0(\boldsymbol{w}, \beta)$$
+
+$$\hat{\beta} = \arg \max_{\beta} \mathcal{L}_0(\boldsymbol{w}, \beta)$$
+
+实际场景下，一般对似然函数 $\mathcal{L}_0$ 取负对数得到 $\mathcal{L} = -\ln \mathcal{L}_0$，将累乘转换为累加、最大值优化转换为最小值优化。
+
+\begin{gather}
+\boldsymbol{\hat{w}} = \arg \min_{\boldsymbol{w}} \mathcal{L}(\boldsymbol{w}, \beta)\\
+\hat{\beta} = \arg \min_{\beta} \mathcal{L}(\boldsymbol{w}, \beta)
+\end{gather}
+
+由 $(\ref{jpdf})$ 整理得到：
+
+\begin{align} \label{ml_ex}
+&\mathrel{\phantom{=}}
+\mathcal{L}(\boldsymbol{w}, \beta) \notag \\
+&=-\ln \mathcal{L}_0(\boldsymbol{w}, \beta) \notag \\
+&=-\frac{\beta}{2}\;\sum_{i=1}^{N}\left(x_i-\tau\left(x_i;\boldsymbol{w}\right)^2\right) - \frac{N}{2} \ln{\beta} - N \ln c + \frac{N \ln (2\pi)}{2}
+\end{align}
+
+显然，要使得 $(\ref{ml_ex})$ 最小，就要使 $\frac{1}{2}\;\sum_{i=1}^{N}\left(x_i-\tau\left(x_i;\boldsymbol{w}\right)^2\right)$ 取最大值，对应的 $\boldsymbol{w}$ 取值便作为 $\boldsymbol{\hat{w}}$，这也就是平方代价函数（Squared Error, SE）背后的数学原理。
+由于取样时的样本数量 $N$ 是固定的，因此还可在 SE 的基础上对误差求均值，进而获得均方代价函数（Mean Squared Error, MSE）。
+
+\section{由最大后验概率推导代价函数}
+
+贝叶斯定理建立了先验知识与后验知识之间的联系，贝叶斯学派（Bayesian School）主张尽可能地在推导过程中使用先验知识。
+
+具体到本例中，频率主义学派在给定样本 $S = {(X_i, Y_i)} \; (i = 1, \cdots, N)$ 后，根据样本值采用极大似然估计确定出参数 $\boldsymbol{w}$，频率主义学派认为 $\boldsymbol{w}$ 是一个未知常量，对 $\boldsymbol{w}$ 的特性不做任何假设。
+
+贝叶斯学派的视角与频率主义学派有所不同，贝叶斯学派倾向于将未知的 $\boldsymbol{w}$ 描述成一个随机变量 $\boldsymbol{W}$（即在确定 $\boldsymbol{W}$ 取值之前，$\boldsymbol{W}$ 是随机变化的），使用概率模型描述 $\boldsymbol{W}$ 的概率分布情况。鉴于 $W$ 是一个变量，因此后文将 $T$ 的拟合函数记为 $\tau(\boldsymbol{W},X)$。
+
+对于连续型随机变量 $\boldsymbol{W}$，概率密度衡量了 $\boldsymbol{W} = \boldsymbol{w}$ 附近概率的集中程度，集中程度越高，则说明 $P(\boldsymbol{w} \preceq \boldsymbol{W} \preceq \boldsymbol{w}+\boldsymbol{\epsilon} | S)$ 越大，进而说明在给定数据集 $S$ 的条件下，$\boldsymbol{W} = \boldsymbol{w}$ 作为参数能够使模型的拟合准确度更高。
+
+还记得下面的贝叶斯定理在连续型随机变量情形下的表述吗？
+\begin{equation} \label{bayes}
+f_{\boldsymbol{W}|S}(\boldsymbol{w}|s)
+=\frac{f_{S|\boldsymbol{W}}(s|\boldsymbol{w}) f_{\boldsymbol{W}}(\boldsymbol{w})}{f_S(s)}
+=\frac{f_{S|\boldsymbol{W}}(s|\boldsymbol{w}) f_{\boldsymbol{W}}(\boldsymbol{w})}{\int_{-\infty}^{+\infty} f_{S|\boldsymbol{W}}(s|\boldsymbol{w}) f_{\boldsymbol{W}}(\boldsymbol{w})\;\mathrm{d}\mathrm{w}}
+\end{equation}
+
+后验概率密度被表达为先验概率密度 $f_S(s)$ 和 $f_{\boldsymbol{W}}(\boldsymbol{w})$ 和另一个条件概率密度 $f_{S|\boldsymbol{W}}(s|\boldsymbol{w})$。$f_{\boldsymbol{W}}(\boldsymbol{w})$ 是在进行任何观测之前，对拟合函数固有特性的描述，它是一种先验知识。例如 $W$ 只可能取某个范围内的实数就是一种先验知识。$f_S(s)$ 是对观测结果的可能情形的描述，也是一种先验知识。而 $f_{S|\boldsymbol{W}}(s|\boldsymbol{w})$ 则是参数 $W$ 取值确定的情况下，对观测结果 $S$ 可能情形的描述。回顾 $(\ref{jpdf})$、$(\ref{ml})$，不难看出，这里的 $f_{S|\boldsymbol{W}}(s|\boldsymbol{w})$ 本质上就是似然函数。后验概率 $f_{\boldsymbol{W}|S}(\boldsymbol{w}|s)$ 由先验概率和似然函数相乘得出，表示在给定观测结果 $S = s$ 的情况下，$\boldsymbol{W}$ 取值落在 $\boldsymbol{W} = \boldsymbol{w}$ 附近的概率大小，该概率密度越大这实际上就说明在观测集 $S = s$ 上，$\boldsymbol{W} = \boldsymbol{w}$ 可靠程度越高。于是，
+我们引入了\textbf{最大后验概率（Maximum a Posteriori Probability, MAP）}法则，通过最大化后验概率（或概率密度）确定 $\boldsymbol{W}$ 的取值，进而获得拟合结果。观察后验概率大小的表达式 $(\ref{bayes})$，不难看出后验概率是关于 $\boldsymbol{w}$ 的函数，而 $f_S{s}$ 取值与 $w$ 无关，因此最大化后验概率实际上可以转换为如下形式的优化问题：
+\begin{gather}
+\boldsymbol{\hat{w}} = \arg \max_{\boldsymbol{w}} f_{S|\boldsymbol{W}}(s|\boldsymbol{w})\;f_{\boldsymbol{W}}(\boldsymbol{w})
+\end{gather}
+
+不难发现，ML 实际上是 MAP 在参数 $\boldsymbol{W}$ 服从均匀分布时的特殊情况，此时似然函数取得最大值，后验概率（或概率密度）也一起取得最大值。
+
+由 MAP 推导得出代价函数的过程除了依赖于似然函数，还依赖于先验概率 $f_{\boldsymbol{W}}(\boldsymbol{w})$，但求解方式仍然类似，故这里不再赘述。
+
+\section{}
+
+
+
+
+
+\end{document}
