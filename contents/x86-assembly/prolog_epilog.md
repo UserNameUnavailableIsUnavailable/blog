@@ -1,4 +1,4 @@
-# Prolog 和 Epilog
+# PROLOG 和 EPILOG
 
 所谓 **prolog**，就是指被调用方采用如下方式分配栈帧的过程。
 

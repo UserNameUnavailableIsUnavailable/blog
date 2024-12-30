@@ -1,5 +1,6 @@
 - [前言](/)
 - [C++](/cpp-notes/)
+- [x86 汇编](/x86-assembly/)
 - [Linux 备忘录](/LinuxMemo/)
 - [数学](/Math/)
 - [SimpleOS 设计与实现](/SimpleOS/)

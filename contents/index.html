@@ -12,9 +12,9 @@
     <link rel="icon" href="https://macrohard.fun/assets/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="https://macrohard.fun/assets/favicon.ico" type="image/x-icon" />
     <!-- 默认主题 -->
-    <!--<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">-->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">
     <!-- stylesheets -->
-    <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="static/theme-simple-dark.css" />
+    <!-- <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="static/theme-simple-dark.css" /> -->
     <link rel="stylesheet" media="(prefers-color-scheme: light)" href="static/theme-simple.css" />
 
 </head>
@@ -70,27 +70,30 @@
 //       }
       }
     </script>
-    <!-- Math -->
+    <!-- docsify -->
+    <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/docsify/4.12.2/docsify.min.js"></script>
+    <!-- 语法高亮 -->
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/prism/components/prism-c.min.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/prism/components/prism-cpp.min.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/prism/components/prism-clike.min.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/prism/components/prism-nasm.min.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/prism/components/prism-powershell.min.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/prism/components/prism-bash.min.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/prism/components/prism-python.min.js"></script>
     <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.2/katex.min.js"></script>
     <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.2/katex.min.css" />
-    <script src="static/docsify-latex@0.js"></script>
-    <!-- docsify的js依赖 -->
-    <script src="static/docsify.min.js"></script>
     <!-- 图片放大缩小支持 -->
-    <script src="static/zoom-image.min.js"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/docsify/4.12.2/plugins/zoom-image.min.js"></script>
     <!-- 搜索功能支持 -->
-    <script src="static/search.min.js"></script>
-    <!--字数统计-->
-    <script src="static/countable.js"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/docsify/4.12.2/plugins/search.min.js"></script>
+    <!-- emoji -->
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/docsify/4.12.2/plugins/emoji.min.js"></script>
     <!-- code render-->
-    <script src="static/prism-bash.js"></script>
-    <script src="static/prism-python.js"></script>
-    <!--<script src="static/docsify-pagination.min.js"></script>-->
-    <script src="static/docsify-copy-code.js"></script>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/docsify-copy-code/2.1.1/docsify-copy-code.min.js"></script>
+    <script src="static/docsify-countable.js"></script>
     <script src="static/docsify-footer.min.js"></script>
-  <!-- gitalk支持-->
-<!--  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">
-
+<!--
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk/dist/gitalk.css">
   <script src="static/gitalk.min.js"></script>
   <script src="static/gitalk.min.js"></script>
   <script>

@@ -4,7 +4,7 @@
 
 在 Windows 或 GNU/Linux 平台下进行汇编、C 语言混合编程期间碰到了很多问题，查阅文档后做一下总结。
 
-造成问题的最主要原因是混淆了 IA-32 和 x86_64 体系结构下的调用约定。32 位平台和 64 位平台分别采用不同的二进制接口规范。IA-32 体系结构下的 C 调用约定等内容并不适用于 x86_64 体系结构下。
+造成问题的最主要原因是混淆了 x86 和 x64 体系结构下的调用约定。32 位平台和 64 位平台分别采用不同的二进制接口规范。x86 下的 C 调用约定等内容并不适用于 x86_64 体系结构下。
 
 ## Windows 平台
 
@@ -20,7 +20,7 @@
 
 下面这段汇编函数被 C 语言调用，汇编函数 `function` 没有在调用 `printf` 之前为整型参数预留内存空间，在执行过程中出现了 Segmentation Fault（Powershell 中查看 `$?` 的值确定程序是否执行出错），在 GDB 中可以看到段错误消息。通过后续 GDB 调试可以确定，`printf` 执行过程中修改了栈帧上方 32 字节的内存空间，进而导致 `function` 返回地址被篡改，返回到错误的位置造成了段错误。因此，在调用前为寄存器参数预留的空间是绝对必须的。
 
-```Assembly
+```nasm
 global function
 extern printf
 format: db "Number: %d, String: %s", 0x0d, 0x0a, 0x00
@@ -38,7 +38,7 @@ function:
   ret
 ```
 
-```C
+```c
 extern void function(int iVal, const char* lpcStr);
 int main()
 {
@@ -46,7 +46,7 @@ int main()
 }
 ```
 
-```Powershell
+```powershell
 # Powershell
 nasm function.asm -o function.obj -f elf32
 clang function.obj main.c -o main
