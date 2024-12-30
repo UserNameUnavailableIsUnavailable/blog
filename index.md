@@ -3,7 +3,7 @@ title: DZY 的个人博客
 sidebar: false
 ---
 
-个人博客 [blog.macrohard.fun](https://blog.macrohard.fun) 的源代码，目前已经改为使用 [quarto](https://quarto.org/) 搭建，尚在迁移中。
+个人博客 [blog.macrohard.fun](https://blog.macrohard.fun)，目前已经改为使用 [quarto](https://quarto.org/) 搭建，尚在迁移中。
 
 ## C++
 
