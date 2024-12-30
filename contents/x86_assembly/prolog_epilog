@@ -1,0 +1,28 @@
+# Prolog 和 Epilog
+
+所谓 **prolog**，就是指被调用方采用如下方式分配栈帧的过程。
+
+```nasm
+push rbp
+mov rbp, rsp
+sub rsp, 16 * N
+```
+
+在 x64 指令集中，`enter` 指令可以做到与上者等价的效果，但实践中基本不用。StackOverflow 有关于此问题的详细解释。[^1]
+
+```nasm
+enter 16 * N, 0
+```
+
+[^1]: [<code>enter</code> 指令与标准 prolog 的性能差异](https://stackoverflow.com/a/5964507)
+
+
+**Epilog** 则指从当前函数返回时清理栈帧的区域。
+
+```nasm
+mov rsp, rbp
+pop rbp
+ret
+```
+
+对应的，`leave` 指令也可以做到清空栈帧的效果，实践中也基本不用。
