@@ -1,10 +1,10 @@
 <hr />
 <div style="text-align: center;">
     <p>
-        <a href="https://beian.miit.gov.cn" target="_blank">苏 ICP 备 2023037770 号-1</a>
+        <img src="/assets/工信部.ico" />&ensp;<a href="https://beian.miit.gov.cn" target="_blank">苏 ICP 备 2023037770 号-1</a>
     </p>
     <p>
-        <img src="https://macrohard.fun/assets/公安.png" />&ensp;<a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=32048202000362" target="_blank">苏公网安备 32048202000362 号</a>
+        <img src="/assets/公安.ico" />&ensp;<a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=32048202000362" target="_blank">苏公网安备 32048202000362 号</a>
     </p>
     <p>
         <img style="height:24px!important;margin-left:3px;vertical-align:text-bottom;" src="/assets/creative-commons-cc.svg" />
