@@ -1,0 +1,13 @@
+website:
+  sidebar:
+    - id: win32-app-develop
+      title: Win32 应用开发
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /win32-app-develop/
+        - text: 字符编码
+          href: /win32-app-develop/character-encoding/

@@ -1,0 +1,15 @@
+website:
+  sidebar:
+    - id: linux-memo
+      title: Linux 备忘录
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /linux-memo/
+        - text: 设置 Ubuntu 默认终端
+          href: /linux-memo/set-ubuntu-default-terminal/
+        - text: nautilus 自定义
+          href: /linux-memo/customize-nautilus-extensions/

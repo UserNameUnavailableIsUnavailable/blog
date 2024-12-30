@@ -1,3 +1,0 @@
-- [返回](/)
-- [C++](/cpp-notes/)
-    - [Categories](/cpp-notes/value_categories)

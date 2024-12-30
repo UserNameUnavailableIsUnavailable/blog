@@ -1,4 +1,0 @@
-- [返回](/)
-- [x86 汇编](/x86-assembly/)
-    - [PROLOG 和 EPILOG](/x86-assembly/prolog_epilog)
-    - [x64 版本的“你好，世界！”](/x86-assembly/hello_world_x64)

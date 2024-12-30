@@ -1,0 +1,15 @@
+website:
+  sidebar:
+    - id: vector-calculus
+      title: Vector Calculus
+      style: docked
+      search: true
+      contents:
+        - text: Back
+          href: /
+        - text: Preface
+          href: /vector-calculus/
+        - text: Basic Concepts
+          href: /vector-calculus/basic-concepts/
+        - text: Five Big Theorems
+          href: /vector-calculus/five-big-theorems/

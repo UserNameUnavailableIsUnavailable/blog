@@ -1,0 +1,21 @@
+website:
+  sidebar:
+    - id: kz-guide
+      title: KZ 教程
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /kz-guide/
+        - text: 准备工作
+          href: /kz-guide/prepare/
+        - text: RUSH 插件
+          href: /kz-guide/rush-addon/
+        - text: 小跳详解
+          href: /kz-guide/duck/
+        - text: 耐力机制
+          href: /kz-guide/stamina/
+        - text: 加速机理
+          href: /kz-guide/strafe-physics/

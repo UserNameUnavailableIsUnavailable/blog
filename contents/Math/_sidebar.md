@@ -1,4 +1,0 @@
-- [返回](/)
-- [数学](Math/)
-    - [概率论](/Math/Probability/)
-    - [向量微积分](/Math/VectorCalculus/)

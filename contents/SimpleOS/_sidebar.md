@@ -1,4 +1,0 @@
-- [返回](/)
-- [SimpleOS 设计与实现](/SimpleOS/)
-    - [编译、链接工具的使用](/SimpleOS/UsageOfCompilerAndLinker)
-    - [应用程序二进制接口](/SimpleOS/About_ABI)

@@ -1,0 +1,42 @@
+project:
+  output-dir: blog
+  type: website
+  title: "Macrohard Blog"
+author: admin
+website:
+  navbar:
+    background: primary
+    search: true
+    left:
+      - text: 首页
+        href: index.html
+      - text: 关于
+        href: about.html
+  site-url: "https://blog.macrohard.fun/"
+format:
+  html:
+    theme: solar
+    toc: true
+    html-math-method:
+      method: katex
+      url: https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.2/ # 字节跳动 CDN
+    # embed-resources: true
+include-in-header:
+  text: |
+    <link rel="shortcut icon" href="https://macrohard.fun/assets/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="https://macrohard.fun/assets/favicon.ico" />
+    <link rel='stylesheet' href="https://show.macrohard.fun/style.css" />
+include-after-body: _footer.md
+execute:
+  cache: true
+metadata-files:
+  - _sidebar.yml
+  - cpp-notes/_sidebar.yml
+  - win32-app-develop/_sidebar.yml
+  - x86-assembly/_sidebar.yml
+  - linux-memo/_sidebar.yml
+  - machine-learning/_sidebar.yml
+  - probability/_sidebar.yml
+  - vector-calculus/_sidebar.yml
+  - SimpleOS/_sidebar.yml
+  - kz-guide/_sidebar.yml

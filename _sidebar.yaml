@@ -1,0 +1,6 @@
+website:
+  sidebar:
+    - id: blog
+      contents:
+        - text: Macrohard
+          href: /

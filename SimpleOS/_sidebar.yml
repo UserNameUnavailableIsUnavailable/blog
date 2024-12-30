@@ -1,0 +1,15 @@
+website:
+  sidebar:
+    - id: SimpleOS
+      title: SimpleOS 设计与实现
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /SimpleOS/
+        - text: 应用程序二进制接口
+          href: /SimpleOS/application-binary-interface
+        - text: 编译器和链接器的使用
+          href: /SimpleOS/usage-of-compiler-and-linker

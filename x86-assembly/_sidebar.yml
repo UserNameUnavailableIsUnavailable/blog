@@ -1,0 +1,15 @@
+website:
+  sidebar:
+    - id: x86-assembly
+      title: x86 汇编
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /x86-assembly/
+        - text: PROLOG 和 EPILOG
+          href: /x86-assembly/prolog-and-epilog/
+        - text: x64 版本的“你好，世界！”
+          href: /x86-assembly/hello-world-x64/

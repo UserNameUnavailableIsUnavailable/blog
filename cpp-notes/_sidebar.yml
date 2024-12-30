@@ -1,0 +1,13 @@
+website:
+  sidebar:
+    - id: cpp-notes
+      title: C++ 笔记
+      style: "docked"
+      search: true
+      contents:
+        - text: Back
+          href: /
+        - text: Preface
+          href: /cpp-notes/
+        - text: Value Categories
+          href: /cpp-notes/value-categories/

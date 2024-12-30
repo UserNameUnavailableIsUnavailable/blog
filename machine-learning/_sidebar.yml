@@ -1,0 +1,13 @@
+website:
+  sidebar:
+    - id: machine-learning
+      title: 机器学习
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /machine-learning/
+        - text: 关于错误函数
+          href: /machine-learning/error-functions
