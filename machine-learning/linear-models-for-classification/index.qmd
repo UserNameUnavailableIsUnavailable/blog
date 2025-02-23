@@ -1,0 +1,19 @@
+# 使用线性模型的分类器
+
+本节内容对应原书第 4 章。
+
+## 判别函数
+
+使用线性模型处理 $K$ 分类任务时，判别函数具有如下形式：
+
+$$y_k = \boldsymbol{w}_k^\mathsf{T}\boldsymbol{x} + w_{k0}, k = 1, \cdots, K$$
+
+将特征 $\boldsymbol{x}$ 输入各个判别函数后，取输出值最大的判别器对应类别作为特征 $\boldsymbol{x}$ 所属类别，即：
+
+$\forall\; k \ne j$，若有 $y_k > y_j$，则判定 $\boldsymbol{x} \in \mathcal{C}_k$。
+
+由这样的判别函数所确定的各个判别区域都是凸集。
+
+为了表述上的简便，通常记 $\widetilde{\boldsymbol{x}} = \begin{bmatrix}1&x_1&x_2&\cdots&x_D\end{bmatrix}^\mathsf{T}$，$\widetilde{\boldsymbol{w}_k} = \begin{bmatrix}w_{k0}&w_{k1}&\cdots&w_{kD}\end{bmatrix}$
+
+## 

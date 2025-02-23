@@ -1,0 +1,13 @@
+# Useful Tools
+
+## Triangle Inequality
+
+For any norm $\|\cdot\|$, the following inequation holds:
+
+$$\|\boldsymbol{a} + \boldsymbol{b}\| \le \|\boldsymbol{a}\| + \|\boldsymbol{b}\|$$
+
+## Cauchy-Schwartz Inequality
+
+$$\left(\boldsymbol{x}^\mathsf{T}\boldsymbol{y}\right)^2 \le \boldsymbol{x}^\mathsf{T}\boldsymbol{x}\; \cdot \;\boldsymbol{y}^\mathsf{T}\boldsymbol{y}$$
+
+$$|\boldsymbol{x}^\mathsf{T}\boldsymbol{y}| \le \|\boldsymbol{x}\|_2 \cdot \|\boldsymbol{y}\|_2.$$

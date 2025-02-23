@@ -1,0 +1,19 @@
+website:
+  sidebar:
+    - id: CSOL-Utilities
+      title: CSOL 集成工具
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /CSOL-Utilities/
+        - text: 综述
+          href: /CSOL-Utilities/01_overview/
+        - text: 中断
+          href: /CSOL-Utilities/02_interrupt/
+        - text: 命令
+          href: /CSOL-Utilities/03_command/
+        - text: 武器
+          href: /CSOL-Utilities/04_weapon/

@@ -1,0 +1,84 @@
+---
+title: Lagrange 法
+---
+
+## 理论基础
+
+对于如下带等式约束的优化问题，其中 $f(\boldsymbol{x})$ 为可微凸函数，且该问题对偶间隙为 $0$：
+
+$$
+\begin{equation}
+\begin{split}
+\min\;&f(\boldsymbol{x})\\
+\text{s.t.}\;&\boldsymbol{Ax}=\boldsymbol{b}
+\end{split}
+\end{equation}
+$$
+
+其拉格朗日函数：
+
+$$\mathcal{L}(\boldsymbol{x, \boldsymbol{\mu}})=f(\boldsymbol{x}) + \boldsymbol{\mu}^\mathsf{T}\left(\boldsymbol{Ax} - \boldsymbol{b}\right)$$
+
+由于问题的对偶间隙为 $0$，说明拉格朗日函数的鞍点 $(\boldsymbol{x}^*, \boldsymbol{\mu}^*)$ 对应于原问题和对偶问题的最优解。
+
+在已知 $\boldsymbol{\mu}^*$ 为对偶问题最优解的情况下：
+
+$$
+\begin{equation}
+\boldsymbol{x}^*=\arg\min_{\boldsymbol{x}} \mathcal{L}(\boldsymbol{x}, \boldsymbol{\mu}^*)
+\label{eq_Primal}
+\end{equation}
+$$
+
+类似地，在已知 $\boldsymbol{x}$ 为对偶问题最优解的情况下：
+
+$$
+\begin{equation}
+\boldsymbol{\mu}^* = \arg\max_{\boldsymbol{\mu}} \mathcal{L}(\boldsymbol{x}^*, \boldsymbol{\mu})
+\label{eq_Dual}
+\end{equation}
+$$
+
+## 梯度下降
+
+求解具备强对偶性的凸问题本质上就是求解 KKT 条件的过程，原问题的 KKT 条件如下：
+
+$$
+\begin{cases}
+\boldsymbol{A}\boldsymbol{x}^*-\boldsymbol{b} = \boldsymbol{0}\\
+\nabla _{\boldsymbol{x}}\mathcal{L}(\boldsymbol{x}^*, \boldsymbol{\mu}^*) = \nabla f(\boldsymbol{x}^*) + \boldsymbol{A}^\mathsf{T}\boldsymbol{\mu}^* = \boldsymbol{0}\\
+\nabla _{\boldsymbol{\mu}}\mathcal{L}(\boldsymbol{x}^*, \boldsymbol{\mu}^*) = \boldsymbol{Ax}^* - \boldsymbol{b}
+\end{cases}
+$$
+
+以使用梯度下降法分别求解原问题 $\eqref{eq_Primal}$ 和对偶问题 $\eqref{eq_Dual}$：
+
+$$
+\begin{equation}
+\boldsymbol{x}_{(k+1)} = \boldsymbol{x}_{(k)} - \alpha_{(k)}\left(\nabla f(\boldsymbol{x}_{(k)}) + \boldsymbol{A}^\mathsf{T}\boldsymbol{\mu}^*\right)
+\label{eq_PrimalIter}
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\boldsymbol{\mu}_{(k+1)} = \boldsymbol{\mu}_{(k)} - \alpha_{(k)}\left(\boldsymbol{A}\boldsymbol{x}^* - \boldsymbol{b} \right)
+\label{eq_DualIter}
+\end{equation}
+$$
+
+很显然，我们无法提前知道 $\boldsymbol{\mu}^*$ 亦或是 $\boldsymbol{x}^*$。不过，我们可以将 $\eqref{eq_PrimalIter}$ 和 $\eqref{eq_DualIter}$ 中的 $\boldsymbol{\mu}^*$ 和 $\boldsymbol{x}^*$ 分别替换为其第 $k$ 轮迭代中的近似值 $\boldsymbol{\mu}_{(k)}$ 和 $\boldsymbol{x_{(k)}}$。
+
+因此，最终我们得到如下迭代公式：
+
+$$
+\begin{equation}
+\boldsymbol{x}_{(k+1)} = \boldsymbol{x}_{(k)} - \alpha_{(k)}\left(\nabla f(\boldsymbol{x}_{(k)}) + \boldsymbol{A}^\mathsf{T}\boldsymbol{\mu}_{(k)}\right)
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\boldsymbol{\mu}_{(k+1)} = \boldsymbol{\mu}_{(k)} - \alpha_{(k)}\left(\boldsymbol{A}\boldsymbol{x}_{(k)} - \boldsymbol{b} \right)
+\end{equation}
+$$

@@ -1,7 +1,7 @@
 website:
   sidebar:
     - id: machine-learning
-      title: 机器学习
+      title: 模式识别与机器学习
       style: docked
       search: true
       contents:
@@ -9,5 +9,5 @@ website:
           href: /
         - text: 前言
           href: /machine-learning/
-        - text: 关于错误函数
-          href: /machine-learning/error-functions
+        - text: 概率分布
+          href: /machine-learning/probability-distributions/

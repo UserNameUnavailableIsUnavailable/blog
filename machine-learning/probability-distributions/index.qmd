@@ -1,0 +1,91 @@
+# 概率分布
+## 前置知识
+
+### 欧拉积分
+
+-   第一类欧拉积分（Beta 函数）：$\mathrm{B}\left(x, y\right) = \int_0^1 t^{x-1} \left(1-t\right)^{y-1}\;\mathrm{d}t\;\left(x, y \in \left(0, +\infty\right)\right).$
+-   第二类欧拉积分（Gamma 函数）：$\Gamma\left(x\right) = \int_0^{+\infty} t^{x-1} e^{-t}\;\mathrm{d}t\;\left(x \in \left(0, +\infty\right)\right).$
+
+$$\mathrm{B}\left(x, y\right) = \frac{\Gamma\left(x+y\right)}{\Gamma\left(x\right)\;\Gamma\left(y\right)}.$$
+
+### 迭代期望定理
+
+固定 $\boldsymbol{Y}$ 的取值，$\mathbb{E}\left[\boldsymbol{Y}|\boldsymbol{X}\right]$ 是关于 $\boldsymbol{X}$ 的函数，因此是随机变量。固定条件 $\boldsymbol{X}$，遍历所有 $\boldsymbol{Y}$ 的取值，$\mathbb{E}_{\boldsymbol{Y}}\left[\boldsymbol{Y}|\boldsymbol{X}\right]$ 即为条件 $\boldsymbol{X}$ 下 $\boldsymbol{Y}$ 的期望，在此基础上遍历所有可能的条件 $\boldsymbol{X}$，即得 $Y$ 的**全期望（total expectation）**。
+
+$$
+\mathbb{E}_{\boldsymbol{Y}}\left[\boldsymbol{Y}\right]
+= \mathbb{E}_{\boldsymbol{X}}\left[\mathbb{E}_{\boldsymbol{Y}}\left[\boldsymbol{Y}|\boldsymbol{X}\right]\right].
+$$
+
+### 全方差定理
+
+$\boldsymbol{Y}$ 被条件 $\boldsymbol{X}$ 划分为样本 $\boldsymbol{Y}|\boldsymbol{X}$。$\mathbb{E}\left[\mathrm{var}\left[\boldsymbol{Y}|\boldsymbol{X}\right]\right]$ 衡量了样本内的差异，$\mathrm{var}\left[\mathbb{E}\left[\boldsymbol{Y}|\boldsymbol{X}\right]\right]$ 衡量了各个样本之间的差异。
+
+$$\mathrm{var}_{\boldsymbol{Y}}\left[\boldsymbol{Y}\right]
+= \mathbb{E}_{\boldsymbol{X}}\left(\mathrm{var}_{\boldsymbol{Y}}\left[\boldsymbol{Y}|\boldsymbol{X}\right]\right) + \mathrm{var}_{\boldsymbol{X}}\left[\boldsymbol{\mathbb{E}_{\boldsymbol{Y}}\left[\boldsymbol{Y}|\boldsymbol{X}\right]}\right].
+$$
+
+### 独热编码和哑编码
+
+对于抛硬币这样的事件，我们可以用 $0$ 和 $1$ 两个数字分别标识硬币不同面朝上的状态，这就是一种编码方案。
+对于掷骰子这样的随机变量可能取值有三个及以上的情况，我们可以将随机变量的取值范围扩展到 $\left\{1, 2, 3, 4, 5, 6\right\}$，即一维随机变量取值分别对应各个类别，但这种做法会给数学模型泛化带来麻烦。
+为了方便地标记这样的互斥状态，常采用**独热编码方案（$1$-of-$K$ scheme, aka., one-hot scheme）**。若有 $K$ 种互斥的状态，则对应的随机变量就有 $K$ 维。以掷骰子为例，朝上点数为一就可记作 $\left[1, 0, 0, 0, 0, 0\right]^\mathsf{T}$。这样，就可以用向量来标记随机变量，并且向量的每一维仍然保持二值特性。
+所谓**哑编码方案（dummy scheme）**是指在独热编码方案的基础上，去掉随机变量中一个冗余的维度（即用全 $0$ 来编码随机变量的一种状态）。例如，按照独热编码方案标记抛硬币可能产生的结果：$\left[1, 0\right]^\mathsf{T}$ 和 $\left[0, 1\right]^\mathsf{T}$。若去掉随机变量的的第一维，就得到了 $0$ 和 $1$，即我们惯用的二值变量编码方案。
+
+### Mahalanobis 距离
+
+$\boldsymbol{X}$ 和 $\boldsymbol{Y}$ 是随机变量，$\boldsymbol{\Sigma}$ 是 $\boldsymbol{X}$ 与 $\boldsymbol{Y}$ 的协方差矩阵。用于计算两个**测度无关**的独立样本之间的相似程度。
+
+$$d = \sqrt{\left(\boldsymbol{x} - \boldsymbol{y}\right)^\mathsf{T}\boldsymbol{\Sigma}^{-1}\left(\boldsymbol{x} - \boldsymbol{y}\right)}.$$
+
+## 二值离散型随机变量的分布
+
+### Bernoulli 分布
+
+$$\mathrm{Bernoulli}\left(k;p\right) = p^k\left(1 - p\right)^{1-k}\;\left(k \in \left\{0, 1\right\}, \;p \in \left[0, 1\right]\right).$$
+
+### 二项分布
+
+$$\mathrm{Binomial}\left(k;N,p\right) = \binom{N}{m} p^k\left(1-p\right)^{N-k}\;\left(k \in \left\{0, 1, 2, \cdots, N\right\}, p \in \left[0, 1\right]\right).$$
+
+### Beta 分布
+
+Beta 分布是二项分布的共轭分布。
+
+$$\mathrm{Beta}\left(p;a,b\right) = \mathrm{B}\left(a, b\right)\;p^{a-1}\left(1-p\right)^{b-1}.$$
+
+对二项分布参数估计问题，在已知参数设定为 $a, b$ 的 Beta 先验分布，$l, m$ 为先验知识（分别为 $l+m$ 次试验中硬币正面和反面朝上的次数）的情况下，其后验概率为：
+
+$$
+\begin{align}
+&\mathcal{P}\left(p|l,m;a,b\right)\notag\\
+=&{}\frac{\mathcal{P}\left(l,m|p\right)\;\mathcal{P}\left(p;a,b\right)}{\int_0^1 \mathcal{P}\left(l,m|p\right)\;\mathcal{P}\left(p;a,b\right)\;\mathrm{d}p}\notag.
+\end{align}
+$$
+
+## 多值离散型随机变量的分布
+
+在引入独热编码方案后，我们可以很容易地将二值变量的分布推广到多值变量的分布。
+
+### 多项分布
+
+$$\mathrm{Multinomial}\left(\boldsymbol{k};N,\boldsymbol{p}\right) = \binom{N}{k_1\ k_2\ \cdots\ k_K}\prod_{l = 1}^{K}p_l^{k_l}\;\left(\sum_{l=1}^{K}p_l = 1, p_l \ge 0\right)$$
+
+### Dirichlet 分布
+
+Dirichlet 分布是对 Beta 分布的推广，在形式上与 Beta 分布基本相似。
+
+$$\mathrm{Dirichlet}\left(\boldsymbol{p}|\boldsymbol{\alpha}\right) = \frac{\Gamma\left(\boldsymbol{1}^\mathsf{T}\boldsymbol{\alpha}\right)}{\prod_{l=1}^{K}\Gamma\left(\alpha_l\right)}\prod_{l=1}^{K}p_l^{\alpha_{l} - 1}\;\left(\sum_{l=1}^{K}p_l = 1, p_{l} \ge 0\right).$$
+
+由于约束条件 $\sum_{l=1}^{K}p_l = 1, p_{l} \ge 0$ 的存在，$p$ 实际上分布在 $K-1$ 维的**单纯形** [^1] 中。
+
+[^1]: 单纯形是仿射无关点集的凸包，是一类特殊的多边形。设有仿射无关点集 $\left\{\boldsymbol{v}_0, \boldsymbol{v_1}, \cdots, \boldsymbol{v}_k\right\}$，由该点集构成的单纯形定义为：$C = \mathbf{conv}\left\{\boldsymbol{v}_0, \boldsymbol{v_1}, \cdots, \boldsymbol{v}_k\right\} = \left\{\boldsymbol{\theta^\mathsf{T}\boldsymbol{v}}\left|\boldsymbol{\theta} \succeq \boldsymbol{0}, \boldsymbol{1}^\mathsf{T}\boldsymbol{\theta}=1\right.\right\}.$
+
+## 连续型随机变量的分布
+
+### Gaussian 分布
+
+- 一维情形：
+$$\mathcal{N}\left(x;\mu,\sigma^{2}\right) = \sqrt{\frac{1}{2\pi\sigma^2}}\exp\left\{-\frac{1}{2\sigma^2}\left(x-\mu\right)^2\right\}.$$
+- 多维情形：
+$$\mathcal{N}\left(\boldsymbol{x};\boldsymbol{\mu}, \boldsymbol{\Sigma}\right) = \left(\frac{1}{2\pi}\right)^\frac{D}{2}\left(\frac{1}{|\boldsymbol{\Sigma}|}\right)^\frac{1}{2}\exp\left\{-\frac{1}{2}\left(\boldsymbol{x}-\boldsymbol{\mu}\right)^\mathsf{T}\boldsymbol{\Sigma}^{-1}\left(\boldsymbol{x}-\boldsymbol{\mu}\right)\right\}.$$
