@@ -13,7 +13,9 @@ website:
           href: /CSOL-Utilities/01_overview/
         - text: 中断
           href: /CSOL-Utilities/02_interrupt/
+        - text: 交互
+          href: /CSOL-Utilities/03_interaction/
         - text: 命令
-          href: /CSOL-Utilities/03_command/
+          href: /CSOL-Utilities/04_command/
         - text: 武器
-          href: /CSOL-Utilities/04_weapon/
+          href: /CSOL-Utilities/05_weapon/

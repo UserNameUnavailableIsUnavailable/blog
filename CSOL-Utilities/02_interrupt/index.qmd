@@ -32,8 +32,8 @@ function Runtime:sleep(milliseconds)
             local end_tp = Runtime:get_running_time()
             local real_sleep_time = end_tp - start_tp
             milliseconds = milliseconds - real_sleep_time -- 减去实际睡眠时间
-        else
-            Runtime:sleep(milliseconds)
+        else -- milliseconds <= 15
+            Sleep(milliseconds)
             break
         end
     end
