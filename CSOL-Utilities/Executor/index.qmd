@@ -20,3 +20,13 @@
 - Executor：实现执行器的各项关键功能
 - Start：执行器入口
 - Main：主模块，导入各个子模块后进入执行器入口
+
+## 关于 Logitech® G Hub 编程接口
+
+罗技 G Hub 编程接口文档可通过软件中“编写 API 脚本”选项查阅。最新版本的罗技 G Hub 已经完全支持 Lua 5.4 语法。因此，执行器**不保证**能够正常运行于旧版本的罗技软件中，旧版本的罗技软件一般支持到 Lua 5.1 语法。
+
+> 不过，执行器在实现时，将**尽量**只使用 Lua 5.1 语法特性。
+
+![点击“编写 API 脚本”查阅Logitech® G Hub API 参考文档](assets/LGHUB_API_specs.avif)
+
+![最新版本已经提供对 Lua 5.4 语法及部分标准库的支持](assets/Lua54_support.avif)

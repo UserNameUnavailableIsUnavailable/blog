@@ -59,7 +59,7 @@ weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SE
 
 将 `weapon` 的购买按键序列设置为 `B` `J` `8` `7`。
 
-> 该字段默认值为 `{}`。
+> 该字段默认值为 `{}`。另外，如果有切换 T / CT 阵营武器购买菜单的需要，请像上例中在购买按键序列中添加 `J` 键。
 
 <hr />
 
@@ -80,6 +80,25 @@ weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SE
 原型：`Weapon:new(obj)`
 
 - `obj` 类型为 `table`，其中应包含 `Weapon` 对象的初始化列表。此外，还可以在其中添加一些自定义的字段。
+
+在 `new` 方法的实现中，将武器对象 `self` 自身（调用 `Weapon:new` 时，`self` 即为 `Weapon`）设置为新武器对象的元表（metatable），因此，当缺省上文中提到的成员字段时，将使用上文提及的默认缺省值。
+
+```lua
+---创建一个武器对象
+---@param obj table 初始化列表。
+---@return table # 武器对象
+function Weapon:new(obj)
+    obj = obj or {}
+    self.__index = self
+    setmetatable(obj, self)
+    Console:information(
+        "新增武器/装备：" .. obj.name
+    )
+    return obj
+end
+```
+
+> 要了解有关 Lua 中元表的语法特性，请参阅 Lua 官方指南 [13 – Metatables and Metamethods](https://www.lua.org/pil/13.html) 小节。
 
 #### 示例
 
@@ -119,6 +138,8 @@ Weapon:new{
 
 原型：`Weapon:switch_without_delay()`
 
+> 在先前版本的实际使用反馈中，发现携带“燃爆 Ignite-10”作为配件装备后，会在购买后出现“自雷”的情况，为此问题，引入了此函数，用于在购买配件武器后，立即切换到其他武器，并通过忽略切换延迟减小对后续切换到其他武器的影响。
+
 <hr />
 
 ### `abandon`
@@ -135,9 +156,11 @@ Weapon:new{
 
 原型：`Weapon:attack()`
 
-> 该函数具有默认的实现。当需要定制常规武器攻击方式时，可重写此函数。在重写时需要注意执行一次 `attack` 的时间一般不超过 10 秒。
+`attack` 函数具有默认的实现。当需要定制常规武器攻击方式时，可重写此函数。在重写时需要注意执行一次 `attack` 的时间一般不超过 10 秒。若对默认的 `attack` 实现不满意，可以重写 `Weapon` 类中 `attack` 的实现。
 
-以下示例创建了定制武器万钧神威，重写了 `attack` 方法。
+默认的 `attack` 在执行攻击操作时，玩家角色朝随机的方向运动，视角水平方向作匀速直线运动，视角垂直方向作简谐运动（上下俯仰），并使用设定的武器攻击按钮进行攻击操作。
+
+以下示例创建了定制武器万钧神威，并重写了 `attack` 方法。
 
 ```lua
 Weapon:new{
@@ -235,3 +258,146 @@ Weapon:new{
 ```
 
 <hr />
+
+## 武器列表
+
+`WeaponList.lua` 是执行器在挂机时使用的武器或装备列表文件。集成工具共提供两种挂机模式，分别为**默认（default）**模式和**扩展（extended）**模式，以适应不同玩家定制化的需求。
+
+### 护甲
+
+挂机时，可以自行决定是否定期购买护甲。`Armor` 为 `WeaponList.lua` 中使用的护甲对象。例如，下面的代码将全甲的购买按键序列定义为 `B` `8` `2`。
+
+```lua
+Armor = Weapon:new{
+    name = "防弹衣+头盔",
+    purchase_sequence = { Keyboard.B, Keyboard.EIGHT, Keyboard.TWO }
+}
+```
+
+> 护甲定义为默认模式和扩展模式所共享。
+
+### 配件武器
+
+在执行器中，配件武器是指挂机过程中携带的辅助武器，例如带有生命配件的手枪等。**配件武器仅作辅助之用，永远不会用于攻击。**
+
+默认模式下的配件武器购买列表为 `DefaultPartWeapons`，扩展模式下的配件武器购买列表为 `ExtendedPartWeapons`。
+
+下面的代码向默认模式下的配件武器列表中添加了三件武器，针对扩展模式的配置方式与此完全相同。挂机时，每隔一段时间购买列表中的配件武器（顺序购买，每次购买一件配件武器）。
+
+```lua
+DefaultPartWeapons = {
+    Weapon:new{
+        name = "星战前线·加特林",
+        number = Weapon.NULL,
+        purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.TWO, Keyboard.FOUR }
+    },
+    Weapon:new{
+        name = "FNP-45战损版",
+        number = Weapon.NULL,
+        purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.ONE, Keyboard.TWO }
+    },
+    Weapon:new{
+        name = "燃爆Ignite-10",
+        number = Weapon.NULL,
+        purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SEVEN }
+    }
+}
+```
+
+> 鉴于配件武器永远不参与攻击，仅作辅助之用，因此在单个配件武器列表中不建议添加超过 3 件配件武器。
+
+### 常规武器
+
+常规武器是指采用常规的左键或右键方式进行攻击的武器。默认模式下的常规武器列表为 `DefaultConventionalWeapons`，扩展模式下的常规武器列表为 `ExtendedConventionalWeapons`。
+
+下面的例子展示了向 `DefaultConventionalWeapons` 添加一件常规武器，其中 `Delay.NORMAL` 是预设的延时，其值为 100 毫秒，你也可以将其设定为某一个具体的数字。
+
+```lua
+DefaultConventionalWeapons = {
+    Weapon:new{
+        name = "幻境！光棱剑",
+        number = Weapon.MELEE,
+        purchase_sequence = { Keyboard.B, Keyboard.G },
+        switch_delay = Delay.NORMAL,
+        attack_button = Mouse.LEFT,
+    }
+}
+```
+
+> 你可以向常规武器列表中添加任意数量的武器或装备，挂机时，会从常规武器列表中等概率随机地抽取一件武器使用一段时间（大约为 8 秒），然后抽取下一件武器。如果你需要增大使用某一件武器地概率，则可以在其中多次重复添加该武器。
+
+### 定制武器
+
+某一些武器（如神鬼开天、万钧神威）同时具备常规攻击和特殊攻击的能力。若需要使用其特殊攻击，则需要在创建该武器对象时，重写默认的 `attack` 方法。重写 `attack` 时，建议确保一轮攻击的时间不超过 10 秒（**这不是强制性要求，但这样做可以避免被注册在 Runtime 中定期执行回合重置的中断处理函数打断，若不关心 `attack` 是否会被打断，可以忽略此建议**）。
+
+下面的例子展示了向扩展常规武器列表中添加一件定制武器：
+
+```lua
+ExtendedConventionalWeapons = {
+    Weapon:new{
+        name = "神鬼开天/魔神开天",
+        switch_delay = Delay.SHORT,
+        number = Weapon.MELEE,
+        purchase_sequence = {
+            Keyboard.B,
+            Keyboard.NINE,
+            Keyboard.SIX
+        },
+        attack = function (self)
+            Mouse:press(Mouse.RIGHT)
+            local sensitivity_x = 1 - 0.8 * math.random()
+            local sensitivity_y = 1 - 0.8 * math.random()
+            local direction = Utility:random_direction()
+            local start_time = Runtime:get_running_time()
+            local last_switch_time = 0
+            repeat					local current_time = Runtime:get_running_time()
+                if current_time - last_switch_time > 1000
+                then
+                    self:switch_without_delay()
+                    last_switch_time = current_time
+                end
+                if Mouse:move_relative(math.floor(direction * 100 * sensitivity_x), math.floor(math.sin(current_time / 1000) * 100 * sensitivity_y), Delay.MINI)
+                then
+                    break
+                end
+            until Runtime:get_running_time() - start_time > 6000
+            Mouse:release(Mouse.RIGHT, 200)
+            Mouse:press(Mouse.LEFT, 1000)
+            Keyboard:press(Keyboard.R, 200)
+            Keyboard:release(Keyboard.R)
+            Mouse:release(Mouse.LEFT)
+        end
+    }
+}
+```
+
+### 特殊武器
+
+与常规武器不同，像圣翼皓印这样的特殊武器没有固定的使用方法，因此必须手动指定。默认模式下使用的特殊武器列表为 `DefaultSpecialWeapons`，扩展模式下使用的特殊武器列表为 `ExtendedSpecialWeapons`。圣翼皓印的定义已经在上文中提供过，故此处提供特殊武器【幽浮】控制核心的定义，并将其添加到扩展特殊武器列表。
+
+```lua
+ExtendedSpecialWeapons = {
+    Weapon:new{
+        name = "【幽浮】控制核心",
+        purchase_sequence = {},
+        switch_delay = 500,
+        number = Weapon.GRENADE,
+        template_name = "【幽浮】控制核心",
+        COOL_DOWN_TIME = 60,
+        last_start_moment = 0,
+        ---为该武器重写 `use` 方法。
+        ---@param self Weapon
+        use = function (self)
+            local current_time = DateTime:get_local_timestamp()
+            if (current_time - self.last_start_moment > self.COOL_DOWN_TIME)
+            then
+                self:switch()
+                self.last_start_moment = current_time
+                Mouse:click(Mouse.LEFT, 500)
+            end
+        end
+    }
+}
+```
+
+> 特殊武器一般为 4 号位武器，建议在列表中只添加 1 件。
