@@ -1,42 +1,70 @@
-# “伪”中断机制
+# 执行器运行时
+
+执行器提供了 `Runtime` 类，其中封装了罗技 G Hub 提供的 API 接口，实现了一些执行器在运行时所必需的功能，其中最核心的功能为“伪”中断。
+
+## “伪”中断机制
 
 罗技 G Hub 在解释执行 Lua 代码时是单线程的，在采用轮询方式设计执行器模块时，会因为缺少中断机制而造成轮询的过程变得复杂化。例如，要想在传统的轮询方案中实现挂机中每隔 10 秒执行一次复活/回合重置、执行器随时启停等功能是十分麻烦的。随着集成工具功能不断增多，轮询的逻辑将变得越来越复杂且难于维护。因此，尽可能地在编程框架中引入中断机制是十分必要的。集成工具在执行器中引入了 `Runtime` 类，其中实现了基础的中断功能。
 
-## 中断发生的条件
+### 中断发生的条件
 
 在使用罗技 G Hub 编程接口执行按键、点击操作时，都需要使用 `Sleep` 函数在每次操作后附加一定的延迟时间，因此，可以在 `Sleep` 的基础上封装一个新的 `Runtime:sleep` 函数作为统一的延时调用接口，所有的按键延时都通过 `Runtime:sleep` 来完成。调用 `Runtime:sleep` 后，首先执行中断处理函数，响应各类中断事件，在中断事件处理完毕后，再执行实际的睡眠操作。如果你有一定的操作系统基础知识，上述中断处理的流程应该很好理解。
 
-为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。
+为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。下面为 `Runtime:sleep` 的实现。
 
 ```lua
----@param milliseconds integer | nil 挂起的时间，不保证挂起的时间是否精确，尤其是在有中断事件需要处理时。
+---@param milliseconds integer 挂起的时间。
+---@param precise boolean | nil 是否需要尽力保证精度。
 ---@return nil
-function Runtime:sleep(milliseconds)
-    -- 罗技API不支持真正的中断，故而当某个过程主动将自己挂起时（即调用Runtime:sleep)视为自发中断，此时可以处理外部事件
+function Runtime:sleep(milliseconds, precise)
+    -- 罗技 API 不支持真正的中断，故而当某个过程主动将自己挂起时（即调用Runtime:sleep)视为自发中断，此时可以处理外部事件
     local before_int = Runtime:get_running_time()
-    -- 执行中断处理
+
+    -- 先执行中断处理
     self:interrupt_handler()
-    local after_int = Runtime:get_running_time()
+
+    -- 中断处理结束后，再校验参数（无论如何都要进行中断处理，即便参数非法）
+    milliseconds = math.floor(milliseconds) -- 防止提供小数时间，若类型非 `number` 会返回 `nil`
     if (type(milliseconds) ~= "number" or milliseconds < 0)
     then
         return
     end
-    -- 减去中断处理耗时
-    milliseconds = milliseconds - (after_int - before_int)
-    milliseconds = math.floor(milliseconds)
+
+    local granularity = 15 -- 默认休眠时间片粒度为 15
+    if (precise)
+    then
+        granularity = 35 -- 对精度有额外要求，将粒度置为 35
+    end
+
+    local after_int = Runtime:get_running_time()
+    local int_time = after_int - before_int
+
+    milliseconds = milliseconds - int_time -- 去除中断处理耗时
     -- 将长时间的休眠拆分为若干短时间休眠，确保 `Runtime` 常常保持对程序的控制权
     while (milliseconds > 0)
     do
-        if (milliseconds > 15)
+        if (milliseconds > granularity)
         then
             local start_tp = Runtime:get_running_time()
-            Runtime:sleep(15)
+            Runtime:sleep(granularity)
             local end_tp = Runtime:get_running_time()
-            -- 计算真实睡眠时间
             local real_sleep_time = end_tp - start_tp
             milliseconds = milliseconds - real_sleep_time -- 减去实际睡眠时间
-        else -- milliseconds <= 15
-            Sleep(milliseconds)
+        elseif (milliseconds == granularity)
+        then
+            Sleep(granularity)
+            milliseconds = milliseconds - granularity -- 冗余语句，增加可维护性，会被编译优化去除
+            break
+        else -- 0 < milliseconds < granularity
+            if (precise) -- 需要较高精度，剩余时间采用忙等
+            then
+                local begin = Runtime:get_running_time()
+                repeat
+                until Runtime:get_running_time() - begin >= milliseconds -- 忙等以确保精度符合要求
+            else
+                Sleep(milliseconds) -- 按照剩余时间直接休眠
+            end
+            milliseconds = 0 -- 冗余语句，增加可维护性，会被编译优化去除
             break
         end
     end
@@ -109,4 +137,69 @@ Runtime:register_interrupt_handler(
 
 ## 中断现场
 
-在操作系统中，中断发生时，需要为当前执行流保存中断现场，然后根据需要切换至另一个执行流，这是操作系统中多任务调度的基础。集成工具也提供了类似的功能，不过，在开发工作中，中断现场保存功能几乎用不到，这主要和集成工具一次只执行一项功能有关，即**除了中断处理外，只存在一条执行流，并不存在执行流并发的情况**，故本文档对此部分内容暂时不予介绍。
+在操作系统中，中断发生时，需要为当前执行流保存中断现场，然后根据需要切换至另一个执行流，这是操作系统中多任务调度的基础。集成工具也提供了类似的功能，不过，在开发工作中，中断现场保存功能几乎用不到，这主要和集成工具一次只执行一项功能有关，即**除了中断处理外，只存在一条执行流，并不存在执行流并发的情况**，故本节对此部分内容暂时不予详细介绍。
+
+## 字段
+
+本小节介绍 `Runtime` 中定义的默认字段，Lua 语法特性允许你在任何时候根据自己需要向其中新增自定义字段。例如，当需要在中断回调函数中使用一些“静态”的变量时，可以将这些变量添加到 `Runtime` 中。
+
+### `manual_flag`
+
+说明：手动接管标志。
+
+注解：执行器中默认注册用于即时启停的中断处理函数，当用户发出开始手动接管请求（默认为按下左右 `Ctrl` 键）后，`manual_flag` 被置为 `true`；用户发出结束手动接管请求（默认为按下左右 `Alt` 键）后，`manual_flag` 被置为 `false`。手动接管期间，使用 `Mouse` 类或 `Keyboard` 类中的成员函数发出的任何鼠标、键盘操作将被跳过（即不执行相应的键鼠操作）。
+
+### `interrupt_flag`
+
+说明：中断标志位。
+
+注解：调用 `sleep` 后，在执行中断处理前，`interrupt_flag` 将被置为 `true`，以避免在后续调用 `sleep` 时产生中断嵌套，进而对当前中断处理造成不必要的影响。中断处理结束后，`interrupt_flag` 恢复为 `false`。
+
+### `interrupt_handler_list`
+
+说明：中断处理函数列表。
+
+注解：**此列表不应手动修改**，而应该使用 `register_interrupt_handler` 和 `unregister_interrupt_handler` 进行中断处理函数的注册和注销。
+
+## 方法
+
+### `sleep`
+
+说明：挂起当前执行流指定时间。
+
+原型：`Runtime:sleep(milliseconds, precise)`
+
+参数：
+
+- `milliseconds`：挂起时间，类型为 `integer`。
+- `precise`：是否需要精确定时，类型为 `boolean | nil`。
+
+注解：挂起时，会将 `milliseconds` 分割为若干更短的时间片，并按照时间片为单位进行休眠。当 `precise` 置为 `false` 或 `nil`（缺省值）时，不保证挂起时间的精确度，这适用于对挂起时间精度要求不高的场景；当 `precise` 置为 `true` 或其他真值时，将尽力保证挂起时间精确，但这样做会带来额外的性能开销。
+
+> 注意，若中断处理函数执行时间过长，即便指定 `precise` 为 `true` 也无法保证挂起时间精度。因此，若休眠时间很短，且对休眠时间精度有特别要求，则在设计中断处理函数时，需要谨慎考虑其时间消耗。
+
+### `register_interrupt_handler`
+
+说明：注册中断处理函数。
+
+原型：`Runtime:register_interrupt_handler(callback)`
+
+参数：
+
+- `callback`：中断处理回调函数，类型为 `function`。
+
+返回值：中断处理函数在中断处理函数列表中的索引，有效的索引为大于 `0` 的整数。
+
+注解：若 `callback` 不是 `function` 类型，返回值为 `0`。
+
+### `unregister_interrupt_handler`
+
+说明：注销中断处理函数。
+
+原型：`Runtime:unregister_interrupt_handler(index)`
+
+参数：
+
+- `index`：中断处理函数在中断处理函数列表中的索引，类型为 `integer`。此值为在调用 `register_interrupt_handler` 时返回。
+
+返回值：若操作成功，返回 `true`，否则返回 `false`。
