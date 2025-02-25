@@ -1,4 +1,4 @@
-# `Weapon` 类
+# 定义武器或装备
 
 `Weapon` 类用于定义挂机时使用的武器或装备。
 
@@ -9,6 +9,8 @@
 `name` 标识武器或装备的名称，类型为字符串。
 
 > 该字段默认值为 `"未知"`。
+
+<hr />
 
 ### `number`
 
@@ -24,6 +26,8 @@
 
 > 该字段默认值为 `Weapon.NULL`。
 
+<hr />
+
 ### `attack_button`
 
 标识**常规**武器或装备的攻击按钮，可取如下值：
@@ -35,11 +39,15 @@
 
 > 该字段默认值为 `Mouse.LEFT`。
 
+<hr />
+
 ### `switch_delay`
 
 标识武器或装备的切换延迟，单位为毫秒
 
 > 该字段默认值为 `150`。
+
+<hr />
 
 ### `purchase_sequence`
 
@@ -53,12 +61,15 @@ weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SE
 
 > 该字段默认值为 `{}`。
 
+<hr />
+
 ### `RELOAD_KEY`
 
 重新装填按键，该设定与配置面板中的提供的重新装填按钮设定选项保持一致。在使用“圣翼皓印”、“万钧神威”等定制武器时，特殊攻击将通过 `RELOAD_KEY` 触发。
 
 > 该字段默认为 `Keyboard.R`。
 
+<hr />
 
 ## 函数
 
@@ -66,7 +77,7 @@ weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SE
 
 构造新武器或装备。
 
-`Weapon:new(obj)`
+原型：`Weapon:new(obj)`
 
 - `obj` 类型为 `table`，其中应包含 `Weapon` 对象的初始化列表。此外，还可以在其中添加一些自定义的字段。
 
@@ -84,33 +95,45 @@ Weapon:new{
 }
 ```
 
+<hr />
+
 ### `purchase`
 
 用于在挂机时购买指定的武器或装备。
 
-`Weapon:purchase()`
+原型：`Weapon:purchase()`
+
+<hr />
 
 ### `switch`
 
 切换至指定的武器或装备，并在切换后等待指定的切换延迟时间。
 
-`Weapon:switch()`
+原型：`Weapon:switch()`
+
+<hr />
 
 ### `switch_without_delay`
 
 切换至指定的武器或装备，切换后忽略切换延迟时间。
 
+原型：`Weapon:switch_without_delay()`
+
+<hr />
+
 ### `abandon`
 
 丢弃指定的武器。
 
-`Weapon:abandon()`
+原型：`Weapon:abandon()`
+
+<hr />
 
 ### `attack`
 
 使用指定的**常规**武器进行**一轮**攻击。
 
-`Weapon:attack()`
+原型：`Weapon:attack()`
 
 > 该函数具有默认的实现。当需要定制常规武器攻击方式时，可重写此函数。在重写时需要注意执行一次 `attack` 的时间一般不超过 10 秒。
 
@@ -135,7 +158,8 @@ Weapon:new{
         local last_switch_time = 0
         local first_throw = false
         local second_throw = false
-        repeat					local current_time = Runtime:get_running_time()
+        repeat
+            local current_time = Runtime:get_running_time()
             if current_time - last_switch_time > 1000
             then
                 self:switch_without_delay()
@@ -162,11 +186,13 @@ Weapon:new{
 }
 ```
 
+<hr />
+
 ### `use`
 
 使用指定的**特殊**武器进行攻击。
 
-`Weapon:use()`
+原型：`Weapon:use()`
 
 > 该函数不提供默认的实现，故需要重写此函数以使用特殊武器进行攻击。在重写时需要注意执行一次 `use` 的时间一般不超过 10 秒。
 
@@ -207,3 +233,5 @@ Weapon:new{
     end
 }
 ```
+
+<hr />

@@ -17,7 +17,11 @@ website:
   site-url: "https://blog.macrohard.fun/"
 format:
   html:
-    theme: solar
+    css:
+      - styles/figure.css
+    theme:
+      dark: darkly
+      light: cosmo
     toc: true
     html-math-method:
       # method: katex

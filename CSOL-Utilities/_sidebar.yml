@@ -9,13 +9,25 @@ website:
           href: /
         - text: 前言
           href: /CSOL-Utilities/
-        - text: 综述
-          href: /CSOL-Utilities/01_overview/
-        - text: 中断
-          href: /CSOL-Utilities/02_interrupt/
-        - text: 交互
-          href: /CSOL-Utilities/03_interaction/
-        - text: 命令
-          href: /CSOL-Utilities/04_command/
-        - text: 武器
-          href: /CSOL-Utilities/05_weapon/
+        - section: 控制器
+          contents:
+            - text: 概述
+              href: /CSOL-Utilities/Controller/
+        - section: 执行器
+          contents:
+            - text: 概述
+              href: /CSOL-Utilities/Executor/
+            - text: 模块化编程
+              href: /CSOL-Utilities/Executor/01_module/
+            - text: “伪”中断机制
+              href: /CSOL-Utilities/Executor/02_interrupt/
+            - text: 与外部程序双向交互
+              href: /CSOL-Utilities/Executor/03_interaction/
+            - text: 命令的解析与执行
+              href: /CSOL-Utilities/Executor/04_command/
+            - text: 鼠标操作
+              href: /CSOL-Utilities/Executor/05_mouse/
+            - text: 键盘操作
+              href: /CSOL-Utilities/Executor/06_keyboard/
+            - text: 定义武器或装备
+              href: /CSOL-Utilities/Executor/07_weapon/
