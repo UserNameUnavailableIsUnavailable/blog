@@ -1,4 +1,4 @@
-# 执行器运行时
+# 运行时
 
 执行器提供了 `Runtime` 类，其中封装了罗技 G Hub 提供的 API 接口，实现了一些执行器在运行时所必需的功能，其中最核心的功能为“伪”中断。
 
@@ -10,7 +10,7 @@
 
 在使用罗技 G Hub 编程接口执行按键、点击操作时，都需要使用 `Sleep` 函数在每次操作后附加一定的延迟时间，因此，可以在 `Sleep` 的基础上封装一个新的 `Runtime:sleep` 函数作为统一的延时调用接口，所有的按键延时都通过 `Runtime:sleep` 来完成。调用 `Runtime:sleep` 后，首先执行中断处理函数，响应各类中断事件，在中断事件处理完毕后，再执行实际的睡眠操作。如果你有一定的操作系统基础知识，上述中断处理的流程应该很好理解。
 
-为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。下面为 `Runtime:sleep` 的实现。
+为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。下面为 `Runtime:sleep` 的实现，有关此函数的详细信息，请参见 [`sleep`](#sec-sleep)。
 
 ```lua
 ---@param milliseconds integer 挂起的时间。
@@ -163,7 +163,7 @@ Runtime:register_interrupt_handler(
 
 ## 方法
 
-### `sleep`
+### `sleep` {#sec-sleep}
 
 说明：挂起当前执行流指定时间。
 
@@ -177,6 +177,36 @@ Runtime:register_interrupt_handler(
 注解：挂起时，会将 `milliseconds` 分割为若干更短的时间片，并按照时间片为单位进行休眠。当 `precise` 置为 `false` 或 `nil`（缺省值）时，不保证挂起时间的精确度，这适用于对挂起时间精度要求不高的场景；当 `precise` 置为 `true` 或其他真值时，将尽力保证挂起时间精确，但这样做会带来额外的性能开销。
 
 > 注意，若中断处理函数执行时间过长，即便指定 `precise` 为 `true` 也无法保证挂起时间精度。因此，若休眠时间很短，且对休眠时间精度有特别要求，则在设计中断处理函数时，需要谨慎考虑其时间消耗。
+
+下面是一个简单的对比示例：
+
+```lua
+PATH = "C:/Users/Silver/Develop/CSOL-Utilities/source/Executor/"
+---加载 LUA 源文件。
+---@param file_name string 文件名（相对路径）。
+---@return nil
+function Include(file_name)
+    if (type(file_name) == "string")
+    then
+        dofile(PATH .. file_name)
+    end
+end
+Include("Runtime.lua")
+Include("Console.lua")
+local i = 25
+repeat
+  local _s = Runtime:get_running_time()
+  -- Runtime:sleep(100) -- `precise` 缺省，取为 `nil`
+  -- Runtime:sleep(100, true) -- `precise` 设置为 `true`
+  local _e = Runtime:get_running_time()
+  Console:information("耗时：%d", _e - _s)
+ i = i - 1
+until i == 0
+```
+
+![不考虑休眠时延精度](assets/unprecise_sleep.avif)
+
+![考虑休眠时间精度](assets/precise_sleep.avif)
 
 ### `register_interrupt_handler`
 

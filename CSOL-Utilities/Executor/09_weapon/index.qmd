@@ -6,15 +6,13 @@
 
 ### `name`
 
-`name` 标识武器或装备的名称，类型为字符串。
+说明：装备的名称，类型为字符串。
 
-> 该字段默认值为 `"未知"`。
-
-<hr />
+注解：缺省值为 `"未知"`。
 
 ### `number`
 
-`number` 成员用于标识武器或装备的栏位，可以取下列值：
+说明：武器或装备的栏位，可以取下列值：
 
 |名称|语义|
 |---|---|
@@ -24,52 +22,42 @@
 |Weapon.MELEE|近战武器|
 |Weapon.GRENADE|手雷|
 
-> 该字段默认值为 `Weapon.NULL`。
-
-<hr />
+注解：该字段缺省值为 `Weapon.NULL`。
 
 ### `attack_button`
 
-标识**常规**武器或装备的攻击按钮，可取如下值：
+说明：**常规**武器或装备的攻击按钮，可取如下值：
 
 |名称|语义|
 |---|---|
 |Mouse.LEFT|鼠标左键|
 |Mouse.RIGHT|鼠标右键|
 
-> 该字段默认值为 `Mouse.LEFT`。
-
-<hr />
+注解：该字段缺省值为 `Mouse.LEFT`。
 
 ### `switch_delay`
 
-标识武器或装备的切换延迟，单位为毫秒
+说明：武器或装备的切换延迟，单位为毫秒
 
-> 该字段默认值为 `150`。
-
-<hr />
+注解：该字段缺省值为 `150`。
 
 ### `purchase_sequence`
 
-记录武器或装备的购买按键序列，例如：
+说明：武器或装备的购买按键序列，例如：
+
+注解：该字段缺省值为 `{}`。另外，如果有切换 T / CT 阵营武器购买菜单的需要，请像上例中在购买按键序列中添加 `J` 键。
+
+下例将 `weapon` 的购买按键序列设置为 `B` `J` `8` `7`。
 
 ```lua
 weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SEVEN }
 ```
 
-将 `weapon` 的购买按键序列设置为 `B` `J` `8` `7`。
-
-> 该字段默认值为 `{}`。另外，如果有切换 T / CT 阵营武器购买菜单的需要，请像上例中在购买按键序列中添加 `J` 键。
-
-<hr />
-
 ### `RELOAD_KEY`
 
-重新装填按键，该设定与配置面板中的提供的重新装填按钮设定选项保持一致。在使用“圣翼皓印”、“万钧神威”等定制武器时，特殊攻击将通过 `RELOAD_KEY` 触发。
+说明：重新装填按键，可取任意键盘按键，参见 [键盘操作](/CSOL-Utilities/Executor/06_keyboard/)。
 
-> 该字段默认为 `Keyboard.R`。
-
-<hr />
+注解：该设定与配置面板中的提供的重新装填按钮设定选项保持一致，缺省值为 `Keyboard.R`。在使用“圣翼皓印”、“万钧神威”等定制武器时，特殊攻击将通过 `RELOAD_KEY` 触发
 
 ## 函数
 
@@ -77,30 +65,29 @@ weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SE
 
 构造新武器或装备。
 
-原型：`Weapon:new(obj)`
+原型：`Weapon:new(init)`
 
-- `obj` 类型为 `table`，其中应包含 `Weapon` 对象的初始化列表。此外，还可以在其中添加一些自定义的字段。
+参数：
 
-在 `new` 方法的实现中，将武器对象 `self` 自身（调用 `Weapon:new` 时，`self` 即为 `Weapon`）设置为新武器对象的元表（metatable），因此，当缺省上文中提到的成员字段时，将使用上文提及的默认缺省值。
+- `init`：初始化列表，类型为 `table | nil`，当其不缺省为 `nil` 时，应包含 `Weapon` 类原型中的各字段初值。除了上文提到的 `Weapon` 中提供的默认字段外，还可以在其中添加一些自定义的字段。
+
+异常：当 `init` 类型不正确时，抛出类型错误异常。
+
+注解：在 `new` 方法的实现中，新武器对象的元表（metatable）会被设置为武器原型 `self`。因此，当缺省上文中提到的成员字段时，将使用上文提及的认缺省值。下面是 `new` 的一个简短版本的实现，在有效性校验完成后，将原型武器 `self`（以 `Weapon:new` 形式调用时，`self` 即 `Weapon`）的 `__index` 指向原型武器自身 [^1]，然后将新武器 `weapon` 的元表设置为 `self`。后续在访问 `weapon` 中的缺省成员时，会先访问 `weapon` 的元表，找到 `self` 中的 `__index` 方法，并通过 `__index` 方法在 `self` 中找到该缺省值。通过这样的方法，就实现了 Lua 中的**继承**。
+
+> 原则上，`__index` 是一个方法（类型为 `function`），但在 Lua 中提供了一个语法糖，允许我们将 `__index` 指向某个表（类型为 `table`）。在试图访问某个缺省值时，将通过调用 `__index`（指向 `function`）或访问 `__index`（指向 `table`）查阅该缺省值。
+
+[^1]: 要了解有关 Lua 中元表的语法特性，请参阅 Lua 官方指南 [13 – Metatables and Metamethods](https://www.lua.org/pil/13.html) 小节。
 
 ```lua
----创建一个武器对象
----@param obj table 初始化列表。
----@return table # 武器对象
-function Weapon:new(obj)
-    obj = obj or {}
+function Weapon:new(init)
+    local weapon = init or {}
+    -->>>对各个字段有效性进行校验，此处省略
     self.__index = self
-    setmetatable(obj, self)
-    Console:information(
-        "新增武器/装备：" .. obj.name
-    )
-    return obj
+    setmetatable(weapon, self)
+    return weapon
 end
 ```
-
-> 要了解有关 Lua 中元表的语法特性，请参阅 Lua 官方指南 [13 – Metatables and Metamethods](https://www.lua.org/pil/13.html) 小节。
-
-#### 示例
 
 下面的例子创建一件名为“幻境！光棱剑”的近战武器，购买按键序列为 `B` `G`，切换延迟为 100 *ms*，使用鼠标左键进行攻击。
 
@@ -114,23 +101,19 @@ Weapon:new{
 }
 ```
 
-<hr />
-
 ### `purchase`
 
-用于在挂机时购买指定的武器或装备。
+说明：购买指定的武器或装备。
 
 原型：`Weapon:purchase()`
 
-<hr />
+参数：无
 
 ### `switch`
 
 切换至指定的武器或装备，并在切换后等待指定的切换延迟时间。
 
 原型：`Weapon:switch()`
-
-<hr />
 
 ### `switch_without_delay`
 
@@ -140,15 +123,11 @@ Weapon:new{
 
 > 在先前版本的实际使用反馈中，发现携带“燃爆 Ignite-10”作为配件装备后，会在购买后出现“自雷”的情况，为此问题，引入了此函数，用于在购买配件武器后，立即切换到其他武器，并通过忽略切换延迟减小对后续切换到其他武器的影响。
 
-<hr />
-
 ### `abandon`
 
 丢弃指定的武器。
 
 原型：`Weapon:abandon()`
-
-<hr />
 
 ### `attack`
 
@@ -209,8 +188,6 @@ Weapon:new{
 }
 ```
 
-<hr />
-
 ### `use`
 
 使用指定的**特殊**武器进行攻击。
@@ -256,8 +233,6 @@ Weapon:new{
     end
 }
 ```
-
-<hr />
 
 ## 武器列表
 
