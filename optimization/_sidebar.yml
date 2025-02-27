@@ -3,7 +3,6 @@ website:
     - id: optimization
       title: 最优化理论
       style: docked
-      search: true
       contents:
         - text: 返回
           href: /

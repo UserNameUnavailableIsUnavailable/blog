@@ -1,9 +1,8 @@
 website:
   sidebar:
-    - id: cpp-notes
-      title: C++ 笔记
-      style: "docked"
-      search: true
+    - title: C++ 笔记
+      id: cpp-notes
+      style: docked
       contents:
         - text: Back
           href: /

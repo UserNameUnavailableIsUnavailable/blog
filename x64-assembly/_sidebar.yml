@@ -3,7 +3,6 @@ website:
     - id: x64-assembly
       title: x64 汇编
       style: docked
-      search: true
       contents:
         - text: 返回
           href: /

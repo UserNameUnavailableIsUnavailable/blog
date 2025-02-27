@@ -3,7 +3,6 @@ website:
     - id: machine-learning
       title: 模式识别与机器学习
       style: docked
-      search: true
       contents:
         - text: 返回
           href: /

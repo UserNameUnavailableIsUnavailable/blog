@@ -3,7 +3,6 @@ website:
     - id: kz-guide
       title: KZ 教程
       style: docked
-      search: true
       contents:
         - text: 返回
           href: /

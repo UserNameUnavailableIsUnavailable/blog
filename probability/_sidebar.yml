@@ -3,7 +3,6 @@ website:
     - id: probability
       title: Probability Theory
       style: docked
-      search: true
       contents:
         - text: Back
           href: .

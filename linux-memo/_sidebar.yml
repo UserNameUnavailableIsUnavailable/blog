@@ -1,9 +1,8 @@
 website:
   sidebar:
-    - id: linux-memo
-      title: Linux 备忘录
+    - title: Linux 备忘录
+      id: linux-memo
       style: docked
-      search: true
       contents:
         - text: 返回
           href: /

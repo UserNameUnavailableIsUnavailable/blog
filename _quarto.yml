@@ -1,20 +1,22 @@
 project:
   output-dir: blog
   type: website
-  title: "Macrohard Blog"
+  title: "Macrohard"
 author: admin
 website:
+  page-navigation: true
+  bread-crumbs: true
   navbar:
     background: primary
-    search: true
     left:
-      - text: 站点首页
-        href: "https://www.macrohard.fun/"
       - text: 博客首页
-        href: index.html
+        href: /
       - text: 关于
-        href: about.html
-  site-url: "https://blog.macrohard.fun/"
+        href: /about.html
+  search:
+    location: navbar
+    type: overlay
+  site-url: "https://www.macrohard.fun/"
 format:
   html:
     css:
@@ -40,7 +42,6 @@ filters:
 execute:
   cache: true
 metadata-files:
-  - _sidebar.yml
   - cpp-notes/_sidebar.yml
   - win32-app-develop/_sidebar.yml
   - x64-assembly/_sidebar.yml

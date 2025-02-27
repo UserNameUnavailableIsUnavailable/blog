@@ -3,7 +3,6 @@ website:
     - id: win32-app-develop
       title: Win32 应用开发
       style: docked
-      search: true
       contents:
         - text: 返回
           href: /

@@ -1,9 +1,8 @@
 website:
   sidebar:
-    - id: CSOL-Utilities
-      title: CSOL 集成工具
+    - title: CSOL 集成工具
+      id: CSOL-Utilities
       style: docked
-      search: true
       contents:
         - text: 返回
           href: /
