@@ -1,0 +1,114 @@
+# 与外部程序双向交互
+
+## 从“读写”说起
+
+罗技编程接口提供的功能很有限，其中最大的限制就是接口中没有提供标准库中的 I/O 功能，这就意味着你不能使用罗技编程接口正常读写文件。在前面的小节中，通过查阅 `_G` 表，我们知道对于“读”的功能，可以通过 `dofile` 勉强实现。但是，这种“读”的功能实际上存在并发控制问题：`$~cmd.lua` 总是由操作系统中的其他进程创建并写入内容的，当 LGHUB Agent（运行脚本的进程）通过 `dofile` 读取并执行 `$~cmd.lua` 时，存在读写并发问题。不过，在 Windows 中，对于一个扇区（512 字节）的读写是原子的，这一点由操作系统保证，所以如果 `$~cmd.lua` 实际大小小于 512 字节，不存在并发控制问题。就目前来看，`$~cmd.lua` 仅仅用于下达命令，其中的内容大小还达不到 512 字节。 到目前为止，我们可以暂时认为 `dofile` **勉强**解决了“读”的问题。
+
+下一个问题是，罗技编程接口中并没有提供传统意义上的“写”功能，但是好在天无绝人之路，这些编程接口中有一个很特殊的方法：`OutputDebugMessage`，它允许我们将字符串写入 Windows 调试器。那么，只要外部应用程序能够获取罗技编程接口向调试器写入的内容，就真正实现了罗技脚本与操作系统中其他应用进程的**双向交互**，换用操作系统中的术语，就是**进程间通信（Inter-Process Communication, IPC）**。IPC 几乎是操作系统中排名前 10 的核心机制，例如，进程 A 创建了一个文件，然后另一个进程 B 读取这个文件的内容，从广义上讲，A 与 B 之间就发生了通信。因此，IPC 的重要性不言而喻，几乎可以说是操作系统世界的基石。
+
+## 使用 Win32 API 读取 `OutputDebugMessage` 写入调试器的内容
+
+首先，完成最简单的部分，使用 `OutputDebugMessage` 定期向调试器写入 `"Hello from CSOL-Utilities!"`。
+
+```lua
+PATH = "C:/Users/Silver/develop/CSOL-Utilities/source/Executor/"
+---加载 LUA 源文件。
+---@param file_name string 文件名（相对路径）。
+---@return nil
+function Include(file_name)
+    if (type(file_name) == "string")
+    then
+        dofile(PATH .. file_name)
+    end
+end
+Include("Runtime.lua")
+while (true)
+do
+  OutputDebugMessage("Hello from CSOL-Utilities!")
+  Runtime:sleep(1000)
+end
+```
+
+运行后，LGHUB Agent 将每隔一秒向 Windows 调试器输出 `"Hello from CSOL-Utilities!"`。
+
+然后，考虑用 Win32 API 读取调试 LGHUB Agent 输出的调试信息。使用 Win32 API 调试有一个通用的流程：
+
+1. attach: 调用 `DebugActiveProcess` 与被调试进程建立连接
+2. debug: 调试进程使用调试 API 读取被调试进程提供的调试信息
+3. detach: 调试完毕后，若要保持被调试进程继续正常运行，则需要调用 `DebugActiveProcessStop` 结束调试。
+
+![](assets/hello_from_lghub_agent.avif)
+
+下面是一个简单的例子：
+
+```C++
+#include <Windows.h>
+#include <iostream>
+
+DWORD dwPId = 0;
+BOOL bRun = TRUE;
+int main()
+{
+    std::cout << "输入被调试进程的进程号：";
+    std::cin >> dwPId;
+	if (!DebugActiveProcess(dwPId)) {
+		std::cout << "附加到被调试进程失败：" << GetLastError() << '\n';
+		return -1;
+	}
+    auto OnCtrlC = [] (DWORD dwCtrlType) -> BOOL{
+        switch (dwCtrlType)
+        {
+        case CTRL_C_EVENT:
+        case CTRL_BREAK_EVENT:
+        case CTRL_CLOSE_EVENT:
+        case CTRL_LOGOFF_EVENT:
+        case CTRL_SHUTDOWN_EVENT:
+            bRun = FALSE;
+            return TRUE;
+        }
+        return FALSE;
+    };
+    SetConsoleCtrlHandler(OnCtrlC, TRUE);
+    auto hProc = OpenProcess(PROCESS_VM_READ, false, dwPId);
+	DEBUG_EVENT debugEvent;
+    std::setlocale(LC_ALL, ".UTF8"); // std::wcout 需要设置 locale
+	while (bRun) {
+		if (WaitForDebugEvent(&debugEvent, 1000)) {
+			if (debugEvent.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT) {
+                OUTPUT_DEBUG_STRING_INFO& debugStringInfo = debugEvent.u.DebugString;
+                if (debugStringInfo.fUnicode) {
+                    std::wstring message(debugStringInfo.nDebugStringLength, L'\0');
+                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &message[0], debugStringInfo.nDebugStringLength * sizeof(wchar_t), nullptr);
+                    std::wcout << message << std::endl;
+                } else {
+                    std::string message(debugStringInfo.nDebugStringLength, '\0');
+                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &message[0], debugStringInfo.nDebugStringLength, nullptr);
+                    std::cout << message << std::endl;
+				}
+			}
+            // 继续调试
+			bRun = ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, DBG_CONTINUE);
+		}
+	}
+	DebugActiveProcessStop(dwPId);
+}
+```
+
+这是一个控制台程序，我们希望在按下 `Ctrl C` 后退出调试进程，但仍然保持被调试进程正常运行。因此，需要通过 `SetConsoleCtrlHandler` 注册控制台处理回调函数。当按下 `Ctrl C` 后，调用 `DebugActiveProcessStop` 结束调试，否则被调试进程会连同调试进程一同终止。
+
+在调用 `DebugActiveProcess` 附加到被调试进程后，我们使用 `WaitForDebugEvent` 等待被调试进程发出调试事件，捕获到调试事件后，从被调试进程的进程空间中取出其发送的调试信息。
+
+编译 `dbg.cpp`，然后运行 `dbg.exe`。
+
+```powershell
+clang++ dbg.cpp -o dbg.exe
+./dbg.exe
+```
+
+![](assets/debug.avif)
+
+可以看到，调试器能够正确的接收来自 LGHUB Agent 的调试消息了。
+
+## 所以有什么用呢？
+
+通过合理使用 `dofile` 和 `OutputDebugMessage` 可以实现罗技脚本与外部应用程序的**双向交互**，执行器通过 `dofile` 接收来自控制器的命令，亦可以通过 `OutputDebugMessage` 向控制器传递自身当前运行的状态信息。在 v1.5.x 未来版本中，很多版本特性将围绕这两个最核心的接口展开。

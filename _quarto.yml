@@ -8,34 +8,47 @@ website:
     background: primary
     search: true
     left:
-      - text: 首页
+      - text: 站点首页
+        href: "https://www.macrohard.fun/"
+      - text: 博客首页
         href: index.html
       - text: 关于
         href: about.html
   site-url: "https://blog.macrohard.fun/"
 format:
   html:
-    theme: solar
+    css:
+      - styles/figure.css
+    theme:
+      dark: darkly
+      light: cosmo
     toc: true
     html-math-method:
-      method: katex
-      url: https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.2/ # 字节跳动 CDN
-    # embed-resources: true
+      method: mathjax
+      url: https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/mathjax/3.2.0/es5/tex-chtml-full.js
 include-in-header:
   text: |
     <link rel="shortcut icon" href="https://macrohard.fun/assets/favicon.ico" />
     <link rel="icon" type="image/x-icon" href="https://macrohard.fun/assets/favicon.ico" />
-include-after-body: _footer.md
+include-after-body:
+  - file: texts/footer.html
+  - text: |
+      <script src="/scripts/mathjax-config.js"></script>
+lang: zh
+filters:
+  - Meta.lua
 execute:
   cache: true
 metadata-files:
   - _sidebar.yml
   - cpp-notes/_sidebar.yml
   - win32-app-develop/_sidebar.yml
-  - x86-assembly/_sidebar.yml
+  - x64-assembly/_sidebar.yml
   - linux-memo/_sidebar.yml
   - machine-learning/_sidebar.yml
   - probability/_sidebar.yml
+  - optimization/_sidebar.yml
   - vector-calculus/_sidebar.yml
   - SimpleOS/_sidebar.yml
   - kz-guide/_sidebar.yml
+  - CSOL-Utilities/_sidebar.yml

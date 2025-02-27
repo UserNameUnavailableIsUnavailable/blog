@@ -1,3 +1,5 @@
-.quarto/
-blog/
-*.zip
+/.quarto/
+/blog/
+/*.zip
+/*.tar
+/.luarc.json

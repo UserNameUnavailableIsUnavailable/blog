@@ -1,0 +1,17 @@
+website:
+  sidebar:
+    - id: optimization
+      title: 最优化理论
+      style: docked
+      search: true
+      contents:
+        - text: 返回
+          href: /
+        - text: 前言
+          href: /optimization/
+        - text: 基本概念
+          href: /optimization/basic-concepts/
+        - text: 常用定理、结论
+          href: /optimization/useful-tools/
+        - text: Lagrange 法
+          href: /optimization/lagrangian-methods/

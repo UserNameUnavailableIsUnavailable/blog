@@ -1,0 +1,78 @@
+# 重定位
+
+## 从 Windows 中的重定位说起
+
+编写如下汇编代码，编译链接得到二进制文件后用 `objdump` 反汇编 。
+
+```nasm
+global mainCRTStartup
+extern GetStdHandle
+extern WriteFile
+extern ExitProcess
+extern GetLastError
+extern Sleep
+section .text
+mainCRTStartup:
+	push rbp ; 16-byte alignment
+	mov rbp, rsp
+
+	sub rsp, dword 4 * 8 ; home for four register parameters
+	mov ecx, dword -11 ; nStdHandle = STD_OUTPUT_HANDLE
+	call GetStdHandle
+	add rsp, dword 4 * 8
+
+	sub rsp, dword 6 * 8
+	mov rcx, rax ; hFile
+	mov rdx, qword string ; lpBuffer，此处 qword 不能省略
+	mov r8d, dword STRING_SIZE ; nNumberOfBytesToWrite
+	mov r9d, dword 0 ; lpNumberOfBytesWritten，对于非 Windows 7 可以为 NULL
+	mov qword [rsp + 4 * 8], dword 0 ; lpOverlapped，在栈上传递
+	call WriteFile
+
+	mov rsp, rbp
+	pop rbp
+	ret
+section .data
+string:
+    db "你好，世界！", 0 ; 控制台代码页需要设置为 UTF-8
+    STRING_SIZE equ $ - string
+```
+
+```powershell
+yasm .\win32-reloc.asm -f win64
+lld-link win32-reloc.obj libkernel32.a /subsystem:console /out:win32-reloc.exe
+objdump -M intel -d .\win32-reloc.exe
+```
+
+![](assets/win32-dump.avif)
+
+不难发现，`WriteFile` 的函数体内部只有一条指令：`jmp qword ptr [rip + 0xfea]`。这个跳转地址，实际上对应于另一个名为 `__impl_WriteFile` 的符号，也就是说，`__impl_WriteFile` 才是 `WriteFile` 真正的入口地址。
+
+如果编写如下一份与上述汇编代码等价的 C++ 代码，并编译时输出汇编代码文件，你就会看到如下的内容：
+
+```c++
+#include <Windows.h>
+
+int main()
+{
+	const char hello[] = "你好，世界！";
+	WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), hello, sizeof(hello), nullptr, nullptr);
+}
+```
+
+```powershell
+clang++ win32-reloc.cpp -S
+```
+
+![](assets/win32-equivalent-cpp.avif)
+
+编译器将上述代码直接优化成了一条使用 **`rip` 相对寻址**的 `call` 指令。
+可是，为什么需要引入 `__impl_WriteFile`，而不是直接在 `WriteFile` 符号对应的地址处提供 `WriteFile` 的实现呢？更具体地来说，就是当我们调用 `call WriteFile` 时，为什么需要多此一举地执行 `jmp __impl_WriteFile`？
+
+这一切都和**重定位（relocation）**有关。
+
+在软件开发中，我们总是希望实现模块之间的“解耦”，在操作系统中也是一样。Windows 为我们提供了 `kernel32.dll`，其中包含了应用程序所需的绝大部分 Windows API 实现（就比如 `GetStdHandle` 和 `WriteFile`）。几乎任何 Windows 应用程序在装入（load）时，都需要链接到 `kernel32.dll`。很显而易见的一点是，我们没有办法事先决定 `kernel32.dll` 的装入地址，即 `kernel32.dll` 应该被放到内存中的哪块地方。然而，传统意义上的 `call` 或者 `jmp` 指令，要么在寻址时需要给定一个立即数地址，要么把地址存到某个通用寄存器（或内存块）中。由于对 `kernel32.dll` 的链接发生在运行时，因此显然不可能以立即数的方式寻址。而把地址存入某个通用寄存器（或内存块）这种方案（**本质是“运行时”动态链接**）对于 `kernel32.dll` 这种容纳了几乎绝大部分重要的 Windows API 的库来说，显然过于麻烦，并且效率很低。我们所希望的是，在程序装载时，就能够链接好 `kernel32.dll` 中的所有函数（**本质是“装载时”动态链接**）。Windows 在为应用程序链接 `kernel32.dll` 这样的库时，会在应用程序的进程空间中创建一个被称作 IAT（Import Address Table）的表，表中的各个表项对应于各个 Windows API 的真实入口，这张表格就由装载器负责填写。
+
+让我们回到 `jmp qword ptr [rip + 0xfea]`，编译器虽然无法事先确定 `__impl_WriteFile` 的地址，但可以通过 PE 文件中的一些字段告知装载器将 Windows API 的真实入口地址填入对应的表项。`[rip + 0xfea]` 是一个内存参数，在进行跳转之前，会先从该内存块中取出 `__impl_WriteFile` 的真实地址，随后跳转到 `__impl_WriteFile` 函数体内执行。所以，在 Windows 中，调用 Windows API 的过程（不进行编译优化）就可以总结为：一次跳转 + 查表（访存）+ 二次跳转。不过鉴于在编写高级语言代码时，编译器可以为我们优化掉第一次跳转，所以实际上是一次查表和一次跳转。
+
+## Linux 中的重定位

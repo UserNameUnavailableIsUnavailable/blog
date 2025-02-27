@@ -1,0 +1,29 @@
+# Basic Concepts
+
+## Affine Set
+
+### Definition
+
+$C \subset \mathbb{R}^n$ is affine iff $\forall x_1, x_2 \in C, \theta x_1 + \left(1 - \theta\right) x_2 \in C$
+
+### Subspace
+
+### Solution Set of Linear System
+
+### Affine Hull
+
+### Zero Norm
+
+Zero norm is the number of non-zero elements in a matrix, which is used to evaluate the sparsity of the matrix.
+
+## Convex Set
+
+### Simplex
+
+For $k+1$ affinely independent [^1] points $\boldsymbol{v}_0,\boldsymbol{v}_1,\boldsymbol{v}_2,\cdots,\boldsymbol{v}_k \in \mathbb{R}^n\;(k \le n)$, the simplex defined by these points are
+
+$$\mathrm{conv}\;\{\boldsymbol{v}_0,\boldsymbol{v}_1,\boldsymbol{v}_2,\cdots,\boldsymbol{v}_k\} = \left\{\left.\sum_{i=0}^k\theta_i\boldsymbol{v}_i \right| \theta_i \gt 0, \sum_{i=0}^k\theta_i=1\right\}$$
+
+> 单纯形是仿射无关的点集的凸包，任意单纯形都是多面体。
+
+[^1]: $\boldsymbol{v}_0,\boldsymbol{v}_1,\boldsymbol{v}_2,\cdots,\boldsymbol{v}_k$ are affinely independent iff  $\boldsymbol{v}_1 - \boldsymbol{v}_0, \boldsymbol{v}_2-\boldsymbol{v}_0, \cdots, \boldsymbol{v}_k - \boldsymbol{v}_0$ are linearly independent. 

@@ -1,0 +1,20 @@
+# CSOL 集成工具开发者参考文档
+
+该文档面向有一定编程基础的用户，详细阐述了 CSOL 集成工具的设计方案。
+
+## 项目主页
+
+[Gitee 项目主页](https://gitee.com/silver1867/csol-24-h)
+
+[GitHub 项目主页](https://github.com/UserNameUnavailableIsUnavailable/CSOL-Utilities)
+
+由于该工具主要面向国内用户，因此 Gitee 仓库将保持第一时间更新。为尽可能避免二次传播，项目发布时将只提供源代码，不提供二进制文件从源代码的构建方式。
+
+## 注意事项
+
+本文档中只介绍 CSOL 集成工具中的最新特性，部分功能特性尚未在 CSOL 集成工具中正式发布。
+已发布的功能特性可在集成工具随附的使用手册中查阅（**仅限正式版，预览版随附手册中的进阶指南与集成工具功能存在不一致**）。
+
+## 概述
+
+CSOL-Utilities 共分为控制器（Controller）和执行器（Executor）两部分。控制器使用 C++ 实现，执行器使用 Lua 实现。执行器运行于 Logitech G Hub 控制器运行后，实时向 `$~cmd.lua` 写入命令，执行器定期从 `$~cmd.lua` 中取出命令并解释执行。因此，执行器的行为由控制器决定。
