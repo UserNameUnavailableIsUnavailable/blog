@@ -6,74 +6,15 @@
 
 罗技 G Hub 在解释执行 Lua 代码时是单线程的，在采用轮询方式设计执行器模块时，会因为缺少中断机制而造成轮询的过程变得复杂化。例如，要想在传统的轮询方案中实现挂机中每隔 10 秒执行一次复活/回合重置、执行器随时启停等功能是十分麻烦的。随着集成工具功能不断增多，轮询的逻辑将变得越来越复杂且难于维护。因此，尽可能地在编程框架中引入中断机制是十分必要的。集成工具在执行器中引入了 `Runtime` 类，其中实现了基础的中断功能。
 
-### 中断发生的条件
+### “伪”中断发生的条件
 
 在使用罗技 G Hub 编程接口执行按键、点击操作时，都需要使用 `Sleep` 函数在每次操作后附加一定的延迟时间，因此，可以在 `Sleep` 的基础上封装一个新的 `Runtime:sleep` 函数作为统一的延时调用接口，所有的按键延时都通过 `Runtime:sleep` 来完成。调用 `Runtime:sleep` 后，首先执行中断处理函数，响应各类中断事件，在中断事件处理完毕后，再执行实际的睡眠操作。如果你有一定的操作系统基础知识，上述中断处理的流程应该很好理解。
 
-为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。下面为 `Runtime:sleep` 的实现，有关此函数的详细信息，请参见 [`sleep`](#sec-sleep)。
+### “伪”中断的实现
 
-```lua
----@param milliseconds integer 挂起的时间。
----@param precise boolean | nil 是否需要尽力保证精度。
----@return nil
-function Runtime:sleep(milliseconds, precise)
-    -- 罗技 API 不支持真正的中断，故而当某个过程主动将自己挂起时（即调用Runtime:sleep)视为自发中断，此时可以处理外部事件
-    local before_int = Runtime:get_running_time()
+为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。有关 `Runtime:sleep` 的详细使用方法及实现细节，请参见 [`sleep`](#sec-sleep) 小节。`Runtime:sleep` 将比 `Sleep` 产生稍大一些的开销，但这样的设计大大简化了执行器轮询方案设计，加之控制器本身具备精准判定游戏内状态并下达正确命令的能力，因此这样额外的开销是值得的。
 
-    -- 先执行中断处理
-    self:interrupt_handler()
-
-    -- 中断处理结束后，再校验参数（无论如何都要进行中断处理，即便参数非法）
-    milliseconds = math.floor(milliseconds) -- 防止提供小数时间，若类型非 `number` 会返回 `nil`
-    if (type(milliseconds) ~= "number" or milliseconds < 0)
-    then
-        return
-    end
-
-    local granularity = 15 -- 默认休眠时间片粒度为 15
-    if (precise)
-    then
-        granularity = 35 -- 对精度有额外要求，将粒度置为 35
-    end
-
-    local after_int = Runtime:get_running_time()
-    local int_time = after_int - before_int
-
-    milliseconds = milliseconds - int_time -- 去除中断处理耗时
-    -- 将长时间的休眠拆分为若干短时间休眠，确保 `Runtime` 常常保持对程序的控制权
-    while (milliseconds > 0)
-    do
-        if (milliseconds > granularity)
-        then
-            local start_tp = Runtime:get_running_time()
-            Runtime:sleep(granularity)
-            local end_tp = Runtime:get_running_time()
-            local real_sleep_time = end_tp - start_tp
-            milliseconds = milliseconds - real_sleep_time -- 减去实际睡眠时间
-        elseif (milliseconds == granularity)
-        then
-            Sleep(granularity)
-            milliseconds = milliseconds - granularity -- 冗余语句，增加可维护性，会被编译优化去除
-            break
-        else -- 0 < milliseconds < granularity
-            if (precise) -- 需要较高精度，剩余时间采用忙等
-            then
-                local begin = Runtime:get_running_time()
-                repeat
-                until Runtime:get_running_time() - begin >= milliseconds -- 忙等以确保精度符合要求
-            else
-                Sleep(milliseconds) -- 按照剩余时间直接休眠
-            end
-            milliseconds = 0 -- 冗余语句，增加可维护性，会被编译优化去除
-            break
-        end
-    end
-end
-```
-
-引入了中断处理后，调用 `Runtime:sleep` 的耗时将比一般调用 `Sleep` 稍长一些，但这样的设计大大简化了执行器轮询方案设计，加之控制器本身具备精准判定游戏内状态并下达正确命令的能力，因此这样额外的开销是值得的。
-
-![示例：调用 `Runtime:sleep`](assets/sleep_example.avif){fig-align="center"}
+![示例：以默认方式（缺省 `precise` 参数）调用 `Runtime:sleep`](assets/sleep_example.avif){fig-align="center"}
 
 ## 中断回调函数注册、注销
 
@@ -169,14 +110,75 @@ Runtime:register_interrupt_handler(
 
 原型：`Runtime:sleep(milliseconds, precise)`
 
-参数：
-
 - `milliseconds`：挂起时间，类型为 `integer`。
 - `precise`：是否需要精确定时，类型为 `boolean | nil`。
 
 注解：挂起时，会将 `milliseconds` 分割为若干更短的时间片，并按照时间片为单位进行休眠。当 `precise` 置为 `false` 或 `nil`（缺省值）时，不保证挂起时间的精确度，这适用于对挂起时间精度要求不高的场景；当 `precise` 置为 `true` 或其他真值时，将尽力保证挂起时间精确，但这样做会带来额外的性能开销。
 
+实际场景下，受操作系统线程调度策略、电源管理策略等因素的影响，实际休眠时间会存在较大的波动。针对这种情况，更好的方案是采用自适应的方式计算阈值。在执行器提供的 `sleep` 实现中，选取一个小一些的休眠时间片（10 *ms*）作为默认的休眠时间片，然后，根据过去执行 `Sleep(10)` 的实际时间开销的历史情况，动态预测本次执行 `Sleep(10)` 可能的时间开销，得到预测值 $t$，按照休眠时间片为单位进行休眠。如果剩余休眠时间大于 $\tau$，则执行 `Sleep(10)`，计算出实际休眠时间 $t$，然后更新预测值 $\tau$；否则，若 `precise` 置为 `true` 就执行忙等（`precise` 置为 `false` 时直接忽略精度，按照剩余时间直接休眠），且保持 $\tau$ 和 $t$ 不变。更新 $\tau$ 时，采用**指数平均法（exponential average）**，计算方式如下：
+
+$$\tau_{n+1} = \alpha\tau_{n} + \left(1 - \alpha\right)t_{n}.$$
+
+其中，$\alpha$ 为预测值和实际值的权重，在执行器提供的 `sleep` 实现中，认为二者同等重要，即取 $\alpha = 0.5$。
+
 > 注意，若中断处理函数执行时间过长，即便指定 `precise` 为 `true` 也无法保证挂起时间精度。因此，若休眠时间很短，且对休眠时间精度有特别要求，则在设计中断处理函数时，需要谨慎考虑其时间消耗。
+
+下面给出了 `sleep` 的具体实现：
+
+```lua
+---期望的睡眠时间
+Runtime.expected_sleep_time = 10
+---实际睡眠时间粒度
+Runtime.actual_sleep_time = 10
+
+---挂起当前执行流，挂起后，可以处理中断事件。除了 `Runtime` 内部方法外，其他地方都应当调用 `Runtime:sleep`，而非直接调用罗技 API 中的 Sleep，这样可以进行中断处理。
+---@param milliseconds integer 挂起的时间。
+---@param precise boolean | nil 是否需要尽力保证精度。
+---@return nil
+function Runtime:sleep(milliseconds, precise)
+    -- 罗技 API 不支持真正的中断，故而当某个过程主动将自己挂起时（即调用Runtime:sleep)视为自发中断，此时可以处理外部事件
+    local before_int = Runtime:get_running_time()
+    -- 先执行中断处理
+    self:interrupt_handler()
+    -- 中断处理结束后，再校验参数（无论如何都要进行中断处理，即便参数非法）
+    milliseconds = math.floor(milliseconds) -- 防止提供小数时间，若类型非 `number` 会返回 `nil`
+    if (type(milliseconds) ~= "number" or milliseconds < 0)
+    then
+        return
+    end
+
+    -- 预测下一次休眠会消耗的时间
+    local expected_sleep_time = 0.5 * self.expected_sleep_time + 0.5 * self.actual_sleep_time
+    local after_int = Runtime:get_running_time()
+    local int_time = after_int - before_int
+
+    milliseconds = milliseconds - int_time -- 去除中断处理耗时
+    -- 将长时间的休眠拆分为若干短时间休眠，确保 `Runtime` 常常保持对程序的控制权
+    while (milliseconds > 0)
+    do
+        if (milliseconds > expected_sleep_time) -- 大于预计休眠时间
+        then
+            local start_timepoint = Runtime:get_running_time()
+            Sleep(10) -- 按照 10 ms 时间片大小进行休眠
+            local end_timepoint = Runtime:get_running_time()
+            local real_sleep_time = end_timepoint - start_timepoint
+            milliseconds = milliseconds - real_sleep_time -- 减去实际睡眠时间
+            -- 更新预测值和实际值
+            self.expected_sleep_time, self.actual_sleep_time = expected_sleep_time, real_sleep_time
+        else -- 0 < milliseconds ≤ expected_sleep_time
+            if (precise) -- 需要较高精度，剩余时间采用忙等
+            then
+                local begin = Runtime:get_running_time()
+                repeat
+                until Runtime:get_running_time() - begin >= milliseconds -- 忙等以确保精度符合要求
+            else
+                Sleep(milliseconds) -- 不考虑精度，按照剩余时间直接休眠
+            end
+            break
+        end
+    end
+end
+```
 
 下面是一个简单的对比示例：
 
@@ -214,8 +216,6 @@ until i == 0
 
 原型：`Runtime:register_interrupt_handler(callback)`
 
-参数：
-
 - `callback`：中断处理回调函数，类型为 `function`。
 
 返回值：中断处理函数在中断处理函数列表中的索引，有效的索引为大于 `0` 的整数。
@@ -227,8 +227,6 @@ until i == 0
 说明：注销中断处理函数。
 
 原型：`Runtime:unregister_interrupt_handler(index)`
-
-参数：
 
 - `index`：中断处理函数在中断处理函数列表中的索引，类型为 `integer`。此值为在调用 `register_interrupt_handler` 时返回。
 

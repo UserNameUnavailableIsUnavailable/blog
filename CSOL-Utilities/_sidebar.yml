@@ -23,6 +23,8 @@ website:
               href: /CSOL-Utilities/Executor/02_runtime/
             - text: 与外部程序双向交互
               href: /CSOL-Utilities/Executor/03_interaction/
+            - text: 日期、时间
+              href: /CSOL-Utilities/Executor/04_datetime/
             - text: 命令的解析与执行
               href: /CSOL-Utilities/Executor/05_command/
             - text: 键盘操作

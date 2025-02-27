@@ -63,11 +63,9 @@ weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SE
 
 ### `new`
 
-构造新武器或装备。
+说明：构造新武器或装备。
 
 原型：`Weapon:new(init)`
-
-参数：
 
 - `init`：初始化列表，类型为 `table | nil`，当其不缺省为 `nil` 时，应包含 `Weapon` 类原型中的各字段初值。除了上文提到的 `Weapon` 中提供的默认字段外，还可以在其中添加一些自定义的字段。
 
@@ -107,17 +105,15 @@ Weapon:new{
 
 原型：`Weapon:purchase()`
 
-参数：无
-
 ### `switch`
 
-切换至指定的武器或装备，并在切换后等待指定的切换延迟时间。
+说明：切换至指定的武器或装备，并在切换后等待指定的切换延迟时间。
 
 原型：`Weapon:switch()`
 
 ### `switch_without_delay`
 
-切换至指定的武器或装备，切换后忽略切换延迟时间。
+说明：切换至指定的武器或装备，切换后忽略切换延迟时间。
 
 原型：`Weapon:switch_without_delay()`
 
@@ -125,13 +121,13 @@ Weapon:new{
 
 ### `abandon`
 
-丢弃指定的武器。
+说明：丢弃指定的武器。
 
 原型：`Weapon:abandon()`
 
 ### `attack`
 
-使用指定的**常规**武器进行**一轮**攻击。
+说明：使用指定的**常规**武器进行**一轮**攻击。
 
 原型：`Weapon:attack()`
 
@@ -190,7 +186,7 @@ Weapon:new{
 
 ### `use`
 
-使用指定的**特殊**武器进行攻击。
+说明：使用指定的**特殊**武器进行攻击。
 
 原型：`Weapon:use()`
 
@@ -325,7 +321,8 @@ ExtendedConventionalWeapons = {
             local direction = Utility:random_direction()
             local start_time = Runtime:get_running_time()
             local last_switch_time = 0
-            repeat					local current_time = Runtime:get_running_time()
+            repeat
+                local current_time = Runtime:get_running_time()
                 if current_time - last_switch_time > 1000
                 then
                     self:switch_without_delay()

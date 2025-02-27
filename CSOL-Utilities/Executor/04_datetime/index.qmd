@@ -1,1 +1,47 @@
 # 日期、时间
+
+`DateTime` 是执行器中用于处理日期和时间的类。
+
+## 字段
+
+### `TIME_ZONE`
+
+说明：时区，东半球取正数，西半球取负数。
+
+## 方法
+
+### `is_leap`
+
+说明：判断给定的年份是否为闰年。
+
+原型：`DateTime:is_leap(year)`
+
+- year：年，类型为整数。
+
+返回值：若 `year` 为闰年，返回 `true`；否则，返回 `false`。
+
+### `timestamp`
+
+说明：根据给定时区的日期和时间，计算的 UNIX 时间戳（UTC + 00:00）。
+
+原型：`DateTime:timestamp(year, month, day, hour, minute, second, time_zone)`
+
+- year：年，类型为整数。
+- month：月，类型为整数。
+- day：日，类型为整数。
+- hour：时，类型为整数。
+- minute：分，类型为整数。
+- second：秒，类型为整数。
+- time_zone：时区，类型为浮点数，东半球取正数，西半球取负数。可缺省，缺省值为 `0`。
+
+返回：由给定给定时区的日期、时间计算的出的协调世界时（UTC）所对应的 UNIX 时间戳，精确到秒。
+
+### `get_local_timestamp`
+
+说明：获取操作系统本地时间，并将其转换为 UNIX 时间戳。
+
+原型：`DateTime:get_local_timestamp()`
+
+返回：UNIX 时间戳（UTC + 00:00）。
+
+注解：使用此函数获取 UNIX 时间戳时，需保证 `TIME_ZONE` 设定为正确的值。

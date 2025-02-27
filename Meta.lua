@@ -1,5 +1,4 @@
 local custom_keys = {
-    "FootnotesSectionName"
 }
 
 function Meta(meta)

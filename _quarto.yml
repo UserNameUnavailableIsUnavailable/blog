@@ -24,30 +24,17 @@ format:
       light: cosmo
     toc: true
     html-math-method:
-      # method: katex
-      # url: https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.2/ # 字节跳动 CDN
       method: mathjax
       url: https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/mathjax/3.2.0/es5/tex-chtml-full.js
-    # embed-resources: true
 include-in-header:
   text: |
     <link rel="shortcut icon" href="https://macrohard.fun/assets/favicon.ico" />
     <link rel="icon" type="image/x-icon" href="https://macrohard.fun/assets/favicon.ico" />
-    <script src="/scripts/mathjax-config.js"></script>
 include-after-body:
   - file: texts/footer.html
   - text: |
-      <script>
-        const name = document.querySelector(`meta[name="FootnotesSectionName"]`)
-        if (name) {
-          let collection = document.getElementsByClassName("quarto-appendix-heading")
-          for (let e of collection) {
-            if (e.innerHTML == "Footnotes") {
-              e.innerHTML = name.content
-            }
-          }
-        }
-      </script>
+      <script src="/scripts/mathjax-config.js"></script>
+lang: zh
 filters:
   - Meta.lua
 execute:
