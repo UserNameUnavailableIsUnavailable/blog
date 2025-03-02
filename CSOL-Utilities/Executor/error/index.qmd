@@ -1,0 +1,169 @@
+# 错误处理
+
+## 字段
+
+### `type`
+
+说明：错误的种类，由玩家自行定义，类型为 `string`。
+
+## `parameters`
+
+说明：错误的附加参数，类型为 `table`。
+
+注解：使用提前注册的错误处理函数进行错误处理时，`parameters` 中的字段将作为参数传递给错误处理函数。
+
+## 方法
+
+### `new`
+
+原型：`Error:new(init)`
+
+- `init`：初始化列表，类型为 `table`。
+
+说明：创建一个错误对象。
+
+返回值：错误对象。
+
+### `throw`
+
+原型：`Error:throw(e)`
+
+- `e`：错误对象，类型为 `Error`。
+
+说明：将错误对象 `e` 抛出。
+
+### `catch`
+
+原型：`Error:catch(e)`
+
+- `e`：错误对象，类型为 `Error`。
+
+说明：捕获错误对象 `e`，并调用相应的错误处理函数进行处理。
+
+注解：`catch` 根据错误的种类（`type`）来决定将该错误指派给哪个错误处理函数进行处理。
+
+### `fatal`
+
+原型：`Error:fatal`
+
+说明：在发生灾难故障时，调用所有注册的灾难故障处理函数。
+
+注解：灾难故障是指**调用 `catch` 捕获错误的过程中，又出现了新的错误。**具体可细分为下列情形：
+
+- 捕获非法的对象（`catch` 仅处理类型为 `Error` 的错误对象）；
+- 捕获到的错误对象不存在对应类型的错误处理函数；
+- 在执行错误处理函数的过程中出现错误。
+
+### `register_error_handler`
+
+原型：`Error:register_error_handler(type, f)`
+
+- `type`：错误种类，类型为 `string`。
+- `f`：错误处理函数，类型为 `function`。
+
+说明：为错误类型 `type` 注册处理函数 `f`。
+
+注解：若捕获到 `catch` 无法处理的错误，或是错误处理函数在执行过程中产生新的错误，则 `catch` 会执行 `dispose_fatal` 并抛出错误。由 `catch` 抛出的错误旨在终止整个程序执行，原则上不应该捕获该错误。
+
+### `unregister_error_handler`
+
+原型：`Error:unregister_error_handler(type)`
+
+- `type`：错误种类，类型为 `string`。
+
+说明：注销指定错误类型的处理函数。
+
+### `register_fatal_disposal`
+
+原型：`Error:register_fatal_disposal(f)`
+
+- `f`：发生灾难故障时调用的处理函数，类型为 `function`。
+
+说明：注册发生灾难故障后的处理函数。
+
+返回值：处理函数的索引，从 `1` 开始编号。若 `f` 类型非法，则返回 `0`。
+
+注解：此函数一般用于在发生故障后回收一些无法释放的资源（如已按下但尚未弹起的键盘按键）。
+
+### `unregister_fatal_disposal`
+
+原型：`Error:unregister_fatal_disposal(index)`
+
+- index：处理函数在处理函数列表中的索引，类型为 `integer`。
+
+返回值：操作成功，则返回 `true`；否则，返回 `false`。
+
+## 示例
+
+### 即时响应命令变更
+
+执行器每隔一段时间从命令文件中取出由控制器下达的命令。有时，执行器执行某一命令（如创建新房间、批量合成配件）需要消耗较长时间，这种情况下若命令文件内容发生变更，执行器将不得不先执行完当前命令，再载入新的命令。通过 Lua 提供的异常机制，你可以通过“主动抛出错误”来销毁当前的调用栈，并将控制权交还给捕获该异常的调用方，进而达到强制改变执行流的效果。与 `Runtime` 提供的中断处理功能相结合，可以实现周期性读取命令文件并检查命令是否变更，并根据变更情况**立即**开始执行新的命令，而不必等到当前命令执行完毕才执行。
+
+首先，我们希望在命令发生变化时，由更新命令的中断处理函数抛出一个类型为 `"COMMAND_CHANGED"` 的错误。为处理此错误，需要注册相应的错误处理函数：
+
+```lua
+Error:register_error_handler(
+    "COMMAND_CHANGED",
+    function (cmd)
+        Console:information("命令变更为：%s。", cmd)
+    end
+)
+```
+
+其次，需要通过 `Runtime:register_interrupt_handler` 注册一个回调函数，用于周期性读取命令，另请参阅 [命令的解释与执行](/CSOL-Utilities/Executor/command/) 和 [运行时](/CSOL-Utilities/Executor/runtime/) 中的内容。当命令类型发生变更时，抛出一个类型为 `"COMMAND_CHANGED"` 的错误。
+
+```lua
+Runtime.last_command_update_timepoint = 0
+Runtime:register_interrupt_handler(
+    function ()
+        if (Runtime:get_running_time() - Runtime.last_command_update_timepoint < 100)
+        then
+            return
+        end
+        Command:update() -- 更新命令
+        Runtime.last_command_update_timepoint = Runtime:get_running_time()
+        -- 命令类型发生变化，需要立即停止当前执行
+        if ((Command:get_status() & Command.TYPE_CHANGED) == Command.TYPE_CHANGED)
+        then
+            Mouse:reset()
+            Keyboard:reset()
+            Player:reset()
+            local e = Error:new{
+                type = "COMMAND_CHANGED",
+                parameters = { Command:claim() }
+            }
+            Error:throw(e) -- 主动触发运行时错误
+        end
+    end
+)
+```
+
+下面是一个最简的解释执行命令的函数：
+
+```lua
+local function interpret()
+    local cmd = Command:claim() -- 领取命令
+
+    -- 解释并执行命令
+
+    Command:finish() -- 将命令标记为完成
+    Runtime:sleep(1000) -- 命令完成后，进入 100 ms 的间隔，期间会由先前注册的中断回调函数检查命令更新情况
+end
+```
+
+然后，通过下面的方式调用 `interpret`：
+
+```lua
+while (true)
+do
+    local status, error = pcall(interpret)
+    if (not status) -- 执行过程中发生错误
+    then
+        Error:catch(error)
+    end
+end
+```
+
+这样，在执行过程中若发生 `"COMMAND_CHANGED"` 错误，则会销毁从主函数到当前正在执行函数的调用栈，随后立即执行错误处理。错误处理完成后，重新开始解释并执行新的命令。这样，就可以实现命令变更的即时响应。
+
+需要指出，这样的处理方法还带来了一个额外的好处。例如，在罗技提供的编程框架中，若按下一个按键，并在随后的执行过程中出现了未被处理的错误导致程序终止，该按键并不会被恢复为弹起状态，这往往会导致非常严重的后果。但是，若我们注册了针对这种灾难性错误的处理函数（比如，回弹所有已经按下但尚未弹起的按键），并在主函数体中捕获由入口函数抛出的错误（假定并未注册对这种错误的处理方式，亦或是这种错误无法被 `catch` 处理），则 `catch` 会先执行 `fatal`，回弹所有未弹起的按键，然后再终止程序运行。

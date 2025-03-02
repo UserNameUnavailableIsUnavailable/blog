@@ -17,20 +17,22 @@ website:
             - text: 概述
               href: /CSOL-Utilities/Executor/
             - text: 模块化编程
-              href: /CSOL-Utilities/Executor/01_module/
+              href: /CSOL-Utilities/Executor/module/
             - text: 运行时
-              href: /CSOL-Utilities/Executor/02_runtime/
+              href: /CSOL-Utilities/Executor/runtime/
+            - text: 错误处理
+              href: /CSOL-Utilities/Executor/error/
             - text: 与外部程序双向交互
-              href: /CSOL-Utilities/Executor/03_interaction/
+              href: /CSOL-Utilities/Executor/interaction/
             - text: 日期、时间
-              href: /CSOL-Utilities/Executor/04_datetime/
+              href: /CSOL-Utilities/Executor/datetime/
             - text: 命令的解析与执行
-              href: /CSOL-Utilities/Executor/05_command/
+              href: /CSOL-Utilities/Executor/command/
             - text: 键盘操作
-              href: /CSOL-Utilities/Executor/06_keyboard/
+              href: /CSOL-Utilities/Executor/keyboard/
             - text: 鼠标操作
-              href: /CSOL-Utilities/Executor/07_mouse/
+              href: /CSOL-Utilities/Executor/mouse/
             - text: 实用工具
-              href: /CSOL-Utilities/Executor/08_utilities/
+              href: /CSOL-Utilities/Executor/utilities/
             - text: 定义武器或装备
-              href: /CSOL-Utilities/Executor/09_weapon/
+              href: /CSOL-Utilities/Executor/weapon/

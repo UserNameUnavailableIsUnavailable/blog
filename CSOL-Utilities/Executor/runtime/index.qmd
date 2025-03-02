@@ -86,19 +86,19 @@ Runtime:register_interrupt_handler(
 
 ### `manual_flag`
 
-说明：手动接管标志。
+说明：手动接管标志，类型为 `boolean`。
 
 注解：执行器中默认注册用于即时启停的中断处理函数，当用户发出开始手动接管请求（默认为按下左右 `Ctrl` 键）后，`manual_flag` 被置为 `true`；用户发出结束手动接管请求（默认为按下左右 `Alt` 键）后，`manual_flag` 被置为 `false`。手动接管期间，使用 `Mouse` 类或 `Keyboard` 类中的成员函数发出的任何鼠标、键盘操作将被跳过（即不执行相应的键鼠操作）。
 
 ### `interrupt_flag`
 
-说明：中断标志位。
+说明：中断标志位，类型为 `boolean`。
 
-注解：调用 `sleep` 后，在执行中断处理前，`interrupt_flag` 将被置为 `true`，以避免在后续调用 `sleep` 时产生中断嵌套，进而对当前中断处理造成不必要的影响。中断处理结束后，`interrupt_flag` 恢复为 `false`。
+注解：调用 `sleep` 后，在执行中断处理前，`interrupt_flag` 将被置为 `true`，以避免在中断处理函数中调用 `sleep` 时产生中断嵌套，进而对当前中断处理造成不必要的影响。中断处理结束后，`interrupt_flag` 恢复为 `false`。
 
-### `interrupt_handler_list`
+### `interrupt_handlers`
 
-说明：中断处理函数列表。
+说明：中断处理函数列表，类型为 `table`。
 
 注解：**此列表不应手动修改**，而应该使用 `register_interrupt_handler` 和 `unregister_interrupt_handler` 进行中断处理函数的注册和注销。
 
