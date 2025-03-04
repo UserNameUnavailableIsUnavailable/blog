@@ -1,1 +1,218 @@
 # 鼠标操作
+
+## 字段
+
+### 鼠标按钮
+
+|字段|值|说明|
+|---|---|---|
+|Mouse.LEFT|`1`|鼠标左键|
+|Mouse.MIDDLE|`2`|鼠标中键|
+|Mouse.RIGHT|`3`|鼠标右键|
+|Mouse.BACKWARD|`4`|鼠标侧键（向后）|
+|Mouse.forward|`5`|鼠标侧键（向前）|
+
+### `DOUBLE_CLICK_INTERVAL`
+
+说明：双击时间间隔，单位为毫秒，默认值为 `150`（人手双击时间间隔一般为此值）。
+
+### `unreleased`
+
+说明：通过 `press` 按下，但未通过 `release` 或 `reset` 弹起的按钮。
+
+### `frozen`
+
+说明：鼠标是否处于冻结状态，类型为 `boolean`。
+
+注解：冻结状态下，`Mouse` 提供的除 `reset` 外所有鼠标操作接口失效。
+
+## 方法
+
+### `freeze`
+
+说明：冻结鼠标，冻结后所有的鼠标操作（`reset` 除外）将被忽略。
+
+### `unfreeze`
+
+说明：与 `freeze` 相对，解除鼠标冻结状态。
+
+### `locate`
+
+说明：定位鼠标光标位置。
+
+原型：`Mouse:locate()`
+
+返回：鼠标光标位置 `(x, y)`，`x` 为横坐标，`y` 为纵坐标，类型均为 `integer`。
+
+### `is_position_valid`
+
+说明：检查鼠标光标位置坐标是否有效。
+
+原型：`Mouse:is_position_valid(x, y)`
+
+- `x`：横坐标。
+- `y`：横坐标。
+
+返回：有效返回 `true`，否则返回 `false`。
+
+注解：坐标值 $x, y \in \left\{t \in \mathbb{N} \left|0 \le t \lt 65535\right.\right\}$ 时视作有效。
+
+### `place`
+
+说明：将鼠标光标置于指定坐标处。
+
+原型：`Mouse:place(x, y, delay, precise)`
+
+- `x`：横坐标。
+- `y`：横坐标。
+- `delay`：移动后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+注解：若坐标无效，则不进行操作，但延迟正常进行。
+
+### `move_relative`
+
+说明：相对移动鼠标光标。
+
+原型：`Mouse:move_relative(rightward, downward, delay, precise)`
+
+- `rightward`：水平方向相对移动的偏移量，类型为 `integer | nil`。正数表示向右，负数表示向左，缺省值为 `0`。
+- `downward`：垂直方向相对移动的偏移量，类型为 `integer | nil`。正数表示向下，负数表示向上，缺省值为 `0`。
+- `delay`：相对移动后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+### `press`
+
+说明：按下指定按钮。
+
+原型：`Mouse:press(button, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`：按下按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+注解：调用此接口按下的按钮将记录到 `unreleased` 中。
+
+### `release`
+
+说明：弹起指定按钮。
+
+原型：`Mouse:release(button, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`：弹起按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+注解：调用此接口弹起的按钮将从 `unreleased`（若存在）中移除。
+
+### `click`
+
+说明：单击指定按钮。
+
+原型：`Mouse:click(button, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`：单击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+### `click_on`
+
+说明：用指定按钮单击指定位置。
+
+原型：`Mouse:click_on(button, x, y, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `x`：横坐标。
+- `y`：纵坐标。
+- `delay`：单击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+注解：若坐标无效，则不进行操作，但延迟正常进行。
+
+### `double_click`
+
+说明：双击指定按钮。
+
+原型：`Mouse:double_click(button, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`：双击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+注解：双击间隔为 `DOUBLE_CLICK_INTERVAL`。
+
+### `double_click_on`
+
+说明：用指定按钮双击指定位置。
+
+原型：`Mouse:double_click_on(button, x, y, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `x`：横坐标。
+- `y`：纵坐标。
+- `delay`：双击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+注解：若坐标无效，则不进行操作，但延迟正常进行。
+
+### `click_several_times`
+
+说明：重复点击指定按钮若干次。
+
+原型：`Mouse:click_several_times(button, times, interval, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `times`：点击次数，类型为 `integer | nil`，缺省值为 `0`。
+- `interval`：点击间隔时间，类型为 `integer | nil`（最后一次点击后不适用该间隔时间），缺省值为 `50`。
+- `delay`：操作完成后的延迟时间，类型为 `integer | nil`，缺省值为 `50`。
+- `precise`：间隔时间和延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+### `click_several_times_on`
+
+说明：用指定按钮重复点击指定位置若干次。
+
+原型：`Mouse:click_several_times_on(button, x, y, times, interval, delay, precise)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `x`：横坐标。
+- `y`：纵坐标。
+- `times`：点击次数，类型为 `integer | nil`，缺省值为 `0`。
+- `interval`：点击间隔时间，类型为 `integer | nil`（最后一次点击后不适用该间隔时间），缺省值为 `50`。
+- `delay`：操作完成后的延迟时间，类型为 `integer | nil`，缺省值为 `50`。
+- `precise`：间隔时间和延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+注解：若坐标无效，则不进行操作，但延迟正常进行。
+
+### `reset`
+
+说明：重置鼠标，即弹起 `unreleased` 中记录的所有按键。
+
+原型：`Mouse:reset(delay, precise)`
+
+- `delay`：每弹起一个按键后的延迟时间，类型为 `integer | nil`，单位为毫秒。缺省值为 `50`。
+
+注解：该接口不受 `frozen` 影响。
+
+### `is_pressed`
+
+说明：判断指定按钮是否按下。
+
+原型：`Mouse:is_pressed(button)`
+
+- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+
+返回：若 `button` 处于按下状态，返回 `true`；否则，返回 `false`。
+
+### `roll`
+
+说明：滚动鼠标滚轮。
+
+原型：`Mouse:roll(times, delay, precise)`
+
+- `times`：滚动滚轮的次数，类型为 `integer | nil`。正数表示向上滚动，负数表示向下滚动，缺省值为 `0`。
+- `delay`：滚动后的延迟时间，类型为 `integer | nil`，缺省值为 `50`。
+- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+
+## 资源回收
+
+`Mouse` 通过 `Error` 注册了灾难故障处理函数。在发生灾难错误导致程序无法继续运行时（需要保证顶层由 `Error:catch` 处理所有异常，另请参阅 [错误处理](/CSOL-Utilities/Executor/error/)），将通过 `reset` 弹起所有已通过 `press` 按下但未弹起的按钮。

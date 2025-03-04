@@ -4,6 +4,8 @@
 
 ## 项目主页
 
+[CSOL 集成工具使用说明（视频教程）](https://www.bilibili.com/video/BV1j8wdemERY)
+
 [Gitee 项目主页](https://gitee.com/silver1867/csol-24-h)
 
 [GitHub 项目主页](https://github.com/UserNameUnavailableIsUnavailable/CSOL-Utilities)

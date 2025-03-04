@@ -44,35 +44,37 @@ end
 例如，要想实现集成工具中提供的随时启停功能，只需要按下面的方式注册中断回调函数：
 
 ```lua
----手动接管标志。接管期间，所有键鼠操作将被跳过。
+---手动接管标志，防止重复打印消息。
 Runtime.manual_flag = false
-
 ---注册暂停事件处理函数，处理用户手动接管事件。
 Runtime:register_interrupt_handler(
     function ()
         if (Keyboard:is_modifier_pressed(Keyboard.LCTRL) and Keyboard:is_modifier_pressed(Keyboard.RCTRL))
         then
-            Keyboard:release_all()
-            Mouse:release_all()
-            -- 注意，如果 pause_flag == true，则 restore_context 不会再恢复中断现场，这是由于 pause_flag 置位后不会执行任何键鼠操作
+            Keyboard:reset()
+            Mouse:reset()
             if (not Runtime.manual_flag)
             then
                 Console:information("开始手动接管，禁用键鼠动作。")
+                Keyboard:freeze()
+                Mouse:freeze()
             end
-            Runtime.manual_flag = true -- 暂停执行，中断现场将不会恢复
+            Runtime.manual_flag = true
         elseif (Keyboard:is_modifier_pressed(Keyboard.LALT) and Keyboard:is_modifier_pressed(Keyboard.RALT))
         then
             if (Runtime.manual_flag)
             then
                 Console:information("中止手动接管，允许键鼠动作。")
+                Keyboard:unfreeze()
+                Mouse:unfreeze()
             end
-            Runtime.manual_flag = false -- 恢复执行，后续中断现场可正常恢复
+            Runtime.manual_flag = false
         end
     end
 )
 ```
 
-在使用像 `Keyboard:click` 这样的接口时，将会先检测 `Runtime.manual_flag` 是否为 `true`。一旦 `Runtime.manual_flag` 置为 `true`，所有的键盘、鼠标操作将被跳过，直至 `Runtime.manual_flag` 重新被置为 `false`。
+按下左右 `CTRL` 后，通过调用 `Keyboard` 和 `Mouse` 提供的 `freeze` 冻结键盘和鼠标，达到暂停所有操作的效果；按下左右 `ALT` 后，通过调用 `Keyboard` 和 `Mouse` 提供的 `freeze` 解冻键盘和鼠标，恢复键鼠操作。
 
 需要指出，`Runtime` 类实现的中断功能并非真正意义上的中断功能，当前执行流调用 `Runtime:sleep` 后，即表示其“出让执行权给其他执行流”，此处的“其他执行流”即中断处理回调函数，因此，我将 `Runtime` 类实现的中断功能称作“伪”中断功能。
 

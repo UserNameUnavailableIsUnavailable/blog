@@ -2,45 +2,41 @@
 
 ## 字段
 
-### `type`
+### `name`
 
-说明：错误的种类，由玩家自行定义，类型为 `string`。
+说明：错误的名称，由玩家自行定义，类型为 `string`。
 
-## `parameters`
+### `message`
+
+说明：错误的详细消息，类型为 `string`。
+
+### `parameters`
 
 说明：错误的附加参数，类型为 `table`。
 
-注解：使用提前注册的错误处理函数进行错误处理时，`parameters` 中的字段将作为参数传递给错误处理函数。
+注解：使用提前注册的错误处理函数进行错误处理时，`parameters` 中的字段将作为参数传递给对应于该名称错误的处理函数。
 
 ## 方法
 
-### `new`
-
-原型：`Error:new(init)`
-
-- `init`：初始化列表，类型为 `table`。
-
-说明：创建一个错误对象。
-
-返回值：错误对象。
-
 ### `throw`
 
-原型：`Error:throw(e)`
+原型：`Error:throw(init)`
 
-- `e`：错误对象，类型为 `Error`。
+- `init`：错误初始化列表，类型为 `table`。
 
-说明：将错误对象 `e` 抛出。
+说明：根据 `init` 初始化错误信息，并将其抛出。抛出的错误对象类型为 `string`，且**具有特定格式**。
+
+注解：抛出对象为遵循某种格式规范的字符串，其中包含了 [字段](#字段) 中提及的所有字段内容，该字符串在通过 `pcall` 或 `xpcall` 获取后应交由 `catch` 处理。
 
 ### `catch`
 
-原型：`Error:catch(e)`
+原型：`Error:catch(error_string)`
 
-- `e`：错误对象，类型为 `Error`。
+- `error_string`：错误对象，类型为 `string`，且具有 [`throw`](#throw) 提到的特定格式。
 
-说明：捕获错误对象 `e`，并调用相应的错误处理函数进行处理。
+说明：捕获 `error_string`，并在解析后调用相应的错误处理函数进行处理。
 
-注解：`catch` 根据错误的种类（`type`）来决定将该错误指派给哪个错误处理函数进行处理。
+注解：`catch` 根据错误的名称（`name`）来决定将该错误指派给哪个错误处理函数进行处理，并在处理时将 `parameters` 作为参数传递给错误处理函数。
 
 ### `fatal`
 
@@ -51,27 +47,27 @@
 注解：灾难故障是指**调用 `catch` 捕获错误的过程中，又出现了新的错误。**具体可细分为下列情形：
 
 - 捕获非法的对象（`catch` 仅处理类型为 `Error` 的错误对象）；
-- 捕获到的错误对象不存在对应类型的错误处理函数；
+- 捕获到的错误对象不存在对应名称的错误处理函数；
 - 在执行错误处理函数的过程中出现错误。
 
 ### `register_error_handler`
 
-原型：`Error:register_error_handler(type, f)`
+原型：`Error:register_error_handler(name, f)`
 
-- `type`：错误种类，类型为 `string`。
+- `name`：错误名称，类型为 `string`。
 - `f`：错误处理函数，类型为 `function`。
 
-说明：为错误类型 `type` 注册处理函数 `f`。
+说明：为错误名称 `name` 注册处理函数 `f`。
 
 注解：若捕获到 `catch` 无法处理的错误，或是错误处理函数在执行过程中产生新的错误，则 `catch` 会执行 `dispose_fatal` 并抛出错误。由 `catch` 抛出的错误旨在终止整个程序执行，原则上不应该捕获该错误。
 
 ### `unregister_error_handler`
 
-原型：`Error:unregister_error_handler(type)`
+原型：`Error:unregister_error_handler(name)`
 
-- `type`：错误种类，类型为 `string`。
+- `name`：错误名称，类型为 `string`。
 
-说明：注销指定错误类型的处理函数。
+说明：注销指定错误名称的处理函数。
 
 ### `register_fatal_disposal`
 
@@ -99,7 +95,7 @@
 
 执行器每隔一段时间从命令文件中取出由控制器下达的命令。有时，执行器执行某一命令（如创建新房间、批量合成配件）需要消耗较长时间，这种情况下若命令文件内容发生变更，执行器将不得不先执行完当前命令，再载入新的命令。通过 Lua 提供的异常机制，你可以通过“主动抛出错误”来销毁当前的调用栈，并将控制权交还给捕获该异常的调用方，进而达到强制改变执行流的效果。与 `Runtime` 提供的中断处理功能相结合，可以实现周期性读取命令文件并检查命令是否变更，并根据变更情况**立即**开始执行新的命令，而不必等到当前命令执行完毕才执行。
 
-首先，我们希望在命令发生变化时，由更新命令的中断处理函数抛出一个类型为 `"COMMAND_CHANGED"` 的错误。为处理此错误，需要注册相应的错误处理函数：
+首先，我们希望在命令发生变化时，由更新命令的中断处理函数抛出一个名称为 `"COMMAND_CHANGED"` 的错误。为处理此错误，需要注册相应的错误处理函数：
 
 ```lua
 Error:register_error_handler(
@@ -110,7 +106,7 @@ Error:register_error_handler(
 )
 ```
 
-其次，需要通过 `Runtime:register_interrupt_handler` 注册一个回调函数，用于周期性读取命令，另请参阅 [命令的解释与执行](/CSOL-Utilities/Executor/command/) 和 [运行时](/CSOL-Utilities/Executor/runtime/) 中的内容。当命令类型发生变更时，抛出一个类型为 `"COMMAND_CHANGED"` 的错误。
+其次，需要通过 `Runtime:register_interrupt_handler` 注册一个回调函数，用于周期性读取命令，另请参阅 [命令的解释与执行](/CSOL-Utilities/Executor/command/) 和 [运行时](/CSOL-Utilities/Executor/runtime/) 中的内容。当命令名称发生变更时，抛出一个名称为 `"COMMAND_CHANGED"` 的错误。
 
 ```lua
 Runtime.last_command_update_timepoint = 0
@@ -128,11 +124,11 @@ Runtime:register_interrupt_handler(
             Mouse:reset()
             Keyboard:reset()
             Player:reset()
-            local e = Error:new{
-                type = "COMMAND_CHANGED",
+            Error:throw{
+                name = "COMMAND_CHANGED",
+                message = "命令变更",
                 parameters = { Command:claim() }
-            }
-            Error:throw(e) -- 主动触发运行时错误
+            } -- 主动触发运行时错误
         end
     end
 )
@@ -167,3 +163,42 @@ end
 这样，在执行过程中若发生 `"COMMAND_CHANGED"` 错误，则会销毁从主函数到当前正在执行函数的调用栈，随后立即执行错误处理。错误处理完成后，重新开始解释并执行新的命令。这样，就可以实现命令变更的即时响应。
 
 需要指出，这样的处理方法还带来了一个额外的好处。例如，在罗技提供的编程框架中，若按下一个按键，并在随后的执行过程中出现了未被处理的错误导致程序终止，该按键并不会被恢复为弹起状态，这往往会导致非常严重的后果。但是，若我们注册了针对这种灾难性错误的处理函数（比如，回弹所有已经按下但尚未弹起的按键），并在主函数体中捕获由入口函数抛出的错误（假定并未注册对这种错误的处理方式，亦或是这种错误无法被 `catch` 处理），则 `catch` 会先执行 `fatal`，回弹所有未弹起的按键，然后再终止程序运行。
+
+## 其他细节
+
+当用户在某个函数中使用 `error` 抛出一个错误，但并未使用 `pcall` 或 `xpcall` 对其进行处理时，LGHUB Agent 将在顶层对其进行捕获，并终止程序运行。
+
+就 Lua 规范而言，`error` 可以抛出任意类型的对象，即允许抛出的对象类型并不局限于 `string` 或 `number`。然而，LGHUB Agent 针对这一点的处理存在严重漏洞。例如，使用 `error({ name = "ERROR"})` 抛出一个 `table` 类型的对象，且不对其进行任何处理，这时，LGHUB Agent 将捕获到该对象，并尝试以某种方式将其字符串化，并进行拼接操作，但由于捕获到的对象为 `table`，该操作会失败，进而导致 LGHUB Agent 崩溃。
+
+需要指出，即便是在抛出的对象中提供 `__tostring` 并正确元表仍不能解决上述问题。在下图中，我们看到，标准的 Lua 解释器能够正确处理这一点。
+
+与此对比的是下面的例子：
+
+> 警告：该例子非常危险！
+
+```lua
+e = {
+  name = "LGHUB_AGENT_FATAL_ERROR",
+  message = "LGHUB Agent 灾难性故障",
+  __name = "LGHUB_AGENT_FATAL_ERROR",
+  __tostring = function (self)
+    return self.message
+  end
+}
+setmetatable(e, e)
+error(e) -- LGHUB Agent 将捕获到此错误对象
+```
+
+运行上面的例子，LGHUB Agent 将崩溃，在 LGHUB 中将提示即将重新启动。但是，由于 LGHUB Agent 启动后又会再次重新运行上述代码，又会再一次崩溃，LGHUB 便陷入了无限重启 LGHUB Agent 的循环。
+
+![LGHUB Agent 崩溃](assets/lghub_agent_crash.avif)
+
+![LGHUB 再也无法正确启动 LGHUB Agent](assets/lghub_unable_to_restore.avif)
+
+要解决上面的问题，需要找到 LGHUB Agent 启动后自动执行的脚本文件，它们位于 `%LOCALAPPDATA%\LGHUB\scripts\` 目录下，该目录下有一些以 GUID 命名的文件夹，其中包含了名为 `script.lua` 的文件。找到正确的文件后，注释掉其中触发上述灾难性故障的 `error(e)` 并保存。然后，重启 LGHUB，LGHUB Agent 即可正常运行。
+
+![LGHUB 中导入的所有脚本](assets/lghub_scripts.avif)
+
+![注释掉 `error(e)`](assets/comment_error.avif)
+
+基于上述原因，`Error` 中提供的 `throw` 被设计为只抛出字符串，以避免发生上述灾难性故障。
