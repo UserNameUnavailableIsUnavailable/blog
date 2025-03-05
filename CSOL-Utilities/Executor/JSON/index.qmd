@@ -1,6 +1,6 @@
-# JSON 解析库
+# JSON 解析
 
-Executor 中纳入了 JSON编解码模块，该模块基于 GitHub 开源项目 [rxi/json.lua](https://github.com/rxi/json.lua) 修改而来，使用 `Include` 包含后，提供 `JSON` 类。
+Executor 中纳入了 JSON 编解码模块，该模块基于 GitHub 开源项目 [rxi/json.lua](https://github.com/rxi/json.lua) 修改而来，使用 `Include` 包含后，提供 `JSON` 类。
 
 ## 方法
 
@@ -24,3 +24,9 @@ JSON 对象的字段值可以是上述基础类型，或由上述基础类型构
 ### `decode`
 
 说明：将 JSON 字符串解析为 JSON 对象。
+
+原型：`JSON.decode(s)`
+
+- `s`：JSON 字符串，类型为 `string`。
+
+返回：JSON 对象，类型为 `table`。

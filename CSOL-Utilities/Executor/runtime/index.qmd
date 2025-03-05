@@ -233,3 +233,44 @@ until i == 0
 - `index`：中断处理函数在中断处理函数列表中的索引，类型为 `integer`。此值为在调用 `register_interrupt_handler` 时返回。
 
 返回值：若操作成功，返回 `true`，否则返回 `false`。
+
+### `sti`
+
+说明：开中断，调用后启用中断处理。
+
+原型：`Runtime:sti()`
+
+注解：强烈建议结合 `push_interrupt_flag` 和 `pop_interrupt_flag` 使用。
+
+### `cli`
+
+说明：关中断，调用后禁用中断处理。
+
+原型：`Runtime:cli()`
+
+注解：强烈建议结合 `push_interrupt_flag` 和 `pop_interrupt_flag` 使用。
+
+### `push_interrupt_flag`
+
+说明：在栈中保存中断标志位。
+
+原型：`Runtime:push_interrupt_flag()`
+
+### `pop_interrupt_flag`
+
+说明：从栈中恢复最近一次保存的中断标志位。
+
+原型：`Runtime:pop_interrupt_flag()`
+
+## 示例
+
+### 原子操作
+
+通过暂时关闭中断，您可以完成原子操作。由于集成工具的核心功能均围绕中断机制实现，因此除非必要（如 `Weapon` 类中实现的购买方法就是原子操作），不应该关中断。
+
+```lua
+Runtime:push_interrupt_flag() -- 保存当前中断标志位
+Runtime:cli() -- 关中断
+Keyboard:click_several_times(Keyboard.ESCAPE, 10) -- 按下 10 次 ESC 键，且不被中断
+Runtime:pop_interrupt_flag() -- 恢复中断标志位
+```
