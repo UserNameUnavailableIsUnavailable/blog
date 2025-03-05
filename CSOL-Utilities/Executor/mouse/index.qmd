@@ -10,7 +10,7 @@
 |Mouse.MIDDLE|`2`|鼠标中键|
 |Mouse.RIGHT|`3`|鼠标右键|
 |Mouse.BACKWARD|`4`|鼠标侧键（向后）|
-|Mouse.forward|`5`|鼠标侧键（向前）|
+|Mouse.FORWARD|`5`|鼠标侧键（向前）|
 
 ### `DOUBLE_CLICK_INTERVAL`
 
@@ -18,7 +18,7 @@
 
 ### `unreleased`
 
-说明：通过 `press` 按下，但未通过 `release` 或 `reset` 弹起的按钮。
+说明：通过 `press` 按下，但未通过 `release` 或 `reset` 弹起的按钮，类型为 `{ integer: boolean | nil }`。若某个按钮通过 `press` 按下，则在此表中该按钮状态被记录为 `true`；后续若通过 `release` 弹起，则记录为 `nil`。
 
 ### `frozen`
 
@@ -32,9 +32,21 @@
 
 说明：冻结鼠标，冻结后所有的鼠标操作（`reset` 除外）将被忽略。
 
+原型：`Mouse:freeze()`
+
 ### `unfreeze`
 
 说明：与 `freeze` 相对，解除鼠标冻结状态。
+
+原型：`Mouse:unfreeze()`
+
+### `is_frozen`
+
+说明：判断鼠标是否处于冻结状态。
+
+原型：`Mouse:is_frozen()`
+
+返回：若处于冻结状态，返回 `true`；否则，返回 `false`。
 
 ### `locate`
 
@@ -56,6 +68,16 @@
 返回：有效返回 `true`，否则返回 `false`。
 
 注解：坐标值 $x, y \in \left\{t \in \mathbb{N} \left|0 \le t \lt 65535\right.\right\}$ 时视作有效。
+
+### `is_button_value_valid`
+
+说明：检查按钮值是否有效。
+
+原型：`Mouse:is_button_value_valid(button_value)`
+
+- `button_value`：需要检查的按钮值，类型为 `any`。
+
+返回：有效返回 `true`；否则，返回 `false`。
 
 ### `place`
 
@@ -189,7 +211,7 @@
 
 原型：`Mouse:reset(delay, precise)`
 
-- `delay`：每弹起一个按键后的延迟时间，类型为 `integer | nil`，单位为毫秒。缺省值为 `50`。
+- `delay`：每弹起一个按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
 
 注解：该接口不受 `frozen` 影响。
 

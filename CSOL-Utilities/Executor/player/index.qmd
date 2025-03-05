@@ -1,0 +1,200 @@
+# 玩家的游戏行为
+
+`Player` 类用于控制游戏内行为。
+
+## 字段
+
+### `armor`
+
+说明：护甲，类型为 `Weapon`。
+
+注解：使用 `new` 方法创建 `Player` 对象时指明此字段，缺省为 `nil`。
+
+### `part_weapons`
+
+说明：配件武器列表，类型为 `Weapon[]`。
+
+注解：使用 `new` 方法创建 `Player` 对象时指明此字段，缺省为 `{}`。
+
+### `conventional_weapons`
+
+说明：常规武器列表，类型为 `Weapon[]`，缺省为 `{}`。
+
+注解：使用 `new` 方法创建 `Player` 对象时指明此字段。
+
+### `special_weapons`
+
+说明：特殊武器列表，类型为 `Weapon[]`，缺省为 `{}`。
+
+注解：使用 `new` 方法创建 `Player` 对象时指明此字段。
+
+### `RESPAWN_KEY`
+
+说明：复活或回合重置按键，可取所有合法的键盘按键值（参阅 [键盘操作](/CSOL-Utilities/Executor/keyboard/)）。
+
+注解：不要直接修改此字段，应通过 `set_respawn_key` 修改此字段。
+
+### `run_direction`
+
+说明：跑动方向，可取下列值。
+
+|值|含义|
+|`0`|静止|
+|`1`|向前奔跑|
+|`2`|向左奔跑|
+|`3`|向后奔跑|
+|`4`|向右奔跑|
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_activate_special_ability_time`
+
+说明：最近一次发动角色技能的时刻，类型为 `integer`，单位为秒。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_weapon`
+
+说明：最近一次使用的武器，类型为 `Weapon`。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_primary_weapon`
+
+说明：最近一次使用的主武器，类型为 `Weapon`。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_secondary_weapon`
+
+说明：最近一次使用的副武器，类型为 `Weapon`。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_buy_part_weapon_time`
+
+说明：最近一次购买配件武器的时刻，类型为 `integer`，单位为秒。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_part_weapon_index`
+
+说明：最近一次购买的配件武器在配件武器列表中的索引，类型为 `integer`。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_buy_special_weapon_time`
+
+说明：最近一次购买特殊武器的时刻，类型为 `integer`，单位为秒。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+### `last_special_weapon_index`
+
+说明：最近一次购买的特殊武器在特殊武器列表中的索引，类型为 `integer`。
+
+注解：该字段值在运行时动态确定，不要修改此字段。
+
+## 方法
+
+### `set_respawn_key`
+
+说明：修改复活或回合重置按键。
+
+原型：`Player:set_respawn_key(key)`
+
+- `key`：键盘按键名称。
+
+### `new`
+
+说明：创建新的 `Player` 实例，实例包含 `Player` 原型的所有字段和方法。
+
+原型：`Player:new(init)`
+
+- `init`：初始化列表，类型为 `table`。
+
+注解：
+
+### `start_move`
+
+说明：开始运动。
+
+原型：`Player:start_move()`
+
+注解：调用该函数后，将向 `run_direction` 指示的方向（该方向随机产生）运动。
+
+### `stop_move`
+
+说明：与 `start_move` 相对，结束运动。
+
+原型：`Player:stop_move()`
+
+### `reset_round_or_respawn`
+
+说明：若 `Setting.lua` 中启用了自动复活或回合重置，则调用此方法会执行复活或回合重置操作。
+
+原型：`Player:reset_round_or_respawn()`
+
+注解：此方法默认注册在中断处理列表内，无需主动调用。
+
+### `activate_special_ability`
+
+说明：若 `Setting.lua` 中启用了周期发动角色技能，则调用此方法将发动角色技能。
+
+原型：`Player:activate_special_ability()`
+
+### `buy_armor`
+
+说明：购买护甲。
+
+原型：`Player:buy_armor()`
+
+### `buy_part_weapons`
+
+说明：按序购买配件武器列表中的武器。
+
+原型：`Player:buy_part_weapons()`
+
+注解：为避免购买配件武器过于频繁，方法内设定了间隔时间，因此调用该方法每隔一段时间才会购买武器。
+
+### `attack_with_conventional_weapons`
+
+说明：随机选取并购买常规武器列表中的武器进行攻击。
+
+原型：`Player:attack_with_conventional_weapons()`
+
+### `attack_with_special_weapons`
+
+说明：按序选取并购买特殊武器列表中的武器进行攻击。
+
+原型：`Player:attack_with_special_weapons`
+
+注解：为避免购买配件武器过于频繁，方法内设定了间隔时间，因此调用该方法每隔一段时间才会购买武器。
+
+### `play`
+
+说明：使用 `Player` 实例进行游戏。
+
+原型：`Player:play()`
+
+注解：该方法内部依次调用 `buy_armor`、`buy_part_weapons`、`attack_with_conventional_weapons`、`attack_with_special_weapons`。
+
+## 示例
+
+下面的例子创建了一个默认玩家对象。其中，`Armor`、`DefaultPartWeapons`、`DefaultConventionalWeapons`、`DefaultSpecialWeapons` 定义在 `WeaponList.lua` 中。
+
+```lua
+---默认模式挂机玩家对象。
+local default_player = Player:new{
+    armor = Armor,
+    part_weapons = DefaultPartWeapons,
+    conventional_weapons = DefaultConventionalWeapons,
+    special_weapons = DefaultSpecialWeapons
+}
+```
+
+调用 `default_player` 实例的 `play` 方法，使用该玩家对象进行游戏。
+
+```lua
+default_player:play()
+```

@@ -8,13 +8,11 @@
 
 每个键盘按键均对应一个扫描码（scan code）。扫描码被操作系统获取后，根据操作系统中的键盘布局设置（如中国大陆地区采用的美式键盘布局）解释为相应的虚拟按键（virtual key）。例如，按下美式 QWERTY 布局键盘上的 Q 键后，键盘向操作系统发送一个扫描码，若操作系统的键盘布局为法国 AZERTY 布局，则这个扫描码会被映射到虚拟按键 A。**因此，键盘上的“按键名称”并不代表真实的按键，而是对应于某一个扫描码，按下某个特定按键，都会向操作系统发送这个扫描码。对该扫描码的解释方法由操作系统确定。**
 
-在罗列下面的键位常量时，遵循 QWERTY 键盘布局进行说明，并假定用户的操作系统虚拟按键布局同为美式键盘布局。
+在罗列下面的键位常量时，遵循美式 QWERTY 键盘布局进行说明，并假定用户的操作系统虚拟按键布局同为美式 QWERTY 键盘布局。
 
 #### 功能区
 
 键盘功能区包含 ESC 键及 F1 ~ F24。
-
-> 现代键盘上基本见不到 F13 ~ F24，但操作系统中仍为其保留了对应键码。
 
 |字段|值|说明|
 |---|---|---|
@@ -44,6 +42,8 @@
 |`Keyboard.F23`|`f23`|功能键 F23|
 |`Keyboard.F24`|`f24`|功能键 F24|
 
+> 现代键盘上基本见不到 F13 ~ F24，但操作系统中仍为其保留了对应键码。
+
 #### 主区
 
 |字段|值|说明|
@@ -59,8 +59,8 @@
 |`Keyboard.EIGHT`|`"8"`|8 或 *|
 |`Keyboard.NINE`|`"9"`|9 或 \(|
 |`Keyboard.ZERO`|`"0"`|0 或 \)|
-|`Keyboard.MINUS`|`"-"`|- 或 _|
-|`Keyboard.EQUAL`|`"="`|= 或 +|
+|`Keyboard.MINUS`|`"minus"`|- 或 _|
+|`Keyboard.EQUAL`|`"equal"`|= 或 +|
 |`Keyboard.BACKSPACE`|`"backspace"`|退格键 BACKSPACE|
 
 > 严谨地说，"tilde" 指波浪 "~"，"backquote" 则指反引号 "\`"。""
@@ -78,13 +78,13 @@
 |`Keyboard.I`|`"i"`|i 或 I|
 |`Keyboard.O`|`"o"`|o 或 O|
 |`Keyboard.P`|`"p"`|p 或 P|
-|`Keyboard.LBRACKET`|`"lbracket"`|\[ 或 {|
-|`Keyboard.RBRACKET`|`"rbracket"`|\] 或 }|
-|`Keyboard.BACK_SLASH`|`"backslash"`|\\ 或 &#124;|
+|`Keyboard.LEFT_BRACKET`|`"lbracket"`|\[ 或 {|
+|`Keyboard.RIGHT_BRACKET`|`"rbracket"`|\] 或 }|
+|`Keyboard.BACKSLASH`|`"backslash"`|\\ 或 &#124;|
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.CAPS_LOCK`|`"capslock"`|大写锁定、解锁键 CAPSLOCK|
+|`Keyboard.CAPS_LOCK`|`"capslock"`|大写锁定、解锁键 CAPS LOCK|
 |`Keyboard.A`|`"a"`|a 或 A|
 |`Keyboard.S`|`"s"`|s 或 S|
 |`Keyboard.D`|`"d"`|d 或 D|
@@ -100,8 +100,8 @@
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.LSHIFT`|`"lshift"`|左侧 SHIFT 键|
-|`Keyboard.NON_US_SLASH`|`non_us_slash`|\\|
+|`Keyboard.LEFT_SHIFT`|`"lshift"`|左侧 SHIFT 键|
+|`Keyboard.NON_US_BACKSLASH`|`non_us_slash`|\\ 或 &#124;|
 |`Keyboard.Z`|`"z"`|z 或 Z|
 |`Keyboard.X`|`"x"`|x 或 X|
 |`Keyboard.C`|`"c"`|c 或 C|
@@ -111,29 +111,29 @@
 |`Keyboard.M`|`"m"`|m 或 M|
 |`Keyboard.COMMA`|`"comma"`|, 或 <|
 |`Keyboard.PERIOD`|`"period"`|. 或 >|
-|`Keyboard.FORWARD_SLASH`|`"backslash"`|/ 或 ?|
-|`Keyboard.RSHIFT`|`"rshift"`|右侧 SHIFT 键|
+|`Keyboard.SLASH`|`"slash"`|/ 或 ?|
+|`Keyboard.RIGHT_SHIFT`|`"rshift"`|右侧 SHIFT 键|
 
-> 对于非标准的美式 QWERTY 键盘布局，左侧 SHIFT 键右侧有时会存在一个反斜线键，即上表中的 `Keyboard.NON_US_SLASH`。
+> 对于非标准的美式 QWERTY 键盘布局，左侧 SHIFT 键右侧有时会存在一个反斜线键，即上表中的 `Keyboard.NON_US_BACKSLASH`。
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.LCTRL`|`"lctrl"`|右侧 CTRL 键|
-|`Keyboard.LWIN`|`"lgui"`|左侧 Windows 徽标键|
-|`Keyboard.LALT`|`"lalt"`|左侧 ALT 键|
+|`Keyboard.LEFT_CTRL`|`"lctrl"`|右侧 CTRL 键|
+|`Keyboard.LEFT_WIN`|`"lgui"`|左侧 Windows 徽标键|
+|`Keyboard.LEFT_ALT`|`"lalt"`|左侧 ALT 键|
 |`Keyboard.SPACE`|`spacebar`|空格键 SPACE|
-|`Keyboard.RALT`|`"ralt"`|右侧 ALT 键|
-|`Keyboard.RWIN`|`"rgui"`|右侧 Windows 徽标键|
+|`Keyboard.RIGHT_ALT`|`"ralt"`|右侧 ALT 键|
+|`Keyboard.RIGHT_WIN`|`"rgui"`|右侧 Windows 徽标键|
 |`Keyboard.APPS`|`appkey`|应用程序键|
-|`Keyboard.RCTRL`|`"rctrl"`|右侧 CTRL 键|
+|`Keyboard.RIGHT_CTRL`|`"rctrl"`|右侧 CTRL 键|
 
 #### 控制区
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.PRINTSCREEN`|`printscreen`|截屏键 PRINT SCREEN|
-|`Keyboard.SCROLL_LOCK`|`scrolllock`|滚动锁定、解锁键 SCROLL LOCK|
-|`Keyboard.PAUSE`|`pause`|暂停、断点键 PAUSE/BREAK|
+|`Keyboard.PRINT_SCREEN`|`printscreen`|截屏键 PRINT SCREEN|
+|`Keyboard.SCROL_LLOCK`|`scrolllock`|滚动锁定、解锁键 SCROLL LOCK|
+|`Keyboard.PAUSE_BREAK`|`pause`|暂停、断点键 PAUSE/BREAK|
 
 |字段|值|说明|
 |---|---|---|
@@ -175,7 +175,7 @@
 
 ### `unreleased`
 
-说明：已通过 `press` 按下，但未通过 `release` 或 `reset` 弹起的按键，类型为 `table`。
+说明：已通过 `press` 按下，但未通过 `release` 或 `reset` 弹起的按键，类型为 `{ string | boolean |nil }`。当某个按键通过 `press` 按下，则在此表中该按键状态被记录为 `true`；后续若通过 `release` 弹起，则记录为 `nil`。
 
 ### `frozen`
 
@@ -189,17 +189,29 @@
 
 说明：冻结键盘，冻结后所有的键盘操作（`reset` 除外）将被忽略。
 
+原型：`Keyboard:freeze()`
+
 ### `unfreeze`
 
 说明：与 `freeze` 相对，解除键盘冻结状态。
+
+原型：`Keyboard:unfreeze()`
+
+### `is_frozen`
+
+说明：判断键盘是否冻结。
+
+原型：`Keyboard:is_frozen()`
+
+返回：若处于冻结状态，返回 `true`；否则，返回 `false`。
 
 ### `is_key_name_valid`
 
 说明：判断给定的按键名称是否有效（即在 [键盘按键](#键盘按键) 列出的键位中）。
 
-原型：`Keyboard:is_key_name_valid(key)`
+原型：`Keyboard:is_key_name_valid(key_name)`
 
-- `key`：按键名称，类型为 `string`。
+- `key_name`：待检查的按键名称，类型为 `any`。
 
 返回：若按键有效，返回 `true`；否则，返回 `false`。
 
@@ -210,7 +222,7 @@
 原型：`Keyboard:press(key, delay, precise)`
 
 - `key`：需要按下的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
-- `delay`：按下按键后的延迟时间，类型为 `integer | nil`，单位为毫秒。缺省值为 `50`。
+- `delay`：按下按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
 - `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
 
 注解：调用该接口按下某个按键后，将在 `unreleased` 表中记录按下的按键。
@@ -222,7 +234,7 @@
 原型：`Keyboard:release(key, delay, precise)`
 
 - `key`：需要弹起的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
-- `delay`：弹起按键后的延迟时间，类型为 `integer | nil`，单位为毫秒。缺省值为 `50`。
+- `delay`：弹起按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
 - `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
 
 注解：调用该接口弹起某个按键后，将在 `unreleased` 表中移除（若存在）该按键。
@@ -234,7 +246,7 @@
 原型：`Keyboard:click(key, delay, precise)`
 
 - `key`：需要点击的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
-- `delay`：点击按键后的延迟时间，类型为 `integer | nil`，单位为毫秒。缺省值为 `50`。
+- `delay`：点击按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
 - `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
 
 ### `click_several_times`
@@ -245,7 +257,7 @@
 
 - `key`：需要点击的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
 - `times`：重复次数，类型为 `integer | nil`，缺省值为 `0`。
-- `delay`：点击按键后的延迟时间，类型为 `integer | nil`，单位为毫秒。缺省值为 `50`。
+- `delay`：点击按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
 - `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
 
 ### `reset`
@@ -254,7 +266,7 @@
 
 原型：`Keyboard:reset(delay, precise)`
 
-- `delay`：每弹起一个按键后的延迟时间，类型为 `integer | nil`，单位为毫秒。缺省值为 `50`。
+- `delay`：每弹起一个按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
 - `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
 
 注解：该接口不受 `frozen` 影响。
@@ -277,7 +289,7 @@
 
 原型：`Keyboard:is_modifier_pressed(modifier)`
 
-- `modifier`：修饰键，包括 `Keyboard.LSHIFT`、`Keyboard.RSHIFT`、`Keyboard.LCTRL`、`Keyboard.RCTRL`、`Keyboard.LALT`、`Keyboard.RALT`。
+- `modifier`：修饰键，包括 `Keyboard.LEFT_SHIFT`、`Keyboard.RIGHT_SHIFT`、`Keyboard.LEFT_CTRL`、`Keyboard.RIGHT_CTRL`、`Keyboard.LEFT_ALT`、`Keyboard.RIGHT_ALT`。
 
 返回：若指定的修饰键被按下，则返回 `true`；否则，返回 `false`。
 

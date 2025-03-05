@@ -1,0 +1,80 @@
+# 自动操作
+
+`Automation` 在执行器所有关键组件的基础上，进一步提供了关键的游戏内自动化操作功能。
+
+## 字段
+
+### `default_player`
+
+说明：默认挂机模式使用的玩家实例，类型为 `Player`。
+
+### `extended_player`
+
+说明：扩展挂机模式使用的玩家实例，类型为 `Player`。
+
+## 方法
+
+### `create_game_room`
+
+说明：自动创建游戏房间。
+
+原型：`Automation:create_game_room()`
+
+### `start_game_room`
+
+说明：开始游戏。
+
+原型：`Automation:start_game_room()`
+
+### `choose_character`
+
+说明：游戏加载完成后选择角色。
+
+原型：`Automation:choose_character()`
+
+### `try_confirm`
+
+说明：尝试进行游戏结算确认。
+
+原型：`Automation:try_confirm()`
+
+### `choose_golden_zombie_reward`
+
+说明：自动选择黄金僵尸击败奖励。
+
+原型：`Automation:choose_golden_zombie_reward`
+
+### `combine_parts`
+
+说明：批量合成配件。
+
+原型：`Automation:combine_parts()`
+
+### `purchase_item`
+
+说明：批量购买指定商店物品。
+
+原型：`Automation:purchase_item(buy_button_x, buy_button_y)`
+
+- `buy_button_x`：兑换按钮横坐标，类型为 `integer | nil`。
+- `buy_button_y`：兑换按钮纵坐标，类型为 `integer | nil`。
+
+注解：每次调用该接口都会记录本次提供的坐标参数。调用本接口时，坐标值可以缺省，此时将复用最近一次提供的坐标值。
+
+### `locate_cursor`
+
+说明：提供定位鼠标光标位置的功能。
+
+原型：`Automation:locate_cursor`
+
+注解：在 `CTRL` 与 `ALT` 同时按下，且 `SHIFT` 处于弹起状态时（这样设计是为了避免与控制器模式切换造成不必要的冲突），在控制台输出当前鼠标光标位置。
+
+## `Automation` 注册的中断处理函数
+
+- 手动接管：当用户按下左侧 `CTRL` 与右侧 `CTRL` 后，冻结后续键鼠操作；按下左侧 `ALT` 与右侧 `ALT` 解冻；
+- 定期复活或回合重置：在游戏内每隔 8 秒尝试执行复活或回合重置操作（需在配置文件中启用此功能）；
+- 命令变更：定期检查命令文件，当命令名称发生变更时，抛出 `COMMAND_CHANGED` 错误。
+
+## `Automation` 注册的错误处理函数
+
+- `COMMAND_CHANGED`：处理命令变更错误。

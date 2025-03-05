@@ -4,13 +4,13 @@
 
 执行器可进一步细分为如下子模块：
 
-- JSON：JSON 解析库，基于 [rxi/json.lua](https://github.com/rxi/json.lua) 修改
 - DateTime：用于处理日期/时间
 - Console：用于处理控制台输出
 - Delay：定义了一些时延常量
 - Command：定义了执行器可识别的命令
 - Context：中断时保存的中断现场
 - Utility：提供一些像计数器这样的常用功能
+- JSON：JSON 解析库，基于 [rxi/json.lua](https://github.com/rxi/json.lua) 修改
 - Error：提供了错误处理框架
 - Runtime：提供中断处理等运行时支持
 - Mouse：执行鼠标操作

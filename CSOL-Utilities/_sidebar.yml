@@ -6,7 +6,7 @@ website:
       contents:
         - text: 返回
           href: /
-        - text: 前言
+        - text: CSOL 集成工具开发者文档
           href: /CSOL-Utilities/
         - section: 控制器
           contents:
@@ -33,6 +33,12 @@ website:
             - text: 鼠标操作
               href: /CSOL-Utilities/Executor/mouse/
             - text: 实用工具
-              href: /CSOL-Utilities/Executor/utilities/
+              href: /CSOL-Utilities/Executor/utility/
+            - text: JSON 解析
+              href: /CSOL-Utilities/Executor/JSON/
             - text: 定义武器或装备
               href: /CSOL-Utilities/Executor/weapon/
+            - text: 玩家的游戏行为
+              href: /CSOL-Utilities/Executor/player/
+            - text: 自动化
+              href: /CSOL-Utilities/Executor/automation/
