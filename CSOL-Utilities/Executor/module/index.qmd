@@ -82,3 +82,5 @@ class Module
 }
 #endif // MODULE_HPP
 ```
+
+模块化设计在执行器中非常重要，它是后面所有章节内容的基础。

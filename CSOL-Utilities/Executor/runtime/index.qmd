@@ -1,6 +1,6 @@
 # 运行时
 
-执行器提供了 `Runtime` 类，其中封装了罗技 G Hub 提供的 API 接口，实现了一些执行器在运行时所必需的功能，其中最核心的功能为“伪”中断。
+**单例类** `Runtime` 中封装了罗技 G Hub 提供的 API 接口，实现了一些执行器在运行时所必需的核心功能，其中最核心的功能为“伪”中断处理机制。
 
 ## “伪”中断机制
 
@@ -16,68 +16,6 @@
 
 ![示例：以默认方式（缺省 `precise` 参数）调用 `Runtime:sleep`](assets/sleep_example.avif){fig-align="center"}
 
-## 中断回调函数注册、注销
-
-引入中断处理后，可以方便地处理一些与当前执行流无关的事件。为了将中断处理逻辑与中断回调逻辑解耦，通常的做法是提供中断处理函数注册和注销的接口。在注册中断调用函数后，每次执行 `Runtime:interrupt_handler` 都会依次执行各个注册好的中断回调函数。
-
-```lua
----注册中断处理函数。若 `f` 类型非 `function`，则返回值为 0。
----@param f function 中断处理函数。
----@return integer index 中断处理函数索引。
-function Runtime:register_interrupt_handler(f)
-    if (type(f) ~= "function")
-    then
-        return 0
-    end
-    local index = #self.interrupt_handler_list + 1
-    self.interrupt_handler_list[index] = f
-    return index
-end
-
----注销中断处理函数。
----@param index integer
-function Runtime:unregister_interrput_handler(index)
-    table.remove(self.interrupt_handler_list, index)
-end
-```
-
-例如，要想实现集成工具中提供的随时启停功能，只需要按下面的方式注册中断回调函数：
-
-```lua
----手动接管标志，防止重复打印消息。
-Runtime.manual_flag = false
----注册暂停事件处理函数，处理用户手动接管事件。
-Runtime:register_interrupt_handler(
-    function ()
-        if (Keyboard:is_modifier_pressed(Keyboard.LCTRL) and Keyboard:is_modifier_pressed(Keyboard.RCTRL))
-        then
-            Keyboard:reset()
-            Mouse:reset()
-            if (not Runtime.manual_flag)
-            then
-                Console:information("开始手动接管，禁用键鼠动作。")
-                Keyboard:freeze()
-                Mouse:freeze()
-            end
-            Runtime.manual_flag = true
-        elseif (Keyboard:is_modifier_pressed(Keyboard.LALT) and Keyboard:is_modifier_pressed(Keyboard.RALT))
-        then
-            if (Runtime.manual_flag)
-            then
-                Console:information("中止手动接管，允许键鼠动作。")
-                Keyboard:unfreeze()
-                Mouse:unfreeze()
-            end
-            Runtime.manual_flag = false
-        end
-    end
-)
-```
-
-按下左右 `CTRL` 后，通过调用 `Keyboard` 和 `Mouse` 提供的 `freeze` 冻结键盘和鼠标，达到暂停所有操作的效果；按下左右 `ALT` 后，通过调用 `Keyboard` 和 `Mouse` 提供的 `freeze` 解冻键盘和鼠标，恢复键鼠操作。
-
-需要指出，`Runtime` 类实现的中断功能并非真正意义上的中断功能，当前执行流调用 `Runtime:sleep` 后，即表示其“出让执行权给其他执行流”，此处的“其他执行流”即中断处理回调函数，因此，我将 `Runtime` 类实现的中断功能称作“伪”中断功能。
-
 ## 中断现场
 
 在操作系统中，中断发生时，需要为当前执行流保存中断现场，然后根据需要切换至另一个执行流，这是操作系统中多任务调度的基础。集成工具也提供了类似的功能，不过，在开发工作中，中断现场保存功能几乎用不到，这主要和集成工具一次只执行一项功能有关，即**除了中断处理外，只存在一条执行流，并不存在执行流并发的情况**，故本节对此部分内容暂时不予详细介绍。
@@ -86,23 +24,29 @@ Runtime:register_interrupt_handler(
 
 本小节介绍 `Runtime` 中定义的默认字段，Lua 语法特性允许你在任何时候根据自己需要向其中新增自定义字段。例如，当需要在中断回调函数中使用一些“静态”的变量时，可以将这些变量添加到 `Runtime` 中。
 
-### `manual_flag`
+### `interrupt_mask_flag`
 
-说明：手动接管标志，类型为 `boolean`。
+说明：中断屏蔽标志位，类型为 `boolean`。若设置为 `true` 则屏蔽中断（关中断）；否则，允许中断（开中断）。
 
-注解：执行器中默认注册用于即时启停的中断处理函数，当用户发出开始手动接管请求（默认为按下左右 `Ctrl` 键）后，`manual_flag` 被置为 `true`；用户发出结束手动接管请求（默认为按下左右 `Alt` 键）后，`manual_flag` 被置为 `false`。手动接管期间，使用 `Mouse` 类或 `Keyboard` 类中的成员函数发出的任何鼠标、键盘操作将被跳过（即不执行相应的键鼠操作）。
+注解：此字段**不应该手动修改**，而应该通过 `enable_interrupt` 和 `disable_interrupt` 修改。
 
-### `interrupt_flag`
+### `interrupt_busy_flag`
 
-说明：中断标志位，类型为 `boolean`。
+说明：中断忙标志位，类型为 `boolean`。用于标识当前是否正在进行中断处理，防止发生中断嵌套。
 
-注解：调用 `sleep` 后，在执行中断处理前，`interrupt_flag` 将被置为 `true`，以避免在中断处理函数中调用 `sleep` 时产生中断嵌套，进而对当前中断处理造成不必要的影响。中断处理结束后，`interrupt_flag` 恢复为 `false`。
+注解：此字段值在运行时自动调整，**不应该以任何方式修改**。
 
-### `interrupt_handlers`
+### `interrupts`
 
-说明：中断处理函数列表，类型为 `table`。
+说明：中断列表，类型为 `Interrupt[]`。
 
-注解：**此列表不应手动修改**，而应该使用 `register_interrupt_handler` 和 `unregister_interrupt_handler` 进行中断处理函数的注册和注销。
+注解：此字段**不应手动修改**，而应该使用 `register_interrupt` 和 `unregister_interrupt` 进行中断处理函数的注册和注销。
+
+### `interrupt_mode`
+
+说明：中断模式。
+
+注解：此字段应通过 `set_interrupt_mode` 修改。
 
 ## 方法
 
@@ -128,11 +72,8 @@ $$\tau_{n+1} = \alpha\tau_{n} + \left(1 - \alpha\right)t_{n}.$$
 下面给出了 `sleep` 的具体实现：
 
 ```lua
----期望的睡眠时间
-Runtime.expected_sleep_time = 10
----实际睡眠时间粒度
-Runtime.actual_sleep_time = 10
-
+Runtime.expected_sleep_time = 10 -- 根据最近睡眠情况推测的一轮睡眠时间
+Runtime.actual_sleep_time = 10 -- 最近一次实际的一轮睡眠时间
 ---挂起当前执行流，挂起后，可以处理中断事件。除了 `Runtime` 内部方法外，其他地方都应当调用 `Runtime:sleep`，而非直接调用罗技 API 中的 Sleep，这样可以进行中断处理。
 ---@param milliseconds integer 挂起的时间。
 ---@param precise boolean | nil 是否需要尽力保证精度。
@@ -141,7 +82,7 @@ function Runtime:sleep(milliseconds, precise)
     -- 罗技 API 不支持真正的中断，故而当某个过程主动将自己挂起时（即调用Runtime:sleep)视为自发中断，此时可以处理外部事件
     local before_int = Runtime:get_running_time()
     -- 先执行中断处理
-    self:interrupt_handler()
+    self:interrupt()
     -- 中断处理结束后，再校验参数（无论如何都要进行中断处理，即便参数非法）
     milliseconds = math.floor(milliseconds) -- 防止提供小数时间，若类型非 `number` 会返回 `nil`
     if (type(milliseconds) ~= "number" or milliseconds < 0)
@@ -212,65 +153,130 @@ until i == 0
 
 ![考虑休眠时间精度](assets/precise_sleep.avif)
 
-### `register_interrupt_handler`
+### `register_interrupt`
 
-说明：注册中断处理函数。
+说明：注册中断。
 
-原型：`Runtime:register_interrupt_handler(callback)`
+原型：`Runtime:register_interrupt(init)`
 
-- `callback`：中断处理回调函数，类型为 `function`。
+- `init`：中断对象或中断处理回调函数，类型为 `Interrupt | function`。
 
-返回值：中断处理函数在中断处理函数列表中的索引，有效的索引为大于 `0` 的整数。
+返回：中断标识符，类型为 `integer`，有效的标识符为大于 `0` 的整数。
 
-注解：若 `callback` 不是 `function` 类型，返回值为 `0`。
+注解：若 `init` 不是 `function` 类型，返回为 `0`。
 
-### `unregister_interrupt_handler`
+### `unregister_interrupt`
 
-说明：注销中断处理函数。
+说明：注销中断。
 
-原型：`Runtime:unregister_interrupt_handler(index)`
+原型：`Runtime:unregister_interrupt(id)`
 
-- `index`：中断处理函数在中断处理函数列表中的索引，类型为 `integer`。此值为在调用 `register_interrupt_handler` 时返回。
+- `id`：中断标识符，类型为 `integer`。此值为调用 `register_interrupt` 时的返回值。
 
-返回值：若操作成功，返回 `true`，否则返回 `false`。
+返回：若操作成功，返回 `true`；否则，返回 `false`。
 
-### `sti`
+### `enable_interrupt`
 
-说明：开中断，调用后启用中断处理。
+说明：开中断，调用后允许中断。
 
-原型：`Runtime:sti()`
+原型：`Runtime:enable_interrupt()`
 
-注解：强烈建议结合 `push_interrupt_flag` 和 `pop_interrupt_flag` 使用。
+注解：强烈建议结合 `push_interrupt_mask_flag` 和 `pop_interrupt_mask_flag` 使用。
 
-### `cli`
+### `disable_interrupt_flag`
 
-说明：关中断，调用后禁用中断处理。
+说明：关中断，调用后屏蔽中断。
 
-原型：`Runtime:cli()`
+注解：对不可屏蔽中断（即 `Interrupt.maskable` 为 `false`），屏蔽不会生效。
 
-注解：强烈建议结合 `push_interrupt_flag` 和 `pop_interrupt_flag` 使用。
+原型：`Runtime:disable_interrupt()`
 
-### `push_interrupt_flag`
+注解：强烈建议结合 `push_interrupt_mask_flag` 和 `pop_interrupt_mask_flag` 使用。
 
-说明：在栈中保存中断标志位。
+### `push_interrupt_mask_flag`
 
-原型：`Runtime:push_interrupt_flag()`
+说明：在栈中保存中断屏蔽标志位。
 
-### `pop_interrupt_flag`
+原型：`Runtime:push_interrupt_mask_flag()`
 
-说明：从栈中恢复最近一次保存的中断标志位。
+### `pop_interrupt_mask_flag`
 
-原型：`Runtime:pop_interrupt_flag()`
+说明：从栈中恢复最近一次保存的中断屏蔽标志位。
+
+原型：`Runtime:pop_interrupt_mask_flag()`
+
+### `set_interrupt_mode`
+
+说明：设置中断模式。
+
+原型：`Runtime:set_interrupt_mode(mode)`
+
+- `mode`：中断模式，可取下列值：
+
+|字段|值|备注|
+|---|---|---|
+|Runtime.INTERRUPT_BURST_MODE|0|猝发模式|
+|Runtime.INTERRUPT_SEQUENCE_MODE|1|顺序模式|
+|Runtime.INTERRUPT_RANDOM_MODE|2|随机模式|
+
+注解：猝发模式是指每次中断时刻（即每一轮睡眠开始时）到来后，触发并处理所有注册的中断；顺序模式是指每次中断时刻到来后，按注册顺序处理下一个中断；随机模式是指每次中断时刻到来后，随机触发并处理一个中断。**默认的中断模式为猝发式。**猝发模式对中断事件响应最快，但运行时开销稍大（对于只注册少量中断的情形，这种开销可以忽略）。
+
+### `get_running_time`
+
+说明：获取当前运行时间。
+
+返回值：当前运行时间，类型为 `integer`，单位为毫秒。
 
 ## 示例
 
-### 原子操作
+### 中断注册、注销
 
-通过暂时关闭中断，您可以完成原子操作。由于集成工具的核心功能均围绕中断机制实现，因此除非必要（如 `Weapon` 类中实现的购买方法就是原子操作），不应该关中断。
+引入中断处理后，可以方便地处理一些与当前执行流无关的事件。为了将中断处理逻辑与中断回调逻辑解耦，通常的做法是提供中断注册和注销的接口。在注册中断后，每次执行 `Runtime:interrupt` 都会依次执行各个注册好的**中断对象**提供的回调函数。关于如何创建中断对象，请参阅 [中断](/CSOL-Utilities/Executor/interrupt/)。
+
+例如，要想实现集成工具中提供的随时启停功能，只需要按下面的方式注册中断回调函数：
 
 ```lua
-Runtime:push_interrupt_flag() -- 保存当前中断标志位
-Runtime:cli() -- 关中断
+---手动接管标志，防止重复打印消息。
+Runtime.manual_flag = false
+---注册暂停事件处理函数，处理用户手动接管事件。
+Runtime:register_interrupt(
+    function ()
+        if (Keyboard:is_modifier_pressed(Keyboard.LCTRL) and Keyboard:is_modifier_pressed(Keyboard.RCTRL))
+        then
+            Keyboard:reset()
+            Mouse:reset()
+            if (not Runtime.manual_flag)
+            then
+                Console:information("开始手动接管，禁用键鼠动作。")
+                Keyboard:freeze()
+                Mouse:freeze()
+            end
+            Runtime.manual_flag = true
+        elseif (Keyboard:is_modifier_pressed(Keyboard.LALT) and Keyboard:is_modifier_pressed(Keyboard.RALT))
+        then
+            if (Runtime.manual_flag)
+            then
+                Console:information("中止手动接管，允许键鼠动作。")
+                Keyboard:unfreeze()
+                Mouse:unfreeze()
+            end
+            Runtime.manual_flag = false
+        end
+    end
+)
+```
+
+按下左右 `CTRL` 后，通过调用 `Keyboard` 和 `Mouse` 提供的 `freeze` 冻结键盘和鼠标，达到暂停所有操作的效果；按下左右 `ALT` 后，通过调用 `Keyboard` 和 `Mouse` 提供的 `freeze` 解冻键盘和鼠标，恢复键鼠操作。
+
+需要指出，`Runtime` 类实现的中断功能并非真正意义上的中断功能，当前执行流调用 `Runtime:sleep` 后，即表示其“出让执行权给其他执行流”，此处的“其他执行流”即中断处理回调函数，因此，我将 `Runtime` 类实现的中断功能称作“伪”中断功能。
+
+### 原子操作
+
+通过暂时关闭中断，您可以完成原子操作。由于集成工具的核心功能均围绕中断机制实现，因此**除非必要**（如 `Weapon` 类中实现的购买方法就是原子操作），不应该关中断。
+
+```lua
+Runtime:push_interrupt_mask_flag() -- 保存当前中断屏蔽标志位
+Runtime:disable_interrupt() -- 关中断
 Keyboard:click_several_times(Keyboard.ESCAPE, 10) -- 按下 10 次 ESC 键，且不被中断
-Runtime:pop_interrupt_flag() -- 恢复中断标志位
+Runtime:pop_interrupt_mask_flag() -- 恢复中断屏蔽标志位
 ```

@@ -12,6 +12,8 @@ website:
           contents:
             - text: 概述
               href: /CSOL-Utilities/Controller/
+            - text: 获取执行器的调试消息
+              href: /CSOL-Utilities/Controller/interaction/
         - section: 执行器
           contents:
             - text: 概述
@@ -20,10 +22,10 @@ website:
               href: /CSOL-Utilities/Executor/module/
             - text: 运行时
               href: /CSOL-Utilities/Executor/runtime/
+            - text: 中断
+              href: /CSOL-Utilities/Executor/interrupt/
             - text: 错误处理
               href: /CSOL-Utilities/Executor/error/
-            - text: 与外部程序双向交互
-              href: /CSOL-Utilities/Executor/interaction/
             - text: 日期、时间
               href: /CSOL-Utilities/Executor/datetime/
             - text: 命令的解析与执行
