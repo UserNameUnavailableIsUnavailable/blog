@@ -12,9 +12,22 @@
 
 ### “伪”中断的实现
 
-为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。有关 `Runtime:sleep` 的详细使用方法及实现细节，请参见 [`sleep`](#sec-sleep) 小节。`Runtime:sleep` 将比 `Sleep` 产生稍大一些的开销，但这样的设计大大简化了执行器轮询方案设计，加之控制器本身具备精准判定游戏内状态并下达正确命令的能力，因此这样额外的开销是值得的。
+为了让中断发生的更为频繁（即确保 `Runtime` 在执行 `Runtime:sleep` 期间保持对执行器的控制权），可以将整个睡眠的时间分割为若干个更短的时间。有关 `Runtime:sleep` 的详细使用方法及实现细节，请参见 [`sleep`](#sleep) 小节。`Runtime:sleep` 将比 `Sleep` 产生稍大一些的开销，但这样的设计大大简化了执行器轮询方案设计，加之控制器本身具备精准判定游戏内状态并下达正确命令的能力，因此这样额外的开销是值得的。
 
-![示例：以默认方式（缺省 `precise` 参数）调用 `Runtime:sleep`](assets/sleep_example.avif){fig-align="center"}
+下面是一个简单的使用 `Runtime` 和 `Interrupt` 的例子。
+
+```lua
+PATH = "C:/Users/Silver/Games/CSOL-Utilities/Executor/"
+---加载 LUA 源文件。
+---@param file_name string 文件名（相对路径）。
+---@return nil
+function Include(file_name)
+    if (type(file_name) == "string")
+    then
+        dofile(PATH .. file_name)
+    end
+end
+```
 
 ## 中断现场
 
@@ -50,7 +63,7 @@
 
 ## 方法
 
-### `sleep` {#sec-sleep}
+### `sleep`
 
 说明：挂起当前执行流指定时间。
 

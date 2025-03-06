@@ -57,6 +57,15 @@ function Include(file_name)
 end
 ```
 
+`Include` 在执行器中非常重要，当想要使用任何一个模块时，都需要使用 `Include` 来包含这个模块，例如：
+
+```lua
+Include("Console.lua")
+Console:information("Hello, world!")
+```
+
+运行上述代码，将在控制台输出 `"Hello, world!"`。
+
 要定义一个单独的模块，首先创建一个 Lua 源文件，例如：`module.lua`，然后在其中编写如下代码：
 
 ```lua
