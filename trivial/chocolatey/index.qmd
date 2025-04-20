@@ -1,0 +1,18 @@
+# Chocolatey 的安装
+
+## 获取安装脚本
+
+```powershell
+Invoke-WebRequest https://community.chocolatey.org/install.ps1 -OutFile install.ps1
+```
+
+## 修改安装路径
+
+阅读源码，可以看到 `$chocoPath` 是 Chocolatey 的安装路径，其值从环境变量 `$Env:ChocolateyInstall` 中获取，缺省值为 `$Env:ALLUSERPROFILE\Chocolatey`。这里的 `$Env:ALLUSERPROFILE` 一般就是 `C:\ProgramData`。
+
+```powershell
+$chocoInstallVariableName = "ChocolateyInstall" # 从名称为 ChocolateyInstall 的环境变量中获取
+$chocoPath = [Environment]::GetEnvironmentVariable($chocoInstallVariableName)
+```
+
+所以，在安装前，需要设置环境变量 `$Env:ChocolateyInstall`。然后，运行安装脚本即可。

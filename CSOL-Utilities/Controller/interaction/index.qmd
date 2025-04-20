@@ -6,12 +6,12 @@
 
 下一个问题是，罗技编程接口中并没有提供传统意义上的“写”功能，但是好在天无绝人之路，这些编程接口中有一个很特殊的方法：`OutputDebugMessage`，它允许我们将字符串写入 Windows 调试器。那么，只要外部应用程序能够获取罗技编程接口向调试器写入的内容，就真正实现了罗技脚本与操作系统中其他应用进程的**双向交互**，换用操作系统中的术语，就是**进程间通信（Inter-Process Communication, IPC）**。IPC 几乎是操作系统中排名前 10 的核心机制，例如，进程 A 创建了一个文件，然后另一个进程 B 读取这个文件的内容，从广义上讲，A 与 B 之间就发生了通信。因此，IPC 的重要性不言而喻，几乎可以说是操作系统世界的基石。
 
-## 使用 Win32 API 读取 `OutputDebugMessage` 写入调试器的内容
+## 使用 Win32 API 读取由 `OutputDebugMessage` 写入调试器的内容
 
-首先，完成最简单的部分，使用 `OutputDebugMessage` 定期向调试器写入 `"Hello from CSOL-Utilities!"`。
+首先，完成最简单的部分，使用 `OutputDebugMessage` 每隔 1 秒向调试器写入调试信息。
 
 ```lua
-PATH = "C:/Users/Silver/develop/CSOL-Utilities/source/Executor/"
+PATH = "C:/Users/Silver/Games/CSOL-Utilities/Executor/"
 ---加载 LUA 源文件。
 ---@param file_name string 文件名（相对路径）。
 ---@return nil
@@ -21,15 +21,16 @@ function Include(file_name)
         dofile(PATH .. file_name)
     end
 end
-Include("Runtime.lua")
+-- 导入入口函数
+Include("Utility.lua")
+local i = 1
 while (true)
 do
-  OutputDebugMessage("Hello from CSOL-Utilities!")
-  Runtime:sleep(1000)
+    OutputDebugMessage("%d. 你好，这是 CSOL 集成工具 😀", i)
+    i = i + 1
+    Runtime:sleep(1000)
 end
 ```
-
-运行后，LGHUB Agent 将每隔一秒向 Windows 调试器输出 `"Hello from CSOL-Utilities!"`。
 
 然后，考虑用 Win32 API 读取调试 LGHUB Agent 输出的调试信息。使用 Win32 API 调试有一个通用的流程：
 
@@ -37,24 +38,62 @@ end
 2. debug: 调试进程使用调试 API 读取被调试进程提供的调试信息
 3. detach: 调试完毕后，若要保持被调试进程继续正常运行，则需要调用 `DebugActiveProcessStop` 结束调试。
 
-![](assets/hello_from_lghub_agent.avif)
-
 下面是一个简单的例子：
 
-```C++
+```c++
 #include <Windows.h>
+#include <debugapi.h>
 #include <iostream>
+#include <thread>
 
 DWORD dwPId = 0;
 BOOL bRun = TRUE;
-int main()
+BOOL bContinue = TRUE;
+
+void debug()
 {
     std::cout << "输入被调试进程的进程号：";
     std::cin >> dwPId;
-	if (!DebugActiveProcess(dwPId)) {
+	if (!DebugActiveProcess(dwPId))
+    {
 		std::cout << "附加到被调试进程失败：" << GetLastError() << '\n';
-		return -1;
+        return;
 	}
+    auto hProc = OpenProcess(PROCESS_VM_READ, FALSE, dwPId);
+	DEBUG_EVENT debugEvent;
+    std::setlocale(LC_ALL, ".UTF8"); // std::wcout 需要设置 locale
+	while (bRun && bContinue)
+    {
+        if (WaitForDebugEvent(&debugEvent, 1000))
+        {
+			if (debugEvent.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
+            {
+                OUTPUT_DEBUG_STRING_INFO& debugStringInfo = debugEvent.u.DebugString;
+                if (debugStringInfo.fUnicode)
+                {
+                    std::wstring wmessage(debugStringInfo.nDebugStringLength, L'\0');
+                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &wmessage[0], debugStringInfo.nDebugStringLength * sizeof(wchar_t), nullptr);
+                    std::wcout << L"OutputDebugStringW: " << wmessage << std::endl;
+                }
+                else
+                {
+                    std::string message(debugStringInfo.nDebugStringLength, '\0');
+                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &message[0], debugStringInfo.nDebugStringLength, nullptr);
+                    std::cout << "OutputDebugStringA: " << message << std::endl;
+				}
+			}
+            // 继续调试
+			bContinue = ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, DBG_CONTINUE);
+		}
+    }
+    if (dwPId)
+    {
+        DebugActiveProcessStop(dwPId);
+    }
+}
+
+int main()
+{
     auto OnCtrlC = [] (DWORD dwCtrlType) -> BOOL{
         switch (dwCtrlType)
         {
@@ -63,38 +102,18 @@ int main()
         case CTRL_CLOSE_EVENT:
         case CTRL_LOGOFF_EVENT:
         case CTRL_SHUTDOWN_EVENT:
-            bRun = FALSE;
+            bRun = FALSE; // 停止 debug 线程运行
             return TRUE;
         }
         return FALSE;
     };
     SetConsoleCtrlHandler(OnCtrlC, TRUE);
-    auto hProc = OpenProcess(PROCESS_VM_READ, false, dwPId);
-	DEBUG_EVENT debugEvent;
-    std::setlocale(LC_ALL, ".UTF8"); // std::wcout 需要设置 locale
-	while (bRun) {
-		if (WaitForDebugEvent(&debugEvent, 1000)) {
-			if (debugEvent.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT) {
-                OUTPUT_DEBUG_STRING_INFO& debugStringInfo = debugEvent.u.DebugString;
-                if (debugStringInfo.fUnicode) {
-                    std::wstring message(debugStringInfo.nDebugStringLength, L'\0');
-                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &message[0], debugStringInfo.nDebugStringLength * sizeof(wchar_t), nullptr);
-                    std::wcout << message << std::endl;
-                } else {
-                    std::string message(debugStringInfo.nDebugStringLength, '\0');
-                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &message[0], debugStringInfo.nDebugStringLength, nullptr);
-                    std::cout << message << std::endl;
-				}
-			}
-            // 继续调试
-			bRun = ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, DBG_CONTINUE);
-		}
-	}
-	DebugActiveProcessStop(dwPId);
+    std::thread t(debug);
+    t.join();
 }
 ```
 
-这是一个控制台程序，我们希望在按下 `Ctrl C` 后退出调试进程，但仍然保持被调试进程正常运行。因此，需要通过 `SetConsoleCtrlHandler` 注册控制台处理回调函数。当按下 `Ctrl C` 后，调用 `DebugActiveProcessStop` 结束调试，否则被调试进程会连同调试进程一同终止。
+这是一个控制台程序（代码页为 65001，即 UTF-8），我们希望在按下 `Ctrl C` 后退出调试进程，但仍然保持被调试进程正常运行。因此，需要通过 `SetConsoleCtrlHandler` 注册控制台处理回调函数。当按下 `Ctrl C` 后，调用 `DebugActiveProcessStop` 结束调试（**这一点非常重要，否则被调试进程会连同调试进程一同终止**）。
 
 在调用 `DebugActiveProcess` 附加到被调试进程后，我们使用 `WaitForDebugEvent` 等待被调试进程发出调试事件，捕获到调试事件后，从被调试进程的进程空间中取出其发送的调试信息。
 
@@ -102,13 +121,156 @@ int main()
 
 ```powershell
 clang++ dbg.cpp -o dbg.exe
-./dbg.exe
+./dbg
 ```
 
-![](assets/debug.avif)
+![](assets/hello_from_lghub_agent.avif)
 
 可以看到，调试器能够正确的接收来自 LGHUB Agent 的调试消息了。
 
 ## 所以有什么用呢？
 
 通过合理使用 `dofile` 和 `OutputDebugMessage` 可以实现罗技脚本与外部应用程序的**双向交互**，执行器通过 `dofile` 接收来自控制器的命令，亦可以通过 `OutputDebugMessage` 向控制器传递自身当前运行的状态信息。在 v1.5.x 未来版本中，很多版本特性将围绕这两个最核心的接口展开。
+
+## 关于 `OutputDebugMessage` 的更多细节
+
+首先，通过上面的简单示例，我们知道 `OutputDebugMessage` 本质上是调用 Win32 API `OutputDebugStringA` 实现的。
+
+```c
+void OutputDebugStringA(
+  [in, optional] LPCSTR lpOutputString
+);
+```
+
+不过，需要提前说明的是，这个 API 的后缀 `A` 与 ANSI 实际上没有太大的关系，它所做的事情仅仅只是把 `lpOutputString` 指向的字符串原封不动地“搬”进调试器。我们对上面的例子稍作修改，编写下面的 Lua 代码，在 LGHUB 中运行，然后用运行于代码页为 UTF-8 控制台中的调试器读取它。
+
+```lua
+PATH = "C:/Users/Silver/Games/CSOL-Utilities/Executor/"
+---加载 LUA 源文件。
+---@param file_name string 文件名（相对路径）。
+---@return nil
+function Include(file_name)
+    if (type(file_name) == "string")
+    then
+        dofile(PATH .. file_name)
+    end
+end
+-- 导入入口函数
+Include("Utility.lua")
+while (true)
+do
+  Utility:report{ -- 集成工具提供的接口
+    name = "你好 😀😀😀😀",
+    message = "这是 CSOL 集成工具！"
+  }
+  Runtime:sleep(1000)
+end
+```
+
+上述代码中，`Utility:report` 是集成工具提供的接口，它将一个 Lua `table` 编码为 JSON 字符串后通过 `OutputDebugMessage` 写入调试器，接收方可以通过 JSON 解析库来解析它。
+
+```c++
+#include <Windows.h>
+#include <debugapi.h>
+#include <iostream>
+#include <iomanip>
+#include <thread>
+
+DWORD dwPId = 0;
+BOOL bRun = TRUE;
+BOOL bContinue = TRUE;
+
+void debug()
+{
+    std::cout << "输入被调试进程的进程号：";
+    std::cin >> dwPId;
+	if (!DebugActiveProcess(dwPId))
+    {
+		std::cout << "附加到被调试进程失败：" << GetLastError() << '\n';
+        return;
+	}
+    auto hProc = OpenProcess(PROCESS_VM_READ, FALSE, dwPId);
+	DEBUG_EVENT debugEvent;
+    std::setlocale(LC_ALL, ".UTF8"); // std::wcout 需要设置 locale
+	while (bRun && bContinue)
+    {
+        if (WaitForDebugEvent(&debugEvent, 1000))
+        {
+			if (debugEvent.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
+            {
+                OUTPUT_DEBUG_STRING_INFO& debugStringInfo = debugEvent.u.DebugString;
+                if (debugStringInfo.fUnicode)
+                {
+                    std::wstring wmessage(debugStringInfo.nDebugStringLength, L'\0');
+                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &wmessage[0], debugStringInfo.nDebugStringLength * sizeof(wchar_t), nullptr);
+                    std::cout << "OutputDebugString (Dump): ";
+                    for (wchar_t c : wmessage)
+                    {
+                        std::wcout << std::hex << std::setw(4) << std::setfill(L'0') << static_cast<int>(c) << " ";
+                    }
+                    std::wcout << std::endl;
+                }
+                else
+                {
+                    std::string message(debugStringInfo.nDebugStringLength, '\0');
+                    ReadProcessMemory(hProc, debugStringInfo.lpDebugStringData, &message[0], debugStringInfo.nDebugStringLength, nullptr);
+                    std::cout << "OutputDebugString (Dump): ";
+                    for (unsigned char c : message)
+                    {
+                        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(c) << " ";
+                    }
+                    std::cout << std::endl;
+				}
+			}
+            // 继续调试
+			bContinue = ContinueDebugEvent(debugEvent.dwProcessId, debugEvent.dwThreadId, DBG_CONTINUE);
+		}
+    }
+    if (dwPId)
+    {
+        DebugActiveProcessStop(dwPId);
+    }
+}
+
+int main()
+{
+    auto OnCtrlC = [] (DWORD dwCtrlType) -> BOOL {
+        switch (dwCtrlType)
+        {
+        case CTRL_C_EVENT:
+        case CTRL_BREAK_EVENT:
+        case CTRL_CLOSE_EVENT:
+        case CTRL_LOGOFF_EVENT:
+        case CTRL_SHUTDOWN_EVENT:
+            bRun = FALSE; // 停止 debug 线程运行
+            return TRUE;
+        }
+        return FALSE;
+    };
+    SetConsoleCtrlHandler(OnCtrlC, TRUE);
+    std::thread t(debug);
+    t.join();
+}
+```
+
+![](assets/dump_message.avif)
+
+然后，把字符串原始字节内容用解码工具进行解码：
+
+![](assets/decode_raw_content.avif)
+
+于是，我们得出这样一个结论：调试字符串不论其采用什么样的字符编码，`OutputDebugMessage` 均会将其原封不动地写到调试器中。
+
+> 在 Windows API 中，API 后缀 `A` 一般代表字符串参数使用本地编码格式 ASNI（ANSI 并不特指某一种字符编码，而是指代一类字符串编码，如 GB2312、SHIFT-JIS、ISO-8859-1 等），如中文（中国）对应的 ANSI 就是 GB2312。API 后缀 `W` 则代表字符串参数使用 UTF-16-LE（小端方式的 UTF-16） 编码。在 Windows 开发中，一般都建议字符串采用 `W` 后缀以提供 Unicode 支持。
+
+谈到这里，实际上已经产生了如下问题：
+
+- 字符串被写入　Windows 调试器，那么这个调试器在哪里？或者换一种问法，字符串被写到了哪个内存地址（缓冲区）？
+- 其他应用程序是如何读取到调试字符串的？
+- 如果应用程序一直频繁地写入调试信息，如何确保缓冲区不溢出？
+
+回答上述问题之前，需要介绍一些操作系统原理。操作系统中的应用程序进程空间划分为两个部分：用户空间和内核空间。用户空间由用户自行管理，每个用户进程所拥有的用户空间都是独立的；而内核空间在整个操作系统中**有且仅有** 一个，各个应用程序都共享同样的内核空间。用户进程平时运行于用户态，只能执行一些计算型的指令（比如算个加法得出结果，然后把结果写到用户空间的内存区域）。要想完成某些非计算型的任务（比如在屏幕上点亮某些像素、读写磁盘），就需要向操作系统发出请求，请操作系统帮助完成这样的任务，这种请求被称作**系统调用（system call, syscall）**。系统调用是操作系统世界的地基，所有应用程序的丰富功能全都依赖于系统调用。当应用程序发起系统调用后，应用程序自身的执行就被打断了，所有的一切都被操作系统内核全权接管（就像手术中的病人和医生一样）。此时 CPU 从用户态短暂地**陷入**到内核态，操作系统内核进而可以同时访问进程的用户空间和内核空间，执行一些用户无权运行的 CPU 指令，完成用户的需求。系统调用结束后，CPU 恢复到用户态，此时用户进程会发现自己的进程空间多了一些由操作系统内核返回的信息，标志着操作系统内核完成了进程请求的事项。
+
+现在，我们可以回答上面的问题了。`OutputDebugString` 内部执行了系统调用，该系统调用把用户提供的 `lpOutputString` 写入到操作系统内核空间的一块专门存放调试信息的缓冲区。每个应用进程调用 `OutputDebugString` 写入的调试信息都会被放到这个内核空间缓冲区。外部应用程序在读取调试信息时，通过 `ReadProcessMemory` 把内核空间的调试信息原封不动地复制到自己的用户进程空间中进行处理。在实现时为了避免缓冲区溢出的问题，一般采用的方案是循环队列，但是仅仅一个循环队列实际上还不足以解决所有问题。试想，任何应用进程都可以通过 `OutputDebugString` 输出调试信息，若这些调试信息不加选择地全部扔进缓冲区，必然导致循环队列中已经写入的内容被频繁地被新内容覆盖。对此，Windows 采取的实现方案是**仅当应用进程被另一个调试进程附加时**[^1]，才把调试信息写入缓冲区，否则不执行任何操作。既然调试信息是给调试器进程看的，那么如果调试器进程压根不存在，那么调试信息也就没有记录的必要。另外，需要指出的是，调试器进程既可以是用户级别的调试器，就比如上述最简调试器示例以及常见的 WinDbg、GDB、LLDB 等（运行于用户态，只针对某个特定进程附加并调试），也可以是系统级别的调试器。所谓“系统级”，实际上是指这个调试器实际上是一个运行于内核态的驱动，进而也就可以直接读取调试信息缓冲区，像 Sysinternals 这样的软件，之所以具备获取所有进程输出的调试信息的能力，就是因为它运行于内核态（更严谨地说，是在获取调试信息时，相应的线程运行于内核态）。
+
+[^1]: Win32 文档关于这一点的表述原文为：If the application does not have a debugger and the system debugger is not active, `OutputDebugString` does nothing.

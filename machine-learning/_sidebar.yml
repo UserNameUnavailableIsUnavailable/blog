@@ -10,3 +10,5 @@ website:
           href: /machine-learning/
         - text: 概率分布
           href: /machine-learning/probability-distributions/
+        - text: 线性分类模型
+          href: /machine-learning/linear-models-for-classification/

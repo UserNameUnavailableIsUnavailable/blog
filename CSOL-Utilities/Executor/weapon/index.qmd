@@ -1,6 +1,7 @@
 # 定义武器或装备
 
-** 单例类**`Weapon` 用于定义挂机时使用的武器或装备。
+**多例类** `Weapon` 用于定义挂机时使用的武器或装备。
+
 
 ## 字段
 
@@ -59,7 +60,7 @@ weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SE
 
 注解：该设定与配置面板中的提供的重新装填按钮设定选项保持一致，缺省值为 `Keyboard.R`。在使用“圣翼皓印”、“万钧神威”等定制武器时，特殊攻击将通过 `RELOAD_KEY` 触发
 
-## 函数
+## 方法
 
 ### `new`
 

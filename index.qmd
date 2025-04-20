@@ -33,3 +33,8 @@ sidebar: false
 ## 炼丹
 
 - [模式识别与机器学习](/machine-learning/)
+- [语义分割](/segmentation/)
+
+## 琐碎记录
+
+- [琐碎记录](/trivial/)

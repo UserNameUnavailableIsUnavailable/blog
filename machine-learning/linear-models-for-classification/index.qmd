@@ -4,16 +4,38 @@
 
 ## 判别函数
 
-使用线性模型处理 $K$ 分类任务时，判别函数具有如下形式：
+使用线性模型处理 $K$ 分类任务时，一般为每一类特征设定一个判别函数。原书中关于为何要这样做有详细的论述过程，这里暂且省略。
 
-$$y_k = \boldsymbol{w}_k^\mathsf{T}\boldsymbol{x} + w_{k0}, k = 1, \cdots, K$$
+判别函数具有如下形式：
+
+$y_k = \boldsymbol{w}_k^\mathsf{T}\boldsymbol{x} + b_{k}$，其中 $k = 1, \cdots, K$。
 
 将特征 $\boldsymbol{x}$ 输入各个判别函数后，取输出值最大的判别器对应类别作为特征 $\boldsymbol{x}$ 所属类别，即：
 
+::: {#def-discriminants}
+
+### $K$ 分类判别器
+
 $\forall\; k \ne j$，若有 $y_k > y_j$，则判定 $\boldsymbol{x} \in \mathcal{C}_k$。
+:::
 
-由这样的判别函数所确定的各个判别区域都是凸集。
+判别函数的交汇处构成了决策超平面（decision hyper-plane），例如，判别器 $y_k$ 与 $y_j$ 相交得到的超平面方程为：
 
-为了表述上的简便，通常记 $\widetilde{\boldsymbol{x}} = \begin{bmatrix}1&x_1&x_2&\cdots&x_D\end{bmatrix}^\mathsf{T}$，$\widetilde{\boldsymbol{w}_k} = \begin{bmatrix}w_{k0}&w_{k1}&\cdots&w_{kD}\end{bmatrix}$
+$$\left(\boldsymbol{w}_k - \boldsymbol{w}_j\right)^\mathsf{T}\boldsymbol{x} + \left(b_k - b_j\right) = 0\; \left(j \ne k\right)$$
+
+让 $j$ 取除 $k$ 外的所有值，有解的超平面方程就形成了一系列的决策平面，这些决策平面进而构成了第 $k$ 类特征的决策区域（decision region）$\mathcal{R}_k$。那么，这个决策区域的形状是怎样的呢？在二维平面下，我们很容易想象到，这样的决策实际上是一个锥形的放射状区域。推广到高维情形，应该是一个凸锥。为了证明这一点，我们任取 $\boldsymbol{x}_A, \boldsymbol{x}_B \in \mathcal{R}_k$（conic combination）$\boldsymbol{x}_C = \lambda_1\; \boldsymbol{x}_A + \lambda_2\; \boldsymbol{x}_B$，其中 $\lambda \in \left[0,+\infty\right)$，只要 $\boldsymbol{x}_C$ 也在 $\boldsymbol{R}_k$ 中，则 $\mathcal{R}_k$ 就是凸锥。
+
+$$
+\begin{align}
+&\mathrel{\phantom{=}}y_k\left(\boldsymbol{x}_C\right)\\
+&=y_k\left(\lambda_1\; \boldsymbol{x}_A + \lambda_2\;\boldsymbol{x}_B\right)\\
+&=\lambda_1\;y_k\left(\boldsymbol{x}_A\right) + \lambda_2\;y_k\left(\boldsymbol{x}_B\right)\\
+&\ge \lambda_1\;y_j\left(\boldsymbol{x}_A\right) + \lambda_2\;y_j\left(\boldsymbol{x}_B\right)\\
+&=y_j\left(\lambda_1\; \boldsymbol{x}_A + \lambda_2\;\boldsymbol{x}_B\right)\\
+&=y_j(\boldsymbol{x}_C)
+\end{align}
+$$
+
+据 $y_k\left(\boldsymbol{x}_C\right) \ge y_j\left(\boldsymbol{x}_C\right)$，由 @def-discriminants 我们知道，$\boldsymbol{x}_C \in \mathcal{R}_k$。所以，$\mathcal{R}_k$ 一定是一个凸锥。
 
 ## 
