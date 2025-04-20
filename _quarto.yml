@@ -53,4 +53,5 @@ metadata-files:
   - SimpleOS/_sidebar.yml
   - kz-guide/_sidebar.yml
   - CSOL-Utilities/_sidebar.yml
+  - thinking/_sidebar.yml
   - trivial/_sidebar.yml

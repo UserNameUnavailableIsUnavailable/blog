@@ -38,3 +38,7 @@ sidebar: false
 ## 琐碎记录
 
 - [琐碎记录](/trivial/)
+
+## 思考
+
+- [思考](/thinking/)
