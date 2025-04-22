@@ -10,6 +10,10 @@ sidebar: false
 - [KZ 教程](/kz-guide/)
 - [CSOL 集成工具](/CSOL-Utilities/)
 
+## 思考
+
+- [思考](/thinking/)
+
 ## C++
 
 - [C++ 笔记](/cpp-notes/)
@@ -38,7 +42,3 @@ sidebar: false
 ## 琐碎记录
 
 - [琐碎记录](/trivial/)
-
-## 思考
-
-- [思考](/thinking/)

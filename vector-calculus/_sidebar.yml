@@ -8,7 +8,7 @@ website:
           href: /
         - text: Preface
           href: /vector-calculus/
-        - text: Basic Concepts
-          href: /vector-calculus/basic-concepts/
+        - text: Basics
+          href: /vector-calculus/basics/
         - text: Five Big Theorems
           href: /vector-calculus/five-big-theorems/

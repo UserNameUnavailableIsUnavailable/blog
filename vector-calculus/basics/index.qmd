@@ -1,0 +1,95 @@
+# Basic Concepts
+
+## Function
+
+A function consists of three parts: domain, codomain, and a rule that maps any element from domain to exactly one element in codomain. For $f: \mathbb{R}^m \mapsto \mathbb{R}^n$, the domain is $\mathbb{R}^m$, the codomain is $\mathbb{R}^n$, and the rule is $f$.
+
+### Domain
+
+Set of inputs accepted by the function. We use $\mathrm{dom}\;f$ to denote the domain of a function. A function may come with a **natrual domain**.
+
+### Range vs. Image
+
+Both terms can be used to describe the set of all outputs that the function can produce. But Image can also be used in an element-wise manner, e.g., if $f(a) = b$, one can say that $b$ is the image of $a$ by rule $f$. The range (or image) of a function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ can be denoted by $f(\boldsymbol{X}) = \{f(x)\;|\;x \in \boldsymbol{X}\}$.
+
+### Codomain（培域）
+
+The set of elements that the function may produce and must be at least as big as the range. Unlike domain, there is no such thing as "natrual codomain", so codomain is always choosed manually.
+
+### Special cases
+
+- **Injective（单射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is injective (or **one-to-one**) if $\forall\; y \in \boldsymbol{Y}$ there is at most one $x \in \boldsymbol{X}$ such that $f(x) = y$.
+- **Surjective（满射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is onto (or **surjective**) if $\forall\; y \in \boldsymbol{Y}$ there $\exists\; x \in \boldsymbol{X}$ such that $f(x)=y$.
+- **Bijective（双射）**: A function is bijective (or **invertible**) if it is *both injective and surjective*. For an invertible mapping $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$, we say its inverse image is $f^{-1}:\boldsymbol{Y}\mapsto\boldsymbol{X}$.
+
+
+## Vectors, matrices, and derivatives
+
+::: {#def-subspace}
+### Subspace of $\mathbb{R}^n$
+
+A subspace (or **vector subspace**) of $\mathbb{R}^n$ is a subset of $\mathbb{R}^n$ such that it is closed under addition and multiplication by scalars.
+:::
+
+::: {#def-vector-field}
+### Vector field
+
+A vector field is a function that take a point in $\mathbb{R}^n$ as input and outputs a vector in $\mathbb{R}^n$ **emanating from that point（从那个点发散出）**.
+:::
+
+## Linearity
+
+:::{#def-linear-transformation}
+### The Definition of Linear Transformation
+
+For a transformation $T: \mathbb{R}^m \mapsto \mathbb{R}^n$, if $\forall \boldsymbol{u}, \boldsymbol{v} \in \mathbb{R}$ and $\forall$ scalars $a$:
+
+$T(\boldsymbol{u} + \boldsymbol{v}) = T(\boldsymbol{u} + \boldsymbol{v})$ and $T(a\boldsymbol{u}) = aT(\boldsymbol{u})$, then we say $T$ is a linear transformation.
+:::
+
+:::{.callout-important}
+Not all linear transformations are invertible.
+:::
+
+:::{#cor-inverse-of-linear-transformation}
+### The Inverse of Linear Transformation
+
+If a linear transformation $T$ is invertible, then its inverse $T^{-1}$ is also linear.
+
+:::{.proof}
+
+To show this, recall that for a linear transformation, the following equation holds:
+
+$$a\boldsymbol{u} + b\boldsymbol{v} = T\left(T^{-1}\left(a\boldsymbol{u} + b\boldsymbol{v}\right)\right)$$
+
+$$a\boldsymbol{u} + b\boldsymbol{v} = T\left(aT^{-1}\left(\boldsymbol{u}\right) + bT^{-1}\left({v}\right)\right).$$
+
+Combine these two equations, we see that: $T\left(T^{-1}\left(a\boldsymbol{u} + b\boldsymbol{v}\right)\right) = T\left(aT^{-1}\left(\boldsymbol{u}\right) + bT^{-1}\left({v}\right)\right)$.
+
+Since $T$ is invertible, so $T^{-1}\left(a\boldsymbol{u} + b\boldsymbol{v}\right) = aT^{-1}\left(\boldsymbol{u}\right) + bT^{-1}\left({v}\right)$, thus $T^{-1}$ is linear.
+:::
+:::
+
+::: {#exm-invertibility-of-linear-transformation}
+A linear transformation $T: \mathbb{R}^m \mapsto \mathbb{R}^n$ is invertible iff. the corresponding $m \times n$ matrix $[T]$ is invertible.
+
+:::{.proof}
+By @cor-inverse-of-linear-transformation, we see that if the inverse of $T$ exists, then $T^{-1}$ is also linear. So, $T^{-1}$ corresponds to a $m \times n$ matrix $[T^{-1}]$. And, because $T \circ T^{-1}(\cdot) = \cdot$ and $T^{-1} \circ T(\cdot) = \cdot$, so $[T][T^{-1}] = [T^{-1}][T] = \boldsymbol{I}$. Therefore, $T$ is invertible, and $m = n$ must hold. ($\Rightarrow$)
+
+Let $[S] = [T^{-1}]$, For $T$ to be invertible, it needs to be both one-to-one and onto.
+
+To show one-to-one holds, let $\boldsymbol{u}, \boldsymbol{v} \in \mathbb{R}^m$, and $T(\boldsymbol{u}) = T(\boldsymbol{v})$.
+
+$$S\left(T\left(\boldsymbol{u}\right)\right) = \boldsymbol{u}.$$
+
+$$S\left(T\left(\boldsymbol{v}\right)\right) = \boldsymbol{v}.$$
+
+Since $T(\boldsymbol{u}) = T(\boldsymbol{v})$, we have $\boldsymbol{u} = \boldsymbol{v}$, which means $T$ is one-to-one.
+
+To show onto holds, for any $\boldsymbol{y} \in \mathbb{R}^n$, we have:
+
+$$\boldsymbol{y} = [T][S]\boldsymbol{y} = \boldsymbol{y},$$
+
+which indicates $T\left(S\left(\boldsymbol{y}\right)\right) = \boldsymbol{y}$, i.e., for any $\boldsymbol{y} \in \mathbb{R}^n$, there exists a vector $S(\boldsymbol{y}) \in \mathbb{R}^m$ that can satisfy mapping $T$. ($\Leftarrow$)
+:::
+:::
