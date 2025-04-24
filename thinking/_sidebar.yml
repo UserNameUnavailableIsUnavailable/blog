@@ -6,9 +6,6 @@ website:
       contents:
         - text: 返回
           href: /
-        - text: 前言
-          href: /thinking/
-        - text: 2025 年 4 月 20 日有感
-          href: /thinking/20250420/
-        - text: 2025 年 4 月 23 日重讀〈逍遙遊〉有感
-          href: /thinking/20250423/
+        - href: thinking/index.qmd
+        - section: 我的 2025
+          contents: thinking/2025/*.qmd
