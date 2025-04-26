@@ -1,3 +1,5 @@
-# 琐碎记录
+---
+title: 琐碎记录
+---
 
 Just some trivial stuff.

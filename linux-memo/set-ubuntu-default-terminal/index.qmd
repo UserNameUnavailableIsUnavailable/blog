@@ -1,4 +1,6 @@
-# 怎样完美修改 Ubuntu 的默认终端
+---
+title: 怎样完美修改 Ubuntu 的默认终端
+---
 
 本文展示如何将 Ubuntu 默认终端完全地修改为指定终端。
 
@@ -7,7 +9,9 @@
 通过 `update-alternatives` 修改默认的终端模拟器。
 
 ```bash
-# 请将 hyper 修改为你想使用的默认终端路径
+---
+title: 请将 hyper 修改为你想使用的默认终端路径
+---
 sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator hyper 100
 sudo update-alternatives --config x-terminal-emulator
 ```
@@ -31,14 +35,18 @@ GNOME 桌面提供了一项非常有用的功能：在桌面上，右键单击�
 上述这段代码的作用是打开默认设置的终端，并将终端的工作目录设置为 `workdir`。其中，`argv.push()` 的作用是向 `argv` 中添加命令行选项，。因此，GNOME 桌面最终在创建终端模拟器进程时，相当于执行这样的 shell 命令：
 
 ```bash
-# 工作目录 workdir 在创建进程时指定
+---
+title: 工作目录 workdir 在创建进程时指定
+---
 x-terminal-emulator argv # 将 argv 字符串化后作为命令行参数传递
 ```
 
 其中 `argv.push(command)` 向 `argv` 添加了 `command`。所以，上面的命令等效于：
 
 ```bash
-# 工作目录 workdir 在创建进程时指定
+---
+title: 工作目录 workdir 在创建进程时指定
+---
 x-terminal-emulator command
 ```
 

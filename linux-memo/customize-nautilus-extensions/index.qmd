@@ -1,4 +1,6 @@
-# 让 Nautilus 更像 Windows 11 Explorer
+---
+title: 让 Nautilus 更像 Windows 11 Explorer
+---
 
 上一篇文章提到，在桌面右键点击“Open in Terminal”能够在终端中直接打开桌面。这个功能和 Windows 11 Explorer 在“终端中打开”的功能非常相像，但是 Windows 11 的该功能不止能打开桌面，而是能够打开任意文件夹。
 另外，Windows 11 还允许在 `VS Code` 等其他软件中打开文件夹。

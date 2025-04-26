@@ -2,4 +2,6 @@
 /blog/
 /*.zip
 /*.tar
+/*.gz
 /.luarc.json
+sidebar.json

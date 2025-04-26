@@ -1,4 +1,6 @@
-# Conditional Probability
+---
+title: Conditional Probability
+---
 
 ## Discrete Form
 

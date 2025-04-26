@@ -1,0 +1,72 @@
+{
+    "type": "section",
+    "title": "执行器",
+    "href": "/CSOL-Utilities/Executor/index.html",
+    "children": [
+        {
+            "type": "document",
+            "title": "自动操作",
+            "href": "/CSOL-Utilities/Executor/automation.html"
+        },
+        {
+            "type": "document",
+            "title": "命令的解释与执行",
+            "href": "/CSOL-Utilities/Executor/command.html"
+        },
+        {
+            "type": "document",
+            "title": "日期、时间",
+            "href": "/CSOL-Utilities/Executor/datetime.html"
+        },
+        {
+            "type": "document",
+            "title": "错误处理",
+            "href": "/CSOL-Utilities/Executor/error.html"
+        },
+        {
+            "type": "document",
+            "title": "中断",
+            "href": "/CSOL-Utilities/Executor/interrupt.html"
+        },
+        {
+            "type": "document",
+            "title": "JSON 解析",
+            "href": "/CSOL-Utilities/Executor/JSON.html"
+        },
+        {
+            "type": "document",
+            "title": "键盘操作",
+            "href": "/CSOL-Utilities/Executor/keyboard.html"
+        },
+        {
+            "type": "document",
+            "title": "模块化编程",
+            "href": "/CSOL-Utilities/Executor/module.html"
+        },
+        {
+            "type": "document",
+            "title": "鼠标操作",
+            "href": "/CSOL-Utilities/Executor/mouse.html"
+        },
+        {
+            "type": "document",
+            "title": "玩家的游戏行为",
+            "href": "/CSOL-Utilities/Executor/player.html"
+        },
+        {
+            "type": "document",
+            "title": "运行时",
+            "href": "/CSOL-Utilities/Executor/runtime.html"
+        },
+        {
+            "type": "document",
+            "title": "实用工具",
+            "href": "/CSOL-Utilities/Executor/utility.html"
+        },
+        {
+            "type": "document",
+            "title": "定义武器或装备",
+            "href": "/CSOL-Utilities/Executor/weapon.html"
+        }
+    ]
+}

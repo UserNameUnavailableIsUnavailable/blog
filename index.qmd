@@ -3,8 +3,6 @@ title: 个人博客
 sidebar: false
 ---
 
-个人博客 [blog.macrohard.fun](https://blog.macrohard.fun)，目前已经改为使用 [quarto](https://quarto.org/) 搭建，尚在迁移中。
-
 ## 游戏
 
 - [KZ 教程](/kz-guide/)
@@ -37,7 +35,6 @@ sidebar: false
 ## 炼丹
 
 - [模式识别与机器学习](/machine-learning/)
-- [语义分割](/segmentation/)
 
 ## 琐碎记录
 

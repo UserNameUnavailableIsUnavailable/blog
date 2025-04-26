@@ -1,4 +1,5 @@
 local custom_keys = {
+    "RuntimeSidebar"
 }
 
 function Meta(meta)

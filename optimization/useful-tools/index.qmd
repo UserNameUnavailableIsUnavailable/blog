@@ -1,4 +1,6 @@
-# Useful Tools
+---
+title: Useful Tools
+---
 
 ## Triangle Inequality
 

@@ -1,4 +1,6 @@
-# JSON 解析
+---
+title: JSON 解析
+---
 
 **单例类** `JSON` 提供了 JSON 编解码模块，该模块基于 GitHub 开源项目 [rxi/json.lua](https://github.com/rxi/json.lua) 修改而来。
 

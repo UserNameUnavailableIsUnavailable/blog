@@ -1,4 +1,6 @@
-# Basic Concepts
+---
+title: Basic Concepts
+---
 
 ## Affine Set
 

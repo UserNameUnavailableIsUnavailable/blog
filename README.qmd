@@ -1,4 +1,6 @@
-# Macrohard Blog
+---
+title: Macrohard Blog
+---
 
 ## 描述
 

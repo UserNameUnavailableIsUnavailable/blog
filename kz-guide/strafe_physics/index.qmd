@@ -1,4 +1,6 @@
-# 译：加速物理学
+---
+title: 译：加速物理学
+---
 
 本节我们将通过半条命已经开放的源码理解加速物理学。我们将着重分析这些文件：<a href="">input.cpp</a>、<a href="">pm_shared.c</a>、<a href="">pm_math.c</a>。
 
