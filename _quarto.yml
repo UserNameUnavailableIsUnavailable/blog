@@ -2,6 +2,8 @@ project:
   output-dir: blog
   type: website
   title: "Macrohard"
+  post-render:
+    - python sidebar.py
 author: admin
 website:
   page-navigation: true
@@ -52,18 +54,3 @@ filters:
   - Meta.lua
 execute:
   cache: true
-# resources: "*/sidebar.json"
-# metadata-files:
-#   - cpp-notes/_sidebar.yml
-#   - win32-app-develop/_sidebar.yml
-#   - x64-assembly/_sidebar.yml
-#   - linux-memo/_sidebar.yml
-#   - machine-learning/_sidebar.yml
-#   - probability/_sidebar.yml
-#   - optimization/_sidebar.yml
-#   - vector-calculus/_sidebar.yml
-#   - SimpleOS/_sidebar.yml
-#   - kz-guide/_sidebar.yml
-#   - CSOL-Utilities/_sidebar.yml
-#   - thinking/_sidebar.yml
-#   - trivial/_sidebar.yml
