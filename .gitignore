@@ -1,3 +1,4 @@
+/.venv/
 /.quarto/
 /blog/
 /*.zip

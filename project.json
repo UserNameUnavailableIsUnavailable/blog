@@ -12,5 +12,6 @@
     "trivial",
     "vector-calculus",
     "win32-app-develop",
-    "x64-assembly"
+    "x64-assembly",
+    "root"
 ]

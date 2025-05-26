@@ -1,0 +1,34 @@
+---
+title: 关于重构博客网站的一些想法
+---
+
+从最开始使用的 WordPress，到后来用的 docsify，再到现在用的 Quarto，老实说我对这些搭建博客的工具并不是特别满意。
+
+WordPress 是傻瓜式的，这既是优点，也是缺点。记得几年前在用 WordPress 写 Markdown 文档时，在本地用相对路径引用图片，传到 WordPress 上之后，发现传图片很麻烦，告诉 WordPress 这个图片的 URL 要用相对路径解析则更加麻烦，几乎不可操作（WordPress 的 Markdown 文档内容是直接作为长字符串存进数据库里的），遂转投 docsify。初用 docsify 感觉很不错，然而 docsify 毕竟是专门为“文档”设计的。“文档”是成体系的，但博客却不是，写的博客一多，很多东西处理起来又变得麻烦起来了。众里寻他千百度，最终找到了 Quarto。不得不承认，作为静态文档生成工具，Quarto 确实非常强。可是，Quarto 静态得有些过头了，写完一篇博客要发表都需要经过编译，甚至于边栏导航这种东西都是直接在编译时直接嵌到编译生成的 HTML 文件里的，这就导致我每次新写一篇博客，在目录里加个条目，都需要把整个目录里的博客们都重新编译一遍，博客一多，编译的耗时实在是难以忍受，更不用说最后还要重新打包部署到服务器上（虽然后来写了个动态生成边栏导航和自动部署的脚本，但还是觉得很麻烦）。
+
+所以，我下了个违背祖宗的决定，我要自己写一个博客管理系统。
+
+这个博客管理系统是“动静结合”的。当客户端请求某一篇博客的内容，如 "https://example.com/foo.html" 后，服务器会返回一个 HTML 模板，初步设想应该长这样：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="__MAIN__" content="https://example.com/foo.md">
+    <title></title>
+</head>
+<body>
+    <article id="__MAIN__">
+        {{Markdown 内容处理成 HTML 后置于此处}}
+    </article>
+</body>
+</html>
+```
+
+返回的 foo.html 文件只是一个简单的模板，然后，JavaScript 脚本会根据元信息 `__MAIN__` 中提示的 URL "https://example.com/foo.md" 向服务器发起一个新的请求，获取到 foo.md 后，在客户端本地解析为 HTML 格式，然后塞进 `<article>` 里。这样，既解决了 WordPress 动态性过强的缺点，也处理了 Quarto 动态性不足的缺点。
+
+这个项目作为我新开的一个大坑，每天做一点，就当补习 Java 后端开发和前端三件套了。
+
+虽说以后想找个 C++ 的工作，但人不能在 C++ 一棵树上吊死。另外，也算是鞭策自己每天搞点小成果出来。

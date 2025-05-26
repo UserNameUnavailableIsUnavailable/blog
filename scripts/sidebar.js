@@ -22,16 +22,6 @@ function makeEl(name, attr, doc) {
     return el;
 }
 
-const processAndRemoveAttr = (el, attr, process, defaultValue) => {
-    const resolvedAttr = el.getAttribute(attr);
-    if (resolvedAttr !== null) {
-        process(el, resolvedAttr);
-        el.removeAttribute(attr);
-    } else if (defaultValue) {
-        process(el, defaultValue);
-    }
-};
-
 let sectionId = 1
 
 function makeRuntimeSidebarItems(list, level, doc, baseUrl) {
@@ -64,7 +54,7 @@ function makeRuntimeSidebarItems(list, level, doc, baseUrl) {
             a2.setAttribute("role", "navigation")
             a2.setAttribute("aria-expanded", e.collapse ? "false" : "true")
             a2.innerHTML = `<i class="bi bi-chevron-right ms-2"></i>`
-            if (window.location.href === url.href) {
+            if (window.location.href === url.href) { // 地址匹配
                 a1.classList.add("active")
             }
             div.appendChild(a1)
@@ -113,34 +103,26 @@ async function makeRuntimeSidebar() {
     let containingDirectory = getContainingDirectory(documentUrl) // https://example.com/path/to/
     let sidebar = "sidebar.json"
     let sidebarUrl = new URL(sidebar, containingDirectory) // https://example.com/path/to/sidebar.json
-    let sidebarJson = undefined
     let response = await fetch(sidebarUrl)
     if (!response.ok) {
         return
     }
-    sidebarJson = await response.json()
-    if (sidebarJson.merged) {
-        sidebar = "../" + sidebar
-        sidebarUrl = new URL(sidebar, containingDirectory)
-    } else {
-        found = true
-    }
-    if (!sidebarJson) {
-        return
-    }
-    console.log(sidebarJson)
-    let sidebarNav = makeEl("nav", { id: "quarto-sidebar", classes: ["sidebar", "collapse", "collapse-horizontal", "quarto-sidebar-collapse-item", "sidebar-navigation", "docked", "overflow-auto",] }, document)
-    let sidebarMenuContainer = makeEl("div", { classes: ["sidebar-menu-container",] }, document)
-    let ul = makeRuntimeSidebarItems(sidebarJson, 0, document, documentUrl.origin)
-    if (ul) {
-        sidebarMenuContainer.appendChild(ul)
-    }
-    sidebarNav.appendChild(sidebarMenuContainer)
-    console.log(quartoSidebar)
-    sidebarNav.style = quartoSidebar.style
-    quartoSidebar.replaceWith(sidebarNav)
-    console.log(sidebarNav)
-    console.log(document.getElementById("quarto-content"))
+    await response.json().then((sidebarJson) => {
+        console.log(sidebarJson)
+        let sidebarNav = makeEl("nav", { id: "quarto-sidebar", classes: ["sidebar", "collapse", "collapse-horizontal", "quarto-sidebar-collapse-item", "sidebar-navigation", "docked", "overflow-auto",] }, document)
+        let sidebarMenuContainer = makeEl("div", { classes: ["sidebar-menu-container",] }, document)
+        let ul = makeRuntimeSidebarItems(sidebarJson, 0, document, documentUrl.origin)
+        if (ul) {
+            sidebarMenuContainer.appendChild(ul)
+        }
+        sidebarNav.appendChild(sidebarMenuContainer)
+        console.log(quartoSidebar)
+        sidebarNav.style = quartoSidebar.style
+        quartoSidebar.replaceWith(sidebarNav)
+        console.log(sidebarNav)
+        console.log(document.getElementById("quarto-content"))
+
+    })
 }
 
 makeRuntimeSidebar()
