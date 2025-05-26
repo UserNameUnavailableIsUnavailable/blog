@@ -33,7 +33,6 @@ title: vscode-neovim 插件的 `<C-q>` 问题
 
 ```json
 [
-    // ...
     {
         "key": "ctrl+q",
         "command": "-workbench.action.quickOpenView"
@@ -42,7 +41,8 @@ title: vscode-neovim 插件的 `<C-q>` 问题
         "key": "ctrl+q",
         "command": "vscode-neovim.send",
         "args": "<C-q>",
-        "when": "editorTextFocus && neovim.mode == 'normal'" // 拥有文本输入焦点且当前为 NORMAL 模式才允许此映射
+        "when": "editorTextFocus && neovim.mode == 'normal'",
+        "tip": "拥有文本输入焦点且当前为 NORMAL 模式才允许此映射。"
     }
 ]
 ```
@@ -51,16 +51,16 @@ title: vscode-neovim 插件的 `<C-q>` 问题
 
 ```json
 [
-    // ...
     {
         "key": "ctrl+q",
-        "command": "-workbench.action.quit"
+        "command": "-workbench.action.quit",
     },
     {
         "key": "ctrl+q",
         "command": "vscode-neovim.send",
         "args": "<C-q>",
-        "when": "editorTextFocus && neovim.mode == 'normal'" // 拥有文本输入焦点且当前为 NORMAL 模式才允许此映射
+        "when": "editorTextFocus && neovim.mode == 'normal'",
+        "tip": "拥有文本输入焦点且当前为 NORMAL 模式才允许此映射。"
     }
 ]
 ```
