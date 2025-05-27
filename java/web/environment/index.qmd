@@ -1,0 +1,227 @@
+---
+title: 环境准备
+---
+
+本文记录如何在 Visual Studio Code 上配置可调试 Java Web 开发环境，其摸索过程异常艰辛，故记录于此。
+
+## 前言
+
+鄙人不是很喜欢 IntelliJ IDEA 这样的集成开发环境，集成开发环境用得过多容易让人变得巨婴化。
+Java 的情况不是很清楚，至少对于 C++ 而言，在使用集成开发环境达到入门水平之后，就应该有意识地摆脱对集成开发环境的依赖，通过使用 GCC、Clang、Make 这样的开发工具链，了解一个项目是如何编译、链接然后加载运行的（当然，对于大型的项目而言，还是要用到一些现代的开发方式，比如使用 CMake，但这与搞清楚项目构建原理是完全两回事）。
+本人已有一定的 Java SE 基础，为了后续在学习 Java Web 开发过程中能够对一些细节了解得更加透彻，另外一点是个人认为 VSCode 开发起来更加自由，故决定采用 VSCode 作为主要开发环境。
+
+## 折腾
+
+### 基本环境准备
+
+要想在 VSCode 上搭建 Java Web 开发环境，需要如下前提条件：
+
+- JDK
+- Apache Tomcat
+- Maven
+
+上述安装过于基础，不再赘述。
+
+### VSCode 配置
+
+需要如下插件：
+
+- [Maven for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
+- [Community Server Connectors](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-community-server-connector)
+
+### 使用 Maven 插件创建 Java Web 项目
+
+Maven 插件实际上是可有可无的，它本质上就是在调用安装的 Maven 来执行一些命令，只是每次都手动输入命令过于麻烦，故需要这么一个插件来自动化执行这些操作。
+
+1. 按下 `<C-p>`，输入 `> Maven` 后点击 "Maven: New project"。
+
+2. 选择 archetype。所谓 archetype，就是 Maven 提供的项目创建的一个模板，其本质就是为你创建一个像下面这样的项目结构：
+
+```plain
+<artifact-id>/
+    ├───src
+    │   └───main
+    │       └───webapp
+    │           │   index.jsp
+    │           │
+    │           └───WEB-INF
+    │                   web.xml
+    │
+    │───target
+    │   ├───classes
+    │   └───test-classes
+    └───pom.xml
+```
+
+![创建项目](assets/create-project.avif)
+
+![选择 archetype](assets/select-archetype.avif)
+
+![指定 archetype 版本](assets/archetype-version.avif)
+
+![指定 group id](assets/group-id.avif)
+
+Group id 代表了项目中所有源文件的包名前缀，我这里使用 `fun.macrohard`。
+
+![指定 artifact id](assets/artifact-id.avif)
+
+Artifact id 代表了项目的标识，与上面所示的项目结构中的 `<artifact-id>` 相同，我这里使用 `blog`。
+
+![snapshot 版本](assets/snapshot-version.avif)
+
+项目快照版本，这一点暂时不涉及，保持默认即可。
+
+![确认](assets/confirm.avif)
+
+### 最简 Java Web 项目
+
+项目创建完毕后，要先写出一个最简单的 Java Web 项目，在这之前，需要修改 `pom.xml` 中的配置。
+
+首先，需要修改文件中的 `properties` 选项，将 `maven.compiler.source` 与 `maven.compiler.target` 改为 `1.8`（或者 `8` 也可以，均代表 JDK 8）。这个两个字段代表的是源代码和目标文件使用的 JDK 版本，这个字段和实际安装的 JDK 版本没有关系，只要实际安装的是 JDK 8 以上的版本，都是可以编译的。
+
+```xml
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+```
+
+然后，在 `dependencies` 选项下新增依赖，引入所需的 Servlet API 包，这里是一个比较大的坑。
+对于 Tomcat 4 ~ Tomcat 9，使用如下的依赖：
+
+```xml
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>4.0.1</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+对于 Tomcat 10 及以上，使用如下依赖。
+
+```xml
+<dependency>
+    <groupId>jakarta.servlet</groupId>
+    <artifactId>jakarta.servlet-api</artifactId>
+    <version>5.0.0</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+该变动的原因是 Tomcat 10 废弃了原有的 `javax` 命名空间，事情的起因要追溯到 Oracle 将 Java EE 移交给 Eclipse，由于版权原因，Java EE 更名为了 Jakarta EE，引发了一系列后续的变动。
+
+最后，也是最为关键的——找到 `build` 选项，在其中添加 `sourceDirectory` 字段（网上的一堆教程没有提及这一点，导致初次配置一直没有办法产生正确的打包，后续有时间一定要去看一下 Maven 的官方文档）。
+`sourceDirectory` 的添加设计到项目文件结构，Maven 根据 archetype 自动创建的项目结构下并没有提供存放 Java 源码的目录，需要手动创建。具体来说，是先在 `blog/src/main/` 里创建 `java/`，然后在其中创建 `fun/macrohard/`，对应于项目的 group id。
+
+为了让 Maven 能够正确编译 `java/` 目录下的源代码，需要在 `build` 选项内添加：
+
+```xml
+<sourceDirectory>src/main/java</sourceDirectory>
+```
+
+然后，可以创建一个简易的 `IndexBlog.java` 文件。**需要注意，如果使用的是 Tomcat 10 以下的版本，下面的引入的包命名空间 `jakarta` 需要改为 `javax`**:
+
+```java
+package fun.macrohard;
+
+import java.io.IOException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+
+@WebServlet("/test")
+public class IndexBlog implements Servlet {
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        System.out.println("hello");
+    }
+    @Override
+    public ServletConfig getServletConfig() {
+        return null;
+    }
+    @Override
+    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+        System.out.println("hello");
+    }
+    @Override
+    public String getServletInfo() {
+        return null;
+    }
+    @Override
+    public void destroy() {
+
+    }
+}
+```
+
+其中，`@WebServelet("/test")` 注解表示当用户访问 `<origin>/<artifact-id>/test` （对应到本文，也即 `http://localhost:8080/blog/test`）时，服务器（Apache Tomcat）会将请求转发到 `IndexBlog` 这个最简服务器，由 `IndexBlog.service` 方法处理该请求。
+
+然后，在左下角找到 Maven 选项卡，点开“Plugins > war > exploded”，右键后点击“Run”（这里的“Debug”与调试上面 Java 代码没有关系）来编译并“打包”本项目（实际并未打包）。
+
+:::{.callout-tip}
+对基于 Servlet 的 Web 项目而言，打包格式称作 WAR（Web Application Archive），其本质上就是一个压缩包，部署到服务器后 Tomcat 将其解压并运行其中的 Java class，以这种方式打包 Java Web 程序的好处是部署方便。然而，实际开发中，项目文件是频繁变动的，这会给开发带来很多不便，因此产生了一种称为“exploded”打包方案，顾名思义就是把 WAR 包炸开（解压），换句话说就是压根不打包，这样在开发过程中就可以实现所谓的“热更新”。
+:::
+
+![打包](assets/exploded.avif)
+
+Maven 会自动处理并编译项目，然后“打包”。在 `target/blog/` 目录下，可以看到构建的所有文件，其中就有 `IndexBlog.class`。
+
+![生成的目标文件](assets/target.avif)
+
+### 使用 Community Server Connectors 部署项目
+
+首先，创建一个服务器。
+
+![创建服务器](assets/create-new-server.avif)
+
+接下来会询问是否要下载服务器，由于我们已经自行下载了 Tomcat，故选择使用硬盘上已有的服务器，并根据弹窗指定 Tomcat 服务器所在的根目录即可。选择完毕后，会询问是否需要配置一些东西，保持默认，直接点击“Finish”即可（在这个面板里也配置不了什么东西，端口号都没法改，要配置还是应该去改 Tomcat 的配置文件）。
+
+![使用现有服务器](assets/use-server-on-disk.avif)
+
+然后，为服务器新增部署，部署类型选择为“Exploded”。
+
+![新增部署](assets/add-deployment.avif)
+
+![部署类型为 exploded](assets/exploded-deployment.avif)
+
+接下来会询问是否需要传递参数，这里没有，选择 No。
+
+![不需要参数](assets/no-parameter.avif)
+
+最后，我们就看到在服务器选项卡下新增了项目，并且状态为“Publish Required”，意思是我们需要“发布”内容，右键并点击“Publish Server（Full）”即可。
+
+![需要发布](assets/publish-required.avif)
+
+![完整发布](assets/publish-server.avif)
+
+每当我们对项目本身做出改动，比如重新编译，都需要再次发布。发布后，服务器状态变为“Synchronized”。
+
+这样，就成功地在服务器中部署了 Java Web 项目。
+
+### 调试
+
+运行这个 Java Web 项目不是我们的最终目标，而且我们也看不到任何运行效果（源代码内完全没有响应客户端请求）。我们想做的是调试这个最简单的 Java Web 项目。
+Web 项目运行于 Tomcat 服务器上，调试的流程是 Tomcat 服务器以调试模式运行 Java Web 项目，调试器在某一个另外的端口监听调试请求。
+当宿主机连接到调试器后，就可以正常调试了。
+
+右键服务器选项并点击“Debug Server”，此时会弹出一个框，询问我们要给调试的项目起什么名字（这个名字和项目本身没有关系）。
+
+![调试服务器](assets/debug-server.avif)
+
+![调试器项目名](assets/debugger-project-name.avif)
+
+在源代码中打好断点，然后访问 `http://localhost:8080/blog/test`，断点成功命中，折腾成功。
+
+![命中断点](assets/breakpoint.avif)
+
+### 没有到此为止
+
+这部分内容至关重要，调试完成后，一定要断开连接，然后关闭服务器，否则直接关掉 VSCode 而 socket 没有正确关闭的话是会造成泄漏的。服务器若不正常关闭，那么服务器即使处在关闭状态，其端口也可能被一直占用（Windows 的情况会好些，Linux 比较严重）。
+
+![断开连接](assets/disconnect.avif)
+
+![关闭服务器](assets/stop-server.avif)
