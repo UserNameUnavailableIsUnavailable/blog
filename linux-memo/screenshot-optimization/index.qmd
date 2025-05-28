@@ -1,0 +1,84 @@
+---
+title: Linux 截图体验优化
+---
+
+## 问题来源
+
+Windows 下，像 SharX 这样的软件截图体验非常好，可以全屏截图，也可以区域截图，还可以自行在软件里定义截图的保存路径，指定截图的名称（比如自动保存在 `%USERPROFILE%\<year>\<month>\<day>\` 目录下，命名为 `<hour>-<minute>-<second>_<millisecond>`）。
+Linux 下 Flameshot 算是比较好用的截图工具了，可是要实现上述自动保存到指定目录并且按特定模式自动命名的功能，体验就非常糟糕了。
+
+## 解决方案
+
+首先，看一下 Flameshot 的命令行使用帮助（摸索了好久，结论是不要指望 GUI 界面里提供的功能能帮得上忙了）：
+
+![Command Line Options](https://flameshot.org/docs/advanced/commandline-options/)
+
+Flameshot 提供了 `gui` 截图模式，可以实现交互式截图，还提供了 `full` 截图模式，可以截图整个桌面，`--path` 选项可以指定截图保存位置，`--clipboard` 还可以将截图存到剪切板。
+有了这些基本功能，直接搓个 Python 脚本，然后把 Python 脚本绑定到热键上即可解决问题。
+
+```python
+#!/bin/python3
+
+import sys
+import os
+import argparse
+import subprocess
+from datetime import datetime
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--mode', help="{test, full, gui}", required=True)
+parser.add_argument('--delay', help="delay before action, in milliseconds", required=False, type=int)
+args = parser.parse_args(sys.argv[1:])
+
+now = datetime.now()
+
+year = now.strftime("%Y")
+month = now.strftime("%m")
+day = now.strftime("%d")
+
+hour = now.strftime("%H")
+minute = now.strftime("%M")
+second = now.strftime("%S")
+
+millisecond = now.strftime("f")[:-3] # 精确到毫秒
+
+HOME = os.path.expanduser('~')
+Pictures = f"{HOME}/Pictures" # 保存截图的根目录
+
+directory = f"{Pictures}/{year}/{month}/{day}"
+file_name = f"{hour}-{minute}-{second}_{millisecond}.png"
+file_path = f"{directory}/{file_name}"
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+elif not os.path.isdir(directory):
+    print(f"{directory} is not a directory.")
+    exit()
+
+cmd = ['flameshot', args.mode, '--path', file_path, "--clipboard"] # 截图保存到指定路径,并复制一份到剪切板
+
+if (args.delay): # 截图前的延迟时间
+    cmd += ["--delay", str(args.delay)]
+
+if (args.mode == 'test'):
+    print(" ".join(cmd)) # 测试模式,打印一下命令,看是否正确
+    exit()
+elif (args.mode != 'full' and args.mode != 'gui'):
+    print("Invalid arguments.")
+    exit()
+
+# 执行截图
+subprocess.run(cmd)
+```
+
+使用方法如下：
+
+- 通过 `--mode` 指定两种模式：`full` 和 `gui`；
+- `--delay` 表示截图前的延迟时间，单位为秒。
+
+对基于 X11 的桌面环境来说，`--delay` 很有用，X11 桌面在弹出对话框之后就没法正常使用热键了（Wayland 没有该问题）。
+
+然后，需要将截图绑定到全局热键。对于 Arch，只要在快捷键里增加两个选项卡就可以实现全桌面截图和交互式截图了。
+
+![Arch 绑定热键](assets/arch-bind.png)

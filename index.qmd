@@ -12,10 +12,11 @@ sidebar: false
 
 - [思考](/thinking/)
 
-## C++
+## 开发
 
 - [C++ 笔记](/cpp-notes/)
 - [Win32 应用开发](/win32-app-develop/)
+- [Java](/java/)
 
 ## 底层技术栈
 
