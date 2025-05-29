@@ -100,7 +100,6 @@ def GenerateTableOfContents(directory: str, parent_sidebar: object = {})-> None:
 
         if (not "children" in parent_sidebar):
             parent_sidebar["children"] = []
-
     # 两种情况：
     # 1. 将 sidebar 直接添加到父级目录的 sidebar 中
     # 2. 将 sidebar 单独保存在 sidebar.json 中，作为独立的边栏导航区
