@@ -1,0 +1,6 @@
+sidebar:
+  children:
+  - title: 返回
+    href: /
+  - title: 思考
+    href: thinking/index.html

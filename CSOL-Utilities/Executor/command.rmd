@@ -20,17 +20,17 @@ title: 命令的解释与执行
 
 |命令|说明|
 |----|----|
-|Command.CMD_NOP|不执行任何操作|
-|Command.CMD_START_GAME_ROOM|点击“开始游戏”按钮以开始一局新的游戏|
-|Command.CMD_CHOOSE_CHARACTER|执行选择角色操作|
-|Command.CMD_DEFAULT_IDLE|执行默认挂机动作|
-|Command.CMD_EXTENDED_IDLE|执行扩展挂机动作|
-|Command.CMD_CONFIRM_RESULTS|执行结算确认操作|
-|Command.CMD_CREATE_GAME_ROOM|创建游戏房间|
-|Command.CMD_BATCH_COMBINE_PARTS|在制造所批量合成配件|
-|Command.CMD_BATCH_PURCHASE_ITEM|在商店内批量兑换指定物品|
-|Command.CMD_LOCATE_CURSOR|定位鼠标光标位置|
-|Command.CMD_CLEAR_POPUS|尝试清除所有弹窗|
+|`"Command.CMD_NOP"`|不执行任何操作|
+|`"Command.CMD_START_GAME_ROOM"`|点击“开始游戏”按钮以开始一局新的游戏|
+|`"Command.CMD_CHOOSE_CHARACTER"`|执行选择角色操作|
+|`"Command.CMD_DEFAULT_IDLE"`|执行默认挂机动作|
+|`"Command.CMD_EXTENDED_IDLE"`|执行扩展挂机动作|
+|`"Command.CMD_CONFIRM_RESULTS"`|执行结算确认操作|
+|`"Command.CMD_CREATE_GAME_ROOM"`|创建游戏房间|
+|`"Command.CMD_BATCH_COMBINE_PARTS"`|在制造所批量合成配件|
+|`"Command.CMD_BATCH_PURCHASE_ITEM"`|在商店内批量兑换指定物品|
+|`"Command.CMD_LOCATE_CURSOR"`|定位鼠标光标位置|
+|`"Command.CMD_CLEAR_POPUS"`|尝试清除所有弹窗|
 
 注解：随着执行器版本更新，会增加支持的命令。
 
@@ -69,11 +69,11 @@ title: 命令的解释与执行
 
 |标志|说明|值|
 |---|---|---|
-|Command.UNCHANGED|与上一次相比未发生任何变化|`0x0`|
-|Command.INDENTIFIER_CHANGED|与上一次相比，标识符发生改变|`0x1`|
-|Command.TYPE_CHANGED|与上一次相比，命令名称发生改变|`0x2`|
-|Command.TIMEPOINT_CHANGED|与上一次相比，命令的时间戳发生改变|`0x4`|
-|Command.REPEATABILITY_CHANGED|与上一次相比，命令的可重复性发生改变|`0x8`|
+|`"Command.UNCHANGED"`|与上一次相比未发生任何变化|`0x0`|
+|`"Command.INDENTIFIER_CHANGED"`|与上一次相比，标识符发生改变|`0x1`|
+|`"Command.TYPE_CHANGED"`|与上一次相比，命令名称发生改变|`0x2`|
+|`"Command.TIMEPOINT_CHANGED"`|与上一次相比，命令的时间戳发生改变|`0x4`|
+|`"Command.REPEATABILITY_CHANGED"`|与上一次相比，命令的可重复性发生改变|`0x8`|
 
 > 应通过 `get_status` 方法获取该字段的值。
 

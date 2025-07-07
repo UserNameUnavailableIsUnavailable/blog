@@ -1,0 +1,11 @@
+  sidebar:
+    children:
+    - title: 返回
+      href: /index.html
+    - title: 琐碎记录
+      href: /trivial/index.html
+      children:
+      - title: 前言
+        href: /trivial/index.html
+      - title: Chocolatey 安装
+        href: /trivial/chocolatey/index.html

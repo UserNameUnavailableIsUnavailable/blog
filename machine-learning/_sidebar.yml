@@ -1,14 +1,11 @@
-website:
-  sidebar:
-    - id: machine-learning
-      title: 模式识别与机器学习
-      style: docked
-      contents:
-        - text: 返回
-          href: /
-        - text: 前言
-          href: /machine-learning/
-        - text: 概率分布
-          href: /machine-learning/probability-distributions/
-        - text: 线性分类模型
-          href: /machine-learning/linear-models-for-classification/
+sidebar:
+  children:
+  - title: 返回
+    href: /
+  - title: 模式识别与机器学习
+    href: /machine-learning/index.html
+    children:
+      - title: 概率分布
+        href: /machine-learning/probability-distributions/
+      - title: 线性分类模型
+        href: /machine-learning/linear-models-for-classification/

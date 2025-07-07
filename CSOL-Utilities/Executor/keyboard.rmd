@@ -20,31 +20,31 @@ title: 键盘操作
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.ESCAPE`|`escape`|转义键 ESC|
-|`Keyboard.F1`|`f1`|功能键 F1|
-|`Keyboard.F2`|`f2`|功能键 F2|
-|`Keyboard.F3`|`f3`|功能键 F3|
-|`Keyboard.F4`|`f4`|功能键 F4|
-|`Keyboard.F5`|`f5`|功能键 F5|
-|`Keyboard.F6`|`f6`|功能键 F6|
-|`Keyboard.F7`|`f7`|功能键 F7|
-|`Keyboard.F8`|`f8`|功能键 F8|
-|`Keyboard.F9`|`f9`|功能键 F9|
-|`Keyboard.F10`|`f10`|功能键 F10|
-|`Keyboard.F11`|`f11`|功能键 F11|
-|`Keyboard.F12`|`f12`|功能键 F12|
-|`Keyboard.F13`|`f13`|功能键 F13|
-|`Keyboard.F14`|`f14`|功能键 F14|
-|`Keyboard.F15`|`f15`|功能键 F15|
-|`Keyboard.F16`|`f16`|功能键 F16|
-|`Keyboard.F17`|`f17`|功能键 F17|
-|`Keyboard.F18`|`f18`|功能键 F18|
-|`Keyboard.F19`|`f19`|功能键 F19|
-|`Keyboard.F20`|`f20`|功能键 F20|
-|`Keyboard.F21`|`f21`|功能键 F21|
-|`Keyboard.F22`|`f22`|功能键 F22|
-|`Keyboard.F23`|`f23`|功能键 F23|
-|`Keyboard.F24`|`f24`|功能键 F24|
+|`Keyboard.ESCAPE`|`"escape"`|转义键 ESC|
+|`Keyboard.F1`|`"f1"`|功能键 F1|
+|`Keyboard.F2`|`"f2"`|功能键 F2|
+|`Keyboard.F3`|`"f3"`|功能键 F3|
+|`Keyboard.F4`|`"f4"`|功能键 F4|
+|`Keyboard.F5`|`"f5"`|功能键 F5|
+|`Keyboard.F6`|`"f6"`|功能键 F6|
+|`Keyboard.F7`|`"f7"`|功能键 F7|
+|`Keyboard.F8`|`"f8"`|功能键 F8|
+|`Keyboard.F9`|`"f9"`|功能键 F9|
+|`Keyboard.F10`|`"f10"`|功能键 F10|
+|`Keyboard.F11`|`"f11"`|功能键 F11|
+|`Keyboard.F12`|`"f12"`|功能键 F12|
+|`Keyboard.F13`|`"f13"`|功能键 F13|
+|`Keyboard.F14`|`"f14"`|功能键 F14|
+|`Keyboard.F15`|`"f15"`|功能键 F15|
+|`Keyboard.F16`|`"f16"`|功能键 F16|
+|`Keyboard.F17`|`"f17"`|功能键 F17|
+|`Keyboard.F18`|`"f18"`|功能键 F18|
+|`Keyboard.F19`|`"f19"`|功能键 F19|
+|`Keyboard.F20`|`"f20"`|功能键 F20|
+|`Keyboard.F21`|`"f21"`|功能键 F21|
+|`Keyboard.F22`|`"f22"`|功能键 F22|
+|`Keyboard.F23`|`"f23"`|功能键 F23|
+|`Keyboard.F24`|`"f24"`|功能键 F24|
 
 > 现代键盘上基本见不到 F13 ~ F24，但操作系统中仍为其保留了对应键码。
 
@@ -52,7 +52,7 @@ title: 键盘操作
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.BACKQUOTE`|`"tilde"`|\` 或 ~|
+|`Keyboard.BACKQUOTE`|`"tilde"`|&#60; 或 ~|
 |`Keyboard.ONE`|`"1"`|1 或 !|
 |`Keyboard.TWO`|`"2"`|2 或 @|
 |`Keyboard.THREE`|`"3"`|3 或 #|
@@ -100,12 +100,12 @@ title: 键盘操作
 |`Keyboard.L`|`"l"`|l 或 L|
 |`Keyboard.SEMICOLON`|`"semicolon"`|; 或 :|
 |`Keyboard.QUOTE`|`"quote"`|' 或 "|
-|`Keyboard.ENTER`|`enter`|回车键 ENTER|
+|`Keyboard.ENTER`|`"enter"`|回车键 ENTER|
 
 |字段|值|说明|
 |---|---|---|
 |`Keyboard.LEFT_SHIFT`|`"lshift"`|左侧 SHIFT 键|
-|`Keyboard.NON_US_BACKSLASH`|`non_us_slash`|\\ 或 &#124;|
+|`Keyboard.NON_US_BACKSLASH`|`"non_us_slash"`|\\ 或 &#124;|
 |`Keyboard.Z`|`"z"`|z 或 Z|
 |`Keyboard.X`|`"x"`|x 或 X|
 |`Keyboard.C`|`"c"`|c 或 C|
@@ -125,57 +125,57 @@ title: 键盘操作
 |`Keyboard.LEFT_CTRL`|`"lctrl"`|右侧 CTRL 键|
 |`Keyboard.LEFT_WIN`|`"lgui"`|左侧 Windows 徽标键|
 |`Keyboard.LEFT_ALT`|`"lalt"`|左侧 ALT 键|
-|`Keyboard.SPACE`|`spacebar`|空格键 SPACE|
+|`Keyboard.SPACE`|`"spacebar"`|空格键 SPACE|
 |`Keyboard.RIGHT_ALT`|`"ralt"`|右侧 ALT 键|
 |`Keyboard.RIGHT_WIN`|`"rgui"`|右侧 Windows 徽标键|
-|`Keyboard.APPS`|`appkey`|应用程序键|
+|`Keyboard.APPS`|`"appkey"`|应用程序键|
 |`Keyboard.RIGHT_CTRL`|`"rctrl"`|右侧 CTRL 键|
 
 #### 控制区
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.PRINT_SCREEN`|`printscreen`|截屏键 PRINT SCREEN|
-|`Keyboard.SCROL_LLOCK`|`scrolllock`|滚动锁定、解锁键 SCROLL LOCK|
-|`Keyboard.PAUSE_BREAK`|`pause`|暂停、断点键 PAUSE/BREAK|
+|`Keyboard.PRINT_SCREEN`|`"printscreen"`|截屏键 PRINT SCREEN|
+|`Keyboard.SCROL_LLOCK`|`"scrolllock"`|滚动锁定、解锁键 SCROLL LOCK|
+|`Keyboard.PAUSE_BREAK`|`"pause"`|暂停、断点键 PAUSE/BREAK|
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.INSERT`|`insert`|插入键 INSERT|
-|`Keyboard.DELETE`|`delete`|删除键 DELETE|
-|`Keyboard.HOME`|`home`|返回页首键 HOME|
-|`Keyboard.END`|`end`|返回页尾键 END|
-|`Keyboard.PAGE_UP`|`pageup`|向上翻页键 PAGE UP|
-|`Keyboard.PAGE_DOWN`|`pagedown`|向下翻页键 PAGE DOWN|
+|`Keyboard.INSERT`|`"insert"`|插入键 INSERT|
+|`Keyboard.DELETE`|`"delete"`|删除键 DELETE|
+|`Keyboard.HOME`|`"home"`|返回页首键 HOME|
+|`Keyboard.END`|`"end"`|返回页尾键 END|
+|`Keyboard.PAGE_UP`|`"pageup"`|向上翻页键 PAGE UP|
+|`Keyboard.PAGE_DOWN`|`"pagedown"`|向下翻页键 PAGE DOWN|
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.UP`|`up`|向上键 ↑|
-|`Keyboard.LEFT`|`left`|向左键 ←|
-|`Keyboard.DOWN`|`down`|向下键 ↓|
-|`Keyboard.RIGHT`|`right`|向右键 →|
+|`Keyboard.UP`|`"up"`|向上键 ↑|
+|`Keyboard.LEFT`|`"left"`|向左键 ←|
+|`Keyboard.DOWN`|`"down"`|向下键 ↓|
+|`Keyboard.RIGHT`|`"right"`|向右键 →|
 
 #### 数字区
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.NUM_LOCK`|`numlock`|数字锁定、解锁 NUM LOCK|
-|`Keyboard.DIVIDE`|`numslash`|除法键 /|
-|`Keyboard.MULTIPLY`|`numstar`|乘法键 *|
-|`Keyboard.NUM_MINUS`|`numminus`|减法键 -|
-|`Keyboard.NUM_SEVEN`|`num7`|数字键 7 或 HOME|
-|`Keyboard.NUM_EIGHT`|`num8`|数字键 8 或 ↑|
-|`Keyboard.NUM_NINE`|`num9`|数字键 9  或 PAGE UP|
-|`Keyboard.NUM_PLUS`|`numplus`|加法键 +|
-|`Keyboard.NUM_FOUR`|`num4`|数字键 4 或 ← |
-|`Keyboard.NUM_FIVE`|`num5`|数字键 5|
-|`Keyboard.NUM_SIX`|`num6`|数字键 6 或 →|
-|`Keyboard.NUM_ONE`|`num1`|数字键 1 或 END|
-|`Keyboard.NUM_TWO`|`num2`|数字键 2 或 ↓|
-|`Keyboard.NUM_THREE`|`num3`|数字键 3 或 PAGE DOWN|
-|`Keyboard.NUM_ZERO`|`num0`|数字键 0 或 INSERT|
-|`Keyboard.NUM_PERIOD`|`numperiod`|小数点键 . 或数字区删除键|
-|`Keyboard.NUM_ENTER`|`numenter`|回车键 ENTER|
+|`Keyboard.NUM_LOCK`|`"numlock"`|数字锁定、解锁 NUM LOCK|
+|`Keyboard.DIVIDE`|`"numslash"`|除法键 /|
+|`Keyboard.MULTIPLY`|`"numstar"`|乘法键 *|
+|`Keyboard.NUM_MINUS`|`"numminus"`|减法键 -|
+|`Keyboard.NUM_SEVEN`|`"num7"`|数字键 7 或 HOME|
+|`Keyboard.NUM_EIGHT`|`"num8"`|数字键 8 或 ↑|
+|`Keyboard.NUM_NINE`|`"num9"`|数字键 9  或 PAGE UP|
+|`Keyboard.NUM_PLUS`|`"numplus"`|加法键 +|
+|`Keyboard.NUM_FOUR`|`"num4"`|数字键 4 或 ← |
+|`Keyboard.NUM_FIVE`|`"num5"`|数字键 5|
+|`Keyboard.NUM_SIX`|`"num6"`|数字键 6 或 →|
+|`Keyboard.NUM_ONE`|`"num1"`|数字键 1 或 END|
+|`Keyboard.NUM_TWO`|`"num2"`|数字键 2 或 ↓|
+|`Keyboard.NUM_THREE`|`"num3"`|数字键 3 或 PAGE DOWN|
+|`Keyboard.NUM_ZERO`|`"num0"`|数字键 0 或 INSERT|
+|`Keyboard.NUM_PERIOD`|`"numperiod"`|小数点键 . 或数字区删除键|
+|`Keyboard.NUM_ENTER`|`"numenter"`|回车键 ENTER|
 
 ### `unreleased`
 
@@ -299,9 +299,9 @@ title: 键盘操作
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.SHIFT`|`shift`|SHIFT 键|
+|`Keyboard.SHIFT`|`"shift"`|SHIFT 键|
 |`Keyboard.CTRL`|`"ctrl"`|CTRL 键|
-|`Keyboard.ALT`|`alt`|ALT 键|
+|`Keyboard.ALT`|`"alt"`|ALT 键|
 
 ## 资源回收
 

@@ -1,0 +1,9 @@
+sidebar:
+  - text: Back
+    href: /index.html
+  - title: C++ 笔记
+    href: /cpp-notes/index.html
+    contents:
+      - text: Value Categories
+        href: /cpp-notes/value-categories/index.html
+

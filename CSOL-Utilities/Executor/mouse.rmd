@@ -10,11 +10,11 @@ title: 鼠标操作
 
 |字段|值|说明|
 |---|---|---|
-|Mouse.LEFT|`1`|鼠标左键|
-|Mouse.MIDDLE|`2`|鼠标中键|
-|Mouse.RIGHT|`3`|鼠标右键|
-|Mouse.BACKWARD|`4`|鼠标侧键（向后）|
-|Mouse.FORWARD|`5`|鼠标侧键（向前）|
+|`Mouse.LEFT`|`1`|鼠标左键|
+|`Mouse.MIDDLE`|`2`|鼠标中键|
+|`Mouse.RIGHT`|`3`|鼠标右键|
+|`Mouse.BACKWARD`|`4`|鼠标侧键（向后）|
+|`Mouse.FORWARD`|`5`|鼠标侧键（向前）|
 
 ### `DOUBLE_CLICK_INTERVAL`
 

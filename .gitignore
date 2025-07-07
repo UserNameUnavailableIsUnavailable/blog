@@ -1,3 +1,6 @@
+/.mypy_cache/
+/dist/
+/server.py
 /.venv/
 /.quarto/
 /blog/

@@ -36,6 +36,6 @@ title: 执行器
 
 > 不过，执行器在实现时，将**尽量**只使用 Lua 5.1 语法特性。
 
-![点击“编写 API 脚本”查阅Logitech® G Hub API 参考文档](assets/LGHUB_API_specs.avif)
+![点击“编写 API 脚本”查阅Logitech® G Hub API 参考文档](assets/LGHUB_API_specs.avif){width="800"}
 
 ![最新版本已经提供对 Lua 5.4 语法及部分标准库的支持](assets/Lua54_support.avif)

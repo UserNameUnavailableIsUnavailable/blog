@@ -1,6 +1,6 @@
 ---
 title: 个人博客
-sidebar: false
+sidebar: null
 ---
 
 ## 游戏

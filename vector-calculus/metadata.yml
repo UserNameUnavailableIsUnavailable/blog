@@ -1,0 +1,10 @@
+  sidebar:
+    - title: Back
+      href: /index.html
+    - title: Vector Calculus
+      href: /vector-calculus/index.html
+      children:
+      - title: Basics
+        href: /vector-calculus/basics/index.html
+      - title: Five Big Theorems
+        href: /vector-calculus/five-big-theorems/index.html

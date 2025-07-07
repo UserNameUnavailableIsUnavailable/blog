@@ -1,13 +1,11 @@
-bread-curmbs: true
 sidebar:
-  - type: root
-    title: Java Web 开发
+  children:
+  - title: 返回
+    href: /java/index.html
+  - title: Java Web 开发
     href: /java/web/index.html
-    back: true
     children:
-      - type: document
-        title: 环境准备
+      - title: 环境准备
         href: /java/web/environment/index.html
-      - type: document
-        title: 深入理解 Servlet
+      - title: 深入理解 Servlet
         href: /java/web/servlet-lifecycle/index.html
