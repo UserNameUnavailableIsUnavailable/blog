@@ -42,7 +42,7 @@ end
 
 下面是一个简单的例子：
 
-```c++
+```cpp
 #include <Windows.h>
 #include <debugapi.h>
 #include <iostream>
@@ -171,7 +171,7 @@ end
 
 上述代码中，`Utility:report` 是集成工具提供的接口，它将一个 Lua `table` 编码为 JSON 字符串后通过 `OutputDebugMessage` 写入调试器，接收方可以通过 JSON 解析库来解析它。
 
-```c++
+```cpp
 #include <Windows.h>
 #include <debugapi.h>
 #include <iostream>
