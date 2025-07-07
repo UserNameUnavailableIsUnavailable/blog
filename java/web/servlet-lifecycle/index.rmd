@@ -18,7 +18,7 @@ public IndexBlog() {
 
 这里有一点必须明确，Tomcat 在创建 `IndexBlog` 实例时，并不是通过常规的调用构造函数的方式创建其对象的。我们设计的 Servlet，最终是编译成字节码提供给 Servlet 容器的，因而 Tomcat 容器要实例化该 Servlet,只能通过**反射**的方式完成，即调用 `Class.newInstance` 来实例化 Servlet，这也就解释了为何我们在为 Servlet 指定 URL 路径时采用的是注解的方式（当然，也可以在 `web.xml` 中进行配置，但并不是现在的主流做法）。因此，为 Servlet 提供含参构造函数是错误的做法，当然，提供无参构造函数还是被允许的。
 
-![Class.newInstance 方法](assets/reflection.avif)
+![`Class.newInstance` 方法](assets/reflection.avif){ .center }
 
 另外，前面提到 Servlet 创建时是**单例**的，而单例则分为两种情况：懒汉式（预加载）和饿汉式（延迟加载）。**在 `@WebServlet` 注解中，我们可以通过 `loadOnStartup` 来控制加载行为（缺省值为 `-1`），负数表示采用饿汉式加载，否则采用懒汉式加载，并且值越小，优先级越高，在启动 Tomcat 服务器时越先被创建，即启动顺序是 $0, 1, 2, \cdots, N$。**
 
@@ -161,4 +161,4 @@ public class IndexBlog implements Servlet {
 }
 ```
 
-![运行效果](assets/results.avif)
+![运行效果](assets/results.avif){ .center }

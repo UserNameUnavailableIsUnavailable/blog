@@ -122,11 +122,11 @@ int main()
 编译 `dbg.cpp`，然后运行 `dbg.exe`。
 
 ```powershell
-clang++ dbg.cpp -o dbg.exe
+clang++ dbg.cpp -o dbg.exeMarkdown
 ./dbg
 ```
 
-![](assets/hello_from_lghub_agent.avif)
+![](assets/hello_from_lghub_agent.avif){width="800" .center}
 
 可以看到，调试器能够正确的接收来自 LGHUB Agent 的调试消息了。
 
@@ -255,11 +255,11 @@ int main()
 }
 ```
 
-![](assets/dump_message.avif)
+![](assets/dump_message.avif){width="800" .center}
 
 然后，把字符串原始字节内容用解码工具进行解码：
 
-![](assets/decode_raw_content.avif)
+![](assets/decode_raw_content.avif){width="800" .center}
 
 于是，我们得出这样一个结论：调试字符串不论其采用什么样的字符编码，`OutputDebugMessage` 均会将其原封不动地写到调试器中。
 
