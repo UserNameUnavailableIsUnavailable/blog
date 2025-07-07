@@ -8,14 +8,14 @@ title: 模块化编程
 
 |事件|描述|
 |---|---|
-|"PROFILE_ACTIVATED"|配置文件被激活|
-|"PROFILE_DEACTIVATED"|配置文件被停用|
-|"G_PRESSED"|罗技设备上的 G 键（按钮）被按下|
-|"M_PRESSED"|罗技设备上的 M 键（按钮）被按下|
-|"G_RELEASED"|罗技设备上的 G 键（按钮）被释放|
-|"M_RELEASED"|罗技设备上的 M 键（按钮）被释放|
-|"MOUSE_BUTTON_PRESSED"|鼠标按钮被按下|
-|"MOUSE_BUTTON_RELEASED"|鼠标按钮被释放|
+|`"PROFILE_ACTIVATED"`|配置文件被激活|
+|`"PROFILE_DEACTIVATED"`|配置文件被停用|
+|`"G_PRESSED"`|罗技设备上的 G 键（按钮）被按下|
+|`"M_PRESSED"`|罗技设备上的 M 键（按钮）被按下|
+|`"G_RELEASED"`|罗技设备上的 G 键（按钮）被释放|
+|`"M_RELEASED"`|罗技设备上的 M 键（按钮）被释放|
+|`"MOUSE_BUTTON_PRESSED"`|鼠标按钮被按下|
+|`"MOUSE_BUTTON_RELEASED"`|鼠标按钮被释放|
 
 这意味着除了罗技设备上的独有的 G 键和 M 键，罗技软件只会在鼠标按钮被按下和释放时进行回调（不考虑配置文件激活和停用）。这样的回调要求实际上非常苛刻，在集成工具的 `legacy` 版本（2023.11 开发）中，我通过在回调时检查键盘锁定键（`NUM_LOCK`、`CAPS_LOCK`、`SCROLL_LOCK`）的状态组合进行状态切换，但不论如何，使用上均非常不便。
 
