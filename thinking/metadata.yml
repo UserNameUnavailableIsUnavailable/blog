@@ -3,4 +3,6 @@ sidebar:
   - title: 返回
     href: /
   - title: 思考
-    href: thinking/index.html
+    href: /thinking/index.html
+  - title: "2025"
+    href: /thinking/2025/index.html
