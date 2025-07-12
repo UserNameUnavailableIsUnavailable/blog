@@ -9,13 +9,13 @@ There are three types of value in C++: lvalue, xvalue, and prvalue. We'll explor
 
 Naturally, when we define a variable in C++, that variable holds a value. For example, the following C++ statement defines a variable named `a`.
 
-```C++
+```cpp
 int a{ 100 };
 ```
 
 This C++ statement corresponds to the assembly instruction below:
 
-```asm
+```nasm
 push dword 100
 ```
 
@@ -29,7 +29,7 @@ Obviously, `a` as a variable, is actually an alias for a block of memory in the 
 
 However, not all values are stored in memory blocks we can have full control over. Before `100`, the integer literal in the above statement, are stored in the memory block aliased by `a`, already exists in the compiled code as an inherent part of the x86 instruction `6A66 0064`. Even though this instruction is stored in memory when the operating system loads the program, we cannot change the hexadecimal `64` to some other value since the operating system forbids us from writing to `.text` section, i.e., the memory section where program instructions is placed. Then, we can conclude that we cannot change literals present in our C++ program. We cannot write something like:
 
-```C++
+```cpp
 100 = 101; // error: assign 101 to literal 100
 ```
 
@@ -41,7 +41,7 @@ Let's delve into the above example. `a` is bound to a block of memory which we h
 
 There do exist cases in which we can move entities refered by a symbol, of which the simplest case is literals. Since literals does not have associated entities and thus cannot be modified, we can "move" them to anywhere. Such "move" is more like "copy" rather than change an object's place. Anyone can claim that they get the ownership of a literal as long as they promise not to change their value. Some compilers may allow us to take the ownership of a literal without such promise, but will give us an error. If we try to change that literal through this problematic owership claim, the operating system will have our program crashed at run-time.
 
-```C++
+```cpp
 const char* s1 = "hello"; // ok, promise not to change a literal's value
 char* s2 = "hello"; // warning: cannot assign const char* to char*
 s2[0] = "H"; // will case a runtime error
@@ -49,14 +49,14 @@ s2[0] = "H"; // will case a runtime error
 
 Another case in which we can move is when the C++ runtime creates temporary objects. Different from literals, such temporary objects are usually moveable.
 
-```C++
+```cpp
 std::string s3 = "Hello";
 s3 + "World" = "hello, world";
 ```
 
 The above example first constructs a string object `s3`, then we concatenate `s3` with a string literal `"World"`, during which a temporary string object containing value `"HelloWorld"` will be created, i.e., such concatenation is equivalent to the following code:
 
-```C++
+```cpp
 std::string temp = "HelloWorld";
 temp = "hello, world";
 ```
