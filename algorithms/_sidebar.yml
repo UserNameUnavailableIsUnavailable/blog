@@ -1,0 +1,12 @@
+website:
+  sidebar:
+    - id: algorithms
+      title: 算法
+      style: docked
+      contents:
+        - text: Back
+          href: /
+        - text: Preface
+          href: /algorithms/
+        - text: Foundations
+          href: /algorithms/foundations/

@@ -1,0 +1,67 @@
+---
+title: Derivatives
+---
+
+## Partial Derivative
+
+Let $U$ be an open subset of $\mathbb{R}^m$, $\mathbf{f}: U \mapsto \mathbb{R}^n$. The partial derivative of $\mathbf{f}$ with respect to the $i$th variable is:
+
+$$
+D_i \mathbf{f}(\mathbf{a}) = \lim_{h \rightarrow 0}\frac{1}{h}\left(
+\mathbf{f}\begin{pmatrix} a_1 \\ \vdots \\ a_i + h \\ \vdots \\ a_m \end{pmatrix} -
+\mathbf{f}\begin{pmatrix} a_1 \\ \vdots \\ a_i \\ \vdots \\ a_m \end{pmatrix}
+\right) = \begin{bmatrix}
+D_i f_1(\mathbf{a})\\
+\vdots\\
+D_i f_n(\mathbf{a})\\
+\end{bmatrix}.
+$$
+
+That is, calculate the derivative for each $f_i$ on the spot.
+
+## Jacobian Matrix and Derivatives
+
+Jacobian matrix put derivative for each component in the order from left to right.
+
+$$
+\left[\mathbf{J}\mathbf{f}(\mathbf{a})\right] = \begin{bmatrix} D_1\mathbf{f}(\mathbf{a})&\cdots&D_m\mathbf{f}(\mathbf{a}) \end{bmatrix}.
+$$
+
+Jacobian matrix is simply a matrix of partial derivatives, so the existence of Jacobian matrix only indicates that the function is partially derivable at point $\mathbf{a}$.
+For the Jacobian matrix to be the functions derivative, i.e., for the function to be derivable, we also need to show the following equation holds:
+
+$$
+\lim_{\vec{h}\rightarrow \vec{0}}\frac{1}{\Vert{\vec{h}}\Vert}\left(\left(\mathbf{f}(\mathbf{a} + \vec{h}) - \mathbf{f}({\mathbf{a}})\right) - \left[\mathbf{J}\mathbf{f}(\mathbf{a})\right]\right) = \vec{0}.
+$$
+
+If this equation holds, we say that the derivative $\left[D\mathbf{f}(\mathbf{a})\right]$ exists, and $\left[D\mathbf{f}(\mathbf{a})\right] = \left[\mathbf{J}\mathbf{f}(\mathbf{a})\right]$.
+
+Also, for a function to be differentiable, the following condition holds:
+
+$$
+\lim_{\vec{h}\rightarrow \vec{0}}\frac{1}{\Vert{\vec{h}}\Vert}\left(\left(\mathbf{f}(\mathbf{a} + \vec{h}) - \mathbf{f}({\mathbf{a}})\right) - L(\vec{h})\right) = \vec{0},
+$$
+
+where $L$ is a linear transformation, i.e., $L:\mathbb{R}^m\mapsto\mathbb{R}^n$.
+
+The derivability and differentiability are equivalent, the transformation $L$ essentially corresponds to the Jacobian matrix. Jacobian matrix is essentially the best approximation to the function at $\mathbf{a}$.
+
+::: {.callout-important}
+Although $\vec\nabla f(\mathbf{a}) = \left[Df(\mathbf{a})\right]^\mathsf{T}$, do not confuse gradients with derivatives. Geometrically, gradients are only defined in spaces with an inner product. And, gradients can only be vectors, which means multi-valued functions do not have gradients (but they still can have Jacobian matrices and derivatives).
+:::
+
+## Directional Derivatives
+
+Directional derivatives are an extension of partial derivatives, it is defined as:
+
+$$
+\vec{D_i}\mathbf{f}(\mathbf{a}) = \lim_{h\rightarrow 0}\frac{\mathbf{f}(\mathbf{a}+h\vec{e}_i) - \mathbf{f}(\mathbf{a})}{h}.
+$$
+
+If function $\mathbf{f}$ is also derivable, then we can calculate the directional derivative in the following method:
+
+$$
+\vec{D_i}\mathbf{f}(\mathbf{a}) = [D \mathbf{f}(\mathbf{a})]\vec{v}.
+$$
+
+Note that $\vec{v}$ need not be a unit vector.

@@ -1,0 +1,17 @@
+website:
+  sidebar:
+    - id: java
+      style: docked
+      content:
+        - text: 返回
+          href: /
+        - text: Java
+          href: /java/
+        - section: Java Web
+          contents:
+            - text: Java Web
+              href: /java/web/
+            - text: 环境准备
+              href: /java/web/environment/
+            - text: 深入理解 Servlet
+              href: /java/web/understanding-servlet

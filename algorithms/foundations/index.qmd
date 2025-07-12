@@ -1,0 +1,152 @@
+---
+title: Foundations
+---
+
+## Mathmatic Basics
+
+### Logarithms
+
+$$a ^ {\log_b c} = c ^ {\log_b a}.$$
+
+### Stirling Approximation
+
+$$n! \approx \sqrt{2 \pi n}\left(\frac{n}{e}\right)^n\left(1 + \Theta\left(\frac{1}{n}\right)\right).$$
+
+More accurately,
+
+$$\frac{1}{n!} \sim \frac{1}{\sqrt{2 \pi n}\left(\frac{n}{e}\right)^n}.$$
+
+### Exponential Approximation
+
+$$e^x = \lim_{n \rightarrow \infty}\left(1 + \frac{x}{n}\right)^n.$$
+
+### Modular Arithmetic
+
+$$\lfloor\frac{n}{2}\rfloor + \lceil\frac{n}{2}\rceil = n.$$
+
+$$\lceil\frac{n}{m}\rceil = \lfloor\frac{n - 1}{m}\rfloor + 1.$$
+
+### Summation of Geometric Series
+
+Given an array $\left\{a_n\right\} = a_1 q_{n-1}$, the summation of this array is $S_n = a_1 \frac{1 - q^n}{1 - q} = \underbrace{\frac{a_1 - a_{n+1}}{1 - q}}_\text{this form is better}.$
+
+This is simple, but easily forgotten 😐.
+
+## Loop Invariant
+
+**Loop invariant** is *a property* that holds true before and after every interation.
+In the insertion sort example, the loop invariant refers to the the card array $A[i \cdots j]$ in the left hand is always sorted.
+By induction, we can use this loop invariant to prove the correctness of an algorithm.
+If the algorithm is initialized with the loop invariant being true (initialization), and this loop invariant maintains true during execution (maintenance), then when the algorithm terminates (termination), the loop invariant still is true, showing that the algorithm can give us the correct solution.
+
+## Analysis of Recursive Algorithms
+
+### Asymptotic Running Time
+
+**Aymptotically tight bound**: Given a non-negative function $g(n)$ and $f(n)$, if there exists non-negative constants $c_1$, $c_2$, and positive integer $N$ such that for all $n \ge N$, $0 \le c_1 g(n) \le f(n) \le c_2 g(n)$ holds, then $g(n)$ is an asymptotically tight bound for $f(n)$. We use $\Theta\left(g\left(n\right)\right)$ to denote the set of functions that can be asymptotically tight bounded by $g(n)$.
+
+Relax some of the conditions for symptotically tight bound, then we will get asymptotic upper bound and asymptotic lower bound.
+
+**Asymptotic upper bound**: Given a non-negative function $g(n)$ and $f(n)$, if there exists non-negative constant $c$, and positive integer $N$, such that for all $n \ge N$, $0 \le f(n) \le c g(n)$ holds, then $g(n)$ is an asymptotic upper bound for $f(n)$. We use $O\left(g\left(n\right)\right)$ to denote the set of functions that can be asymptotically upper bounded by $g(n)$.
+
+**Asymptotic lower bound**: Given a non-negative function $g(n)$ and $f(n)$, if there exists non-negative constant $c$, and positive integer $N$, such that for all $n \ge N$, $0 \le c g(n) \le f(n)$ holds, then $g(n)$ is an asymptotic lower bound for $f(n)$. We use $\Omega\left(g\left(n\right)\right)$ to denote the set of functions that can be asymptotically lower bounded by $g(n)$.
+
+$f(n) \in \Theta\left(g\left(n\right)\right)$ iff. $f(n) \in O\left(g\left(n\right)\right)$ and $f(n) \in \Omega\left(g\left(n\right)\right)$.
+
+Apart from above notations, there are also $o\left(g\left(n\right)\right)$ and $\omega\left(g\left(n\right)\right)$. We could understand these notations in this way:
+
+![Understanding asymptotic notations](assets/understanding-aymptotic-notations.avif)
+
+### Merge Sort Example
+
+Given a partially sorted input array $A[p \cdots q]$, where $A[p \cdots q]$ and $A[q+1 \cdots r]$ are in incremental order.
+We merge this array by picking the smallest element in $A[p \cdots q]$ and $A[q+1 \cdots r]$ and put it in the output array.
+We need to sort in place, so we first construct two copies of $A[p \cdots q]$ and $A[q+1 \cdots r]$, and appending two $\infty$ sentinels at the end for simplicity.
+
+$$L_1[1 \cdots n_1 + 1] = A[p \cdots q] + [\infty],$$
+
+$$L_2[1 \cdots n_2 + 1] = A[q+1 \cdots r] + [\infty].$$
+
+Since the output array is of size $n_1 + n_2$, so when both arrays run out of non-sentinel elements, we obtain the sorted array $A[p \cdots q]$.
+
+For any unsorted array $A$, we assume the left part and the right part are sorted in the merge sort function, then apply merge sort on these two parts separately, which will again repeat the above steps internally. Finally, we apply a total merge on these two sorted parts, and thus obtain a sorted array.
+
+### Recurrence Equation
+
+Assume a merge sort on an array of size $n$ requires running time $T(n)$, we first divide the array into two parts, merge sort on each part requires running time $T(\frac{n}{2})$, followed by a merge operation requires running time $\Theta(n)$. So, the running time $T(n)$ could be written as:
+
+$$\begin{equation}
+T(n) = \begin{cases}
+\Theta(1), & n = 1;\\
+2T(\frac{n}{2}) + \Theta(n), & n \gt 1.\\
+\end{cases}
+\end{equation}
+$$
+
+More generally, for a problem of size $n$, the running time of a recursive algorithm could be written as:
+
+$$
+\begin{equation}
+T(n) = \begin{cases}
+\Theta(1), & n \lt c;\\
+aT(\frac{n}{b}) + D(n) + C(n), & n \gt 1.\\
+\end{cases}
+\end{equation}
+$$
+
+- $a$: The number of sub-problems;
+- $\frac{n}{b}$: The size of each sub-problem;
+- $D(n)$: The time required to **devide** the problem;
+- $C(n)$: The time required to **combine** the solutions to the sub-problems.
+  
+### Master Theorem
+
+Given $a \ge 1, b\gt 1$, let $n$ be exact powers of $b$:
+
+$$
+\begin{array}{c}
+T(n) = \begin{cases}
+\Theta(1)&, n = 0;\\
+aT\left(\frac{n}{b}\right) + f(n)&, n = b^i.
+\end{cases}
+\end{array}
+$$
+
+$$
+\begin{align*}
+T(n) &= a\left(aT\left(\frac{n}{b^2}\right) + f\left(\frac{n}{b}\right)\right) + f(n)\\
+     &= a^2T\left(\frac{n}{b^2}\right) + af(\frac{n}{b}) + f(n)\\
+     &= \cdots\\
+     &= a^kT(1) + \sum_{i=0}^{k-1}f(\frac{n}{b}), k=\log_b n\\
+     &= \Theta(n^{\log_b a}) + \sum_{i=0}^{\log_b n - 1} a^i f\left(\frac{n}{b^i}\right).
+\end{align*}
+$$
+
+Here, we aim to determine which term, $\Theta(n^{\log_b a})$ or $g(n) = \sum_{i=0}^{\log_b n - 1} a^i f\left(\frac{n}{b^i}\right)$, dictates the asymptotic bound.
+
+If $f(n) \in \Theta(n^{\log_b a})$, the asymptotic tight bound of $g(n)$ becomes $\Theta(n^{\log_b a} \log n)$.
+
+If $f(n)$ grows slightly slower, i.e., $f(n) = O\left(n^{\log_b a - \epsilon}\right)$ for some $\epsilon > 0$, then $g(n) = O\left(n^{\log_b a - \epsilon}\sum_{i=0}^{\log_b n - 1} (b^\epsilon)^i\right) = O\left(\frac{n^\epsilon - 1}{b^\epsilon - 1}n^{\log_b a - \epsilon}\right)$. Ignoring lower-order terms and constants, we find $g(n) = O\left(n^{\log_b a}\right)$.
+
+Now consider the case where $f(n) = \Omega(n^{\log_b a - \epsilon})$. This leads to $g(n) = \Omega\left(n^{\log_b a}\right)$, which does not help us refine the bound further (we already know the bound is at least $\Omega\left(n^{\log_b a}\right)$). However, since $g(n) = \sum_{i=0}^{\log_b n - 1} a^i f\left(\frac{n}{b^i}\right)$, it follows that $g(n) = \Omega\left(f(n)\right)$. To achieve a tight bound, we want $g(n) = \Theta\left(f(n)\right)$. This requires $g(n) = \Omega\left(f(n)\right)$ to hold.
+
+Given the *sparsity* of the sum (as $n$ is divided by $b^i$), we hypothesize that it suffices if $af\left(\frac{n}{b}\right) \le cf(n)$ for some constant $c < 1$. From this, we derive $a^j f\left(\frac{n}{b^j}\right) \le c^j f(n)$. Using this inequality, we can express $g(n)$ as:
+
+$$
+\begin{align*}
+g(n) &\le f(n) \sum_{i=0}^{\log_b n -1} c^i\\
+     &\lt f(n) \sum_{i=0}^{\infty} c^i\\
+     &=f(n)\;\frac{1}{1-c}, c \in (0, 1);\\
+     &= O\left(f(n)\right).
+\end{align*}
+$$
+
+For the geometric series to converge, $c$ has to be within $(0, 1)$. Then, we can conclude that when $af\left(\frac{n}{b}\right) \le cf(n)$ for some constant $c \lt 1$, $g(n) = O\left(f(n)\right)$.
+
+With the above conclusions, we can further deduce:
+
+- If $f(n) = O(n^{\log_b a - \epsilon})$ for some $\epsilon \gt 0$, then $T(n) = \Theta(n^{\log_b a})$;
+- If $f(n) = \Theta(n^{\log_b a})$, then $T(n) = \Theta(n^{\log_b a} \log n)$;
+- If $f(n) = \Omega(n^{\log_b a + \epsilon})$ for some $\epsilon \gt 0$, then $T(n) = \Theta(f(n))$.
+
+The proof still is not complete, since we do not consider the situations where $n$ is not exact powers of $b$, but it is not very difficult if you refer to this part in the textbook.

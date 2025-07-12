@@ -1,0 +1,152 @@
+---
+title: Design a translation function
+---
+
+This is a question I asked on Stack Overflow: [C++ format string compile-time validity check](https://stackoverflow.com/questions/79622326/c-format-string-compile-time-validity-check).
+
+In my CSOL-Utilities project, I implemented a function that "translates" a string based on the current locale. The mechanism of `Translate` is straightforward. At runtime, a language package is loaded based on the locale specified by the user, e.g., `--language zh-CN`.
+
+```c++
+std::unordered_map<std::string, std::string> g_LanguagePackage;
+```
+
+The program prints the translated string by passing a `key` to `Translate`, which performs a lookup in `g_LanguagePackage` and returns a format string template. For example, a lookup for `HELLO@1` might return `"Hello, {}!"`, which can then be formatted using C++20's `std::vformat`.
+
+During the initial design of CSOL-Utilities, I recognized the importance of **statically identifying** the number of format parameters. To achieve this, the `key` must have a `@N` suffix to indicate the number of format parameters (`@0` can be omitted). This helps reduce incorrect usage of `Translate`.
+
+```c++
+template <typename... VA>
+std::string Translate(const std::string& key, VA&&... va);
+```
+
+However, this approach does not eliminate all possible errors at compile time. For instance, a developer could write `Translate("FOO@2", "bar")`. Here, `"FOO@2"` expects 2 parameters, but only 1 is provided, which could lead to unexpected behavior at runtime.
+
+As seen in C++20's `std::format`, calling `std::format("foo {} {}", "bar")` results in a compile-time error. I wondered if a similar compile-time validity check could be implemented for `Translate`.
+
+Initially, I explored C++20's `<format>` implementation for inspiration, but it was too complex for me to grasp. So, I turned to Stack Overflow for help.
+
+First, I tried these two approaches, but neither worked:
+
+```c++
+template <typename... VA>
+std::string Translate(constexpr std::string& key, VA&&... va); // std::string is not constexpr-able
+template <typename... VA>
+std::string Translate(constexpr std::string_view key, VA&&... va); // function parameters cannot be declared as constexpr
+```
+
+The challenge lies in informing the compiler that `key` is a compile-time constant. Unfortunately, C++ does not allow function parameters to be declared as `constexpr`.
+
+The solution is quite ingenious. C++20 introduced the `consteval` keyword, which forces a function to be **evaluated at compile time**. This keyword can be used with class constructors, enabling the creation of compile-time classes.
+
+To leverage this, we need to define a compile-time class:
+
+```c++
+template <typename... VA>
+class TranslationKey;
+```
+
+Using the `VA` template parameter, we can determine at compile time how many arguments are passed to the function. Additionally, we need a `consteval` constructor:
+
+```c++
+template <typename... VA>
+class TranslationKey
+{
+public:
+    consteval TranslationKey(std::string_view key_name)
+        : m_KeyName(key_name) // must construct m_KeyName at compile time
+    {
+        auto idx = m_KeyName.find('@');
+        if (idx == m_KeyName.npos)
+        {
+            if (sizeof...(VA) != 0)
+            {
+                throw "Expected no arguments";
+            }
+        }
+        else
+        {
+            std::size_t params_cnt{ 0 };
+            for (auto i = idx + 1; m_KeyName.begin() + i != m_KeyName.end(); i++)
+            {
+                auto digit = m_KeyName.at(i);
+                if ('0' <= digit && digit <= '9')
+                {
+                    params_cnt = params_cnt * 10 + digit - '0';
+                }
+                else
+                {
+                    throw "Invalid number of parameters";
+                }
+            }
+            if (sizeof...(VA) != params_cnt)
+            {
+                throw "Mismatched number of parameters";
+            }
+        }
+    }
+private:
+    std::string_view m_KeyName;
+};
+```
+
+Note that we use `m_KeyName` because `key_name` may not be `constexpr`, but `m_KeyName` must be evaluated at compile time for a `consteval` constructor. Consider this example:
+
+```c++
+consteval auto foo(int anything)
+{
+    return 100;
+}
+```
+
+You can pass any value to `anything` at runtime, but the function is still evaluated at compile time. The `consteval` keyword ensures the entire function is evaluated at compile time unless it encounters a statement that cannot be evaluated at compile time (in which case the compiler raises an error).
+
+```c++
+consteval auto foo(int anything)
+{
+    if (anything > 100) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+int main()
+{
+    foo(101); // compile-time evaluation, returns false
+    int x;
+    std::cin >> x;
+    foo(x); // runtime evaluation required, compiler error
+}
+```
+
+Returning to the `Translate` function:
+
+```c++
+template <typename... VA>
+std::string Translate(TranslationKey<VA...> translation_key, VA&&... va)
+{
+    std::string s;
+    // do something
+    return s;
+}
+```
+
+This implementation is still incomplete because `VA` is deduced twice: once for `TranslationKey<VA...>` and again for `VA&&...`. This leads to a deduction mismatch:
+
+```c++
+Translate("HELLO@1", "foo"); // Candidate template ignored: could not match 'TranslationKey<VA...>' against 'const char *'
+```
+
+The issue arises because type deduction for `VA` happens independently for both parameters, resulting in a conflict. For `TranslationKey<VA...>`, `"foo"` is of type `const char[4]`, so `VA = const char[4]`. However, for `VA&&...`, the type decays to `VA = const char*`. These mismatched deductions cause the error.
+
+Since `VA...` is only used to count the number of format parameters, the exact types are irrelevant. To prevent type deduction for `TranslationKey<VA...>`, we can use C++20's `std::identity_t`. The final implementation of `Translate` looks like this:
+
+```c++
+template <typename... VA>
+std::string Translate(TranslationKey<std::type_identity_t<VA>...> translation_key, VA&&... va)
+{
+    std::string s;
+    // do something
+    return s;
+}
+```
