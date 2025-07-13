@@ -2,48 +2,48 @@
 title: 日期、时间
 ---
 
-**单例类** `DateTime` 用于处理日期和时间。
+**单例类** `DateTime`{ .language-lua } 用于处理日期和时间。
 
 ## 字段
 
-### `TIME_ZONE`
+### `TIME_ZONE`{ .language-lua }
 
-说明：时区，类型为 `float`。东半球取正数，西半球取负数。
+说明：时区，类型为 `float`{ .language-lua }。东半球取正数，西半球取负数。
 
 ## 方法
 
-### `is_leap`
+### `is_leap`{ .language-lua }
 
 说明：判断给定的年份是否为闰年。
 
-原型：`DateTime:is_leap(year)`
+原型：`DateTime:is_leap(year)`{ .language-lua }
 
 - year：年，类型为整数。
 
-返回值：若 `year` 为闰年，返回 `true`；否则，返回 `false`。
+返回值：若 `year`{ .language-lua } 为闰年，返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `timestamp`
+### `timestamp`{ .language-lua }
 
 说明：根据给定时区的日期和时间，计算的 UNIX 时间戳（UTC + 00:00）。
 
-原型：`DateTime:timestamp(year, month, day, hour, minute, second, time_zone)`
+原型：`DateTime:timestamp(year, month, day, hour, minute, second, time_zone)`{ .language-lua }
 
-- `year`：年，类型为整数。
-- `month`：月，类型为整数。
-- `day`：日，类型为整数。
-- `hour`：时，类型为整数。
-- `minute`：分，类型为整数。
-- `second`：秒，类型为整数。
-- `time_zone`：时区，类型为浮点数，东半球取正数，西半球取负数。可缺省，缺省值为 `0`。
+- `year`{ .language-lua }：年，类型为整数。
+- `month`{ .language-lua }：月，类型为整数。
+- `day`{ .language-lua }：日，类型为整数。
+- `hour`{ .language-lua }：时，类型为整数。
+- `minute`{ .language-lua }：分，类型为整数。
+- `second`{ .language-lua }：秒，类型为整数。
+- `time_zone`{ .language-lua }：时区，类型为浮点数，东半球取正数，西半球取负数。可缺省，缺省值为 `0`{ .language-lua }。
 
 返回：由给定给定时区的日期、时间计算的出的协调世界时（UTC）所对应的 UNIX 时间戳，精确到秒。
 
-### `get_local_timestamp`
+### `get_local_timestamp`{ .language-lua }
 
 说明：获取操作系统本地时间，并将其转换为 UNIX 时间戳。
 
-原型：`DateTime:get_local_timestamp()`
+原型：`DateTime:get_local_timestamp()`{ .language-lua }
 
 返回：UNIX 时间戳（UTC + 00:00）。
 
-注解：使用此函数获取 UNIX 时间戳时，需保证 `TIME_ZONE` 设定为正确的值。
+注解：使用此函数获取 UNIX 时间戳时，需保证 `TIME_ZONE`{ .language-lua } 设定为正确的值。

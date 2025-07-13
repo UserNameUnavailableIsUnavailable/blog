@@ -2,23 +2,23 @@
 title: 实用工具
 ---
 
-**单例类** `Utility` 提供了一些有用的工具。
+**单例类** `Utility`{ .language-lua } 提供了一些有用的工具。
 
 ## 方法
 
-### `create_counter`
+### `create_counter`{ .language-lua }
 
 说明：创建计数器函数闭包。
 
-原型：`Utility:create_counter(from, to, step)`
+原型：`Utility:create_counter(from, to, step)`{ .language-lua }
 
-- `from`：计数起始值，类型为 `number`。
-- `to`：计数器终止值，类型为 `number | nil`，缺省值为 `1145141919810`。
-- `step`：计数步长，类型为 `number | nil`，缺省值为 `1`。
+- `from`{ .language-lua }：计数起始值，类型为 `number`{ .language-lua }。
+- `to`{ .language-lua }：计数器终止值，类型为 `number | nil`{ .language-lua }，缺省值为 `1145141919810`{ .language-lua }。
+- `step`{ .language-lua }：计数步长，类型为 `number | nil`{ .language-lua }，缺省值为 `1`{ .language-lua }。
 
 注解：计数范围为 $\mathrm{from} \le x \lt \mathrm{to}$，当 $x$ 到达计数终止值后，折返回计数起始值。
 
-返回：计数器，类型为 `function`，每次调用该函数都会返回下一个计数值。
+返回：计数器，类型为 `function`{ .language-lua }，每次调用该函数都会返回下一个计数值。
 
 下面的例子展示了计数器用法：
 
@@ -29,18 +29,18 @@ counter() -- 返回 2
 counter() -- 返回 1
 ```
 
-### `random_direction`
+### `random_direction`{ .language-lua }
 
 说明：返回等概率产生的随机方向 $\pm 1$。
 
-原型：`Utility:random_direction()`
+原型：`Utility:random_direction()`{ .language-lua }
 
-### `report`
+### `report`{ .language-lua }
 
 说明：向 Windows 调试器汇报 JSON 格式的内容。
 
-原型：`Utility:report(t)`
+原型：`Utility:report(t)`{ .language-lua }
 
-- `t`：JSON 对象，类型为 `table`。
+- `t`{ .language-lua }：JSON 对象，类型为 `table`{ .language-lua }。
 
-注解：该接口将 `t` 编码为 JSON 字符串，写入 Windows 调试器。可以通过 Win32 API 读取调试器信息。
+注解：该接口将 `t`{ .language-lua } 编码为 JSON 字符串，写入 Windows 调试器。可以通过 Win32 API 读取调试器信息。

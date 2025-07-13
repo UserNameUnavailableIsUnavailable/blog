@@ -2,81 +2,81 @@
 title: 定义武器或装备
 ---
 
-**多例类** `Weapon` 用于定义挂机时使用的武器或装备。
+**多例类** `Weapon`{ .language-lua } 用于定义挂机时使用的武器或装备。
 
 
 ## 字段
 
-### `name`
+### `name`{ .language-lua }
 
 说明：装备的名称，类型为字符串。
 
-注解：缺省值为 `"未知"`。
+注解：缺省值为 `"未知"`{ .language-lua }。
 
-### `number`
+### `number`{ .language-lua }
 
 说明：武器或装备的栏位，可以取下列值：
 
 |名称|语义|
 |---|---|
-|Weapon.NULL|表示不会被使用的武器或装备，如防弹衣、配件武器|
-|Weapon.PRIMARY|主武器|
-|Weapon.SECONDARY|副武器|
-|Weapon.MELEE|近战武器|
-|Weapon.GRENADE|手雷|
+|`Weapon.NULL`{ .language-lua }|表示不会被使用的武器或装备，如防弹衣、配件武器|
+|`Weapon.PRIMARY`{ .language-lua }|主武器|
+|`Weapon.SECONDARY`{ .language-lua }|副武器|
+|`Weapon.MELEE`{ .language-lua }|近战武器|
+|`Weapon.GRENADE`{ .language-lua }|手雷|
 
-注解：该字段缺省值为 `Weapon.NULL`。
+注解：该字段缺省值为 `Weapon.NULL`{ .language-lua }。
 
-### `attack_button`
+### `attack_button`{ .language-lua }
 
 说明：**常规**武器或装备的攻击按钮，可取如下值：
 
 |名称|语义|
 |---|---|
-|Mouse.LEFT|鼠标左键|
-|Mouse.RIGHT|鼠标右键|
+|`Mouse.LEFT`{ .language-lua }|鼠标左键|
+|`Mouse.RIGHT`{ .language-lua }|鼠标右键|
 
-注解：该字段缺省值为 `Mouse.LEFT`。
+注解：该字段缺省值为 `Mouse.LEFT`{ .language-lua }。
 
-### `switch_delay`
+### `switch_delay`{ .language-lua }
 
 说明：武器或装备的切换延迟，单位为毫秒
 
-注解：该字段缺省值为 `150`。
+注解：该字段缺省值为 `150`{ .language-lua }。
 
-### `purchase_sequence`
+### `purchase_sequence`{ .language-lua }
 
-说明：武器或装备的购买按键序列，类型为 `table`。
+说明：武器或装备的购买按键序列，类型为 `table`{ .language-lua }。
 
-注解：该字段缺省值为 `{}`。另外，如果有切换 T / CT 阵营武器购买菜单的需要，请像上例中在购买按键序列中添加 `J` 键。
+注解：该字段缺省值为 `{}`{ .language-lua }。另外，如果有切换 T / CT 阵营武器购买菜单的需要，请像上例中在购买按键序列中添加 `J`{ .language-lua } 键。
 
-下例将 `weapon` 的购买按键序列设置为 `B` `J` `8` `7`。
+下例将 `weapon`{ .language-lua } 的购买按键序列设置为 `B`{ .language-lua } `J`{ .language-lua } `8`{ .language-lua } `7`{ .language-lua }。
 
 ```lua
 weapon.purchase_sequence = { Keyboard.B, Keyboard.J, Keyboard.EIGHT, Keyboard.SEVEN }
 ```
 
-### `RELOAD_KEY`
+### `RELOAD_KEY`{ .language-lua }
 
 说明：重新装填按键，可取任意键盘按键，参见 [键盘操作](/CSOL-Utilities/Executor/06_keyboard/)。
 
-注解：该设定与配置面板中的提供的重新装填按钮设定选项保持一致，缺省值为 `Keyboard.R`。在使用“圣翼皓印”、“万钧神威”等定制武器时，特殊攻击将通过 `RELOAD_KEY` 触发
+注解：该设定与配置面板中的提供的重新装填按钮设定选项保持一致，缺省值为 `Keyboard.R`{ .language-lua }。在使用“圣翼皓印”、“万钧神威”等定制武器时，特殊攻击将通过 `RELOAD_KEY`{ .language-lua } 触发
 
 ## 方法
 
-### `new`
+### `new`{ .language-lua }
 
 说明：构造新武器或装备。
 
-原型：`Weapon:new(init)`
+原型：`Weapon:new(init)`{ .language-lua }
 
-- `init`：初始化列表，类型为 `table | nil`，当其不缺省为 `nil` 时，应包含 `Weapon` 类原型中的各字段初值。除了上文提到的 `Weapon` 中提供的默认字段外，还可以在其中添加一些自定义的字段。
+- `init`{ .language-lua }：初始化列表，类型为 `table | nil`{ .language-lua }，当其不缺省为 `nil`{ .language-lua } 时，应包含 `Weapon`{ .language-lua } 类原型中的各字段初值。除了上文提到的 `Weapon`{ .language-lua } 中提供的默认字段外，还可以在其中添加一些自定义的字段。
 
-异常：当 `init` 类型不正确时，抛出类型错误异常。
+异常：当 `init`{ .language-lua } 类型不正确时，抛出类型错误异常。
 
-注解：在 `new` 方法的实现中，新武器对象的元表（metatable）会被设置为武器原型 `self`。因此，当缺省上文中提到的成员字段时，将使用上文提及的认缺省值。下面是 `new` 的一个简短版本的实现，在有效性校验完成后，将原型武器 `self`（以 `Weapon:new` 形式调用时，`self` 即 `Weapon`）的 `__index` 指向原型武器自身 [^1]，然后将新武器 `weapon` 的元表设置为 `self`。后续在访问 `weapon` 中的缺省成员时，会先访问 `weapon` 的元表，找到 `self` 中的 `__index` 方法，并通过 `__index` 方法在 `self` 中找到该缺省值。通过这样的方法，就实现了 Lua 中的**继承**。
+注解：在 `new`{ .language-lua } 方法的实现中，新武器对象的元表（metatable）会被设置为武器原型 `self`{ .language-lua }。因此，当缺省上文中提到的成员字段时，将使用上文提及的认缺省值。下面是 `new`{ .language-lua } 的一个简短版本的实现，在有效性校验完成后，将原型武器 `self`{ .language-lua }（以 `Weapon:new`{ .language-lua } 形式调用时，`self`{ .language-lua } 即 `Weapon`{ .language-lua }）的 `__index`{ .language-lua } 指向原型武器自身 [^1]，然后将新武器 `weapon`{ .language-lua } 的元表设置为 `self`{ .language-lua }。后续在访问 `weapon`{ .language-lua } 中的缺省成员时，会先访问 `weapon`{ .language-lua } 的元表，找到 `self`{ .language-lua } 中的 `__index`{ .language-lua } 方法，并通过 `__index`{ .language-lua } 方法在 `self`{ .language-lua } 中找到该缺省值。通过这样的方法，就实现了 Lua 中的**继承**。
 
-> 原则上，`__index` 是一个方法（类型为 `function`），但在 Lua 中提供了一个语法糖，允许我们将 `__index` 指向某个表（类型为 `table`）。在试图访问某个缺省值时，将通过调用 `__index`（指向 `function`）或访问 `__index`（指向 `table`）查阅该缺省值。
+> 原则上，`__index`{ .language-lua } 是一个方法（类型为 `function`{ .language-lua }），但在 Lua 中提供了一个语法糖，允许我们将 `__index`{ .language-lua } 指向某个表（类型为 `table`{ .language-lua }）。在试图访问某个缺省值时，将通过调用 `__index`{ .language-lua }（指向 `function`{ .language-lua }）或访问 `__index`{ .language-lua }（指向 `table`{ .language-lua }）查阅该缺省值。
 
 [^1]: 要了解有关 Lua 中元表的语法特性，请参阅 Lua 官方指南 [13 – Metatables and Metamethods](https://www.lua.org/pil/13.html) 小节。
 
@@ -90,7 +90,7 @@ function Weapon:new(init)
 end
 ```
 
-下面的例子创建一件名为“幻境！光棱剑”的近战武器，购买按键序列为 `B` `G`，切换延迟为 100 *ms*，使用鼠标左键进行攻击。
+下面的例子创建一件名为“幻境！光棱剑”的近战武器，购买按键序列为 `B`{ .language-lua } `G`{ .language-lua }，切换延迟为 100 *ms*，使用鼠标左键进行攻击。
 
 ```lua
 Weapon:new{
@@ -102,45 +102,45 @@ Weapon:new{
 }
 ```
 
-### `purchase`
+### `purchase`{ .language-lua }
 
 说明：购买指定的武器或装备。
 
-原型：`Weapon:purchase()`
+原型：`Weapon:purchase()`{ .language-lua }
 
-说明：鉴于武器购买具有一定特殊性，不应该被其他中断调用过程（如：定期复活或回合重置操作会按下与当前购买操作无关的按键）干扰，因此该方法内部在执行购买时会调用 `Runtime:cli` 方法**关中断**。
+说明：鉴于武器购买具有一定特殊性，不应该被其他中断调用过程（如：定期复活或回合重置操作会按下与当前购买操作无关的按键）干扰，因此该方法内部在执行购买时会调用 `Runtime:cli`{ .language-lua } 方法**关中断**。
 
-### `switch`
+### `switch`{ .language-lua }
 
 说明：切换至指定的武器或装备，并在切换后等待指定的切换延迟时间。
 
-原型：`Weapon:switch()`
+原型：`Weapon:switch()`{ .language-lua }
 
-### `switch_without_delay`
+### `switch_without_delay`{ .language-lua }
 
 说明：切换至指定的武器或装备，切换后忽略切换延迟时间。
 
-原型：`Weapon:switch_without_delay()`
+原型：`Weapon:switch_without_delay()`{ .language-lua }
 
 > 在先前版本的实际使用反馈中，发现携带“燃爆 Ignite-10”作为配件装备后，会在购买后出现“自雷”的情况，为此问题，引入了此函数，用于在购买配件武器后，立即切换到其他武器，并通过忽略切换延迟减小对后续切换到其他武器的影响。
 
-### `abandon`
+### `abandon`{ .language-lua }
 
 说明：丢弃指定的武器。
 
-原型：`Weapon:abandon()`
+原型：`Weapon:abandon()`{ .language-lua }
 
-### `attack`
+### `attack`{ .language-lua }
 
 说明：使用指定的**常规**武器进行**一轮**攻击。
 
-原型：`Weapon:attack()`
+原型：`Weapon:attack()`{ .language-lua }
 
-`attack` 函数具有默认的实现。当需要定制常规武器攻击方式时，可重写此函数。在重写时需要注意执行一次 `attack` 的时间一般不超过 10 秒。若对默认的 `attack` 实现不满意，可以重写 `Weapon` 类中 `attack` 的实现。
+`attack`{ .language-lua } 函数具有默认的实现。当需要定制常规武器攻击方式时，可重写此函数。在重写时需要注意执行一次 `attack`{ .language-lua } 的时间一般不超过 10 秒。若对默认的 `attack`{ .language-lua } 实现不满意，可以重写 `Weapon`{ .language-lua } 类中 `attack`{ .language-lua } 的实现。
 
-默认的 `attack` 在执行攻击操作时，玩家角色朝随机的方向运动，视角水平方向作匀速直线运动，视角垂直方向作简谐运动（上下俯仰），并使用设定的武器攻击按钮进行攻击操作。
+默认的 `attack`{ .language-lua } 在执行攻击操作时，玩家角色朝随机的方向运动，视角水平方向作匀速直线运动，视角垂直方向作简谐运动（上下俯仰），并使用设定的武器攻击按钮进行攻击操作。
 
-以下示例创建了定制武器万钧神威，并重写了 `attack` 方法。
+以下示例创建了定制武器万钧神威，并重写了 `attack`{ .language-lua } 方法。
 
 ```lua
 Weapon:new{
@@ -189,15 +189,15 @@ Weapon:new{
 }
 ```
 
-### `use`
+### `use`{ .language-lua }
 
 说明：使用指定的**特殊**武器进行攻击。
 
-原型：`Weapon:use()`
+原型：`Weapon:use()`{ .language-lua }
 
-> 该函数不提供默认的实现，故需要重写此函数以使用特殊武器进行攻击。在重写时需要注意执行一次 `use` 的时间一般不超过 10 秒。
+> 该函数不提供默认的实现，故需要重写此函数以使用特殊武器进行攻击。在重写时需要注意执行一次 `use`{ .language-lua } 的时间一般不超过 10 秒。
 
-以下示例创建了特殊武器圣翼皓印，并重写了 `use` 方法。需要注意，可以在初始化列表中增加一些自定义的字段（如例中的 `discharging` 等），并在 `use` 内使用它们。
+以下示例创建了特殊武器圣翼皓印，并重写了 `use`{ .language-lua } 方法。需要注意，可以在初始化列表中增加一些自定义的字段（如例中的 `discharging`{ .language-lua } 等），并在 `use`{ .language-lua } 内使用它们。
 
 ```lua
 Weapon:new{
@@ -237,11 +237,11 @@ Weapon:new{
 
 ## 武器列表
 
-`WeaponList.lua` 是执行器在挂机时使用的武器或装备列表文件。集成工具共提供两种挂机模式，分别为**默认（default）**模式和**扩展（extended）**模式，以适应不同玩家定制化的需求。
+`WeaponList.lua`{ .language-lua } 是执行器在挂机时使用的武器或装备列表文件。集成工具共提供两种挂机模式，分别为**默认（default）**模式和**扩展（extended）**模式，以适应不同玩家定制化的需求。
 
 ### 护甲
 
-挂机时，可以自行决定是否定期购买护甲。`Armor` 为 `WeaponList.lua` 中使用的护甲对象。例如，下面的代码将全甲的购买按键序列定义为 `B` `8` `2`。
+挂机时，可以自行决定是否定期购买护甲。`Armor`{ .language-lua } 为 `WeaponList.lua`{ .language-lua } 中使用的护甲对象。例如，下面的代码将全甲的购买按键序列定义为 `B`{ .language-lua } `8`{ .language-lua } `2`{ .language-lua }。
 
 ```lua
 Armor = Weapon:new{
@@ -256,7 +256,7 @@ Armor = Weapon:new{
 
 在执行器中，配件武器是指挂机过程中携带的辅助武器，例如带有生命配件的手枪等。**配件武器仅作辅助之用，永远不会用于攻击。**
 
-默认模式下的配件武器购买列表为 `DefaultPartWeapons`，扩展模式下的配件武器购买列表为 `ExtendedPartWeapons`。
+默认模式下的配件武器购买列表为 `DefaultPartWeapons`{ .language-lua }，扩展模式下的配件武器购买列表为 `ExtendedPartWeapons`{ .language-lua }。
 
 下面的代码向默认模式下的配件武器列表中添加了三件武器，针对扩展模式的配置方式与此完全相同。挂机时，每隔一段时间购买列表中的配件武器（顺序购买，每次购买一件配件武器）。
 
@@ -284,9 +284,9 @@ DefaultPartWeapons = {
 
 ### 常规武器
 
-常规武器是指采用常规的左键或右键方式进行攻击的武器。默认模式下的常规武器列表为 `DefaultConventionalWeapons`，扩展模式下的常规武器列表为 `ExtendedConventionalWeapons`。
+常规武器是指采用常规的左键或右键方式进行攻击的武器。默认模式下的常规武器列表为 `DefaultConventionalWeapons`{ .language-lua }，扩展模式下的常规武器列表为 `ExtendedConventionalWeapons`{ .language-lua }。
 
-下面的例子展示了向 `DefaultConventionalWeapons` 添加一件常规武器，其中 `Delay.NORMAL` 是预设的延时，其值为 100 毫秒，你也可以将其设定为某一个具体的数字。
+下面的例子展示了向 `DefaultConventionalWeapons`{ .language-lua } 添加一件常规武器，其中 `Delay.NORMAL`{ .language-lua } 是预设的延时，其值为 100 毫秒，你也可以将其设定为某一个具体的数字。
 
 ```lua
 DefaultConventionalWeapons = {
@@ -304,7 +304,7 @@ DefaultConventionalWeapons = {
 
 ### 定制武器
 
-某一些武器（如神鬼开天、万钧神威）同时具备常规攻击和特殊攻击的能力。若需要使用其特殊攻击，则需要在创建该武器对象时，重写默认的 `attack` 方法。重写 `attack` 时，建议尽量确保一轮攻击的时间不超过 10 秒（**这不是强制性要求，但这样做可以避免被注册在 `Runtime` 中定期执行回合重置的中断处理函数打断，但一般来说这不会产生很大影响，故若不关心 `attack` 是否会被打断，可以忽略此建议**）。
+某一些武器（如神鬼开天、万钧神威）同时具备常规攻击和特殊攻击的能力。若需要使用其特殊攻击，则需要在创建该武器对象时，重写默认的 `attack`{ .language-lua } 方法。重写 `attack`{ .language-lua } 时，建议尽量确保一轮攻击的时间不超过 10 秒（**这不是强制性要求，但这样做可以避免被注册在 `Runtime`{ .language-lua } 中定期执行回合重置的中断处理函数打断，但一般来说这不会产生很大影响，故若不关心 `attack`{ .language-lua } 是否会被打断，可以忽略此建议**）。
 
 下面的例子展示了向扩展常规武器列表中添加一件定制武器：
 
@@ -350,7 +350,7 @@ ExtendedConventionalWeapons = {
 
 ### 特殊武器
 
-与常规武器不同，像圣翼皓印这样的特殊武器没有固定的使用方法，因此必须手动指定。默认模式下使用的特殊武器列表为 `DefaultSpecialWeapons`，扩展模式下使用的特殊武器列表为 `ExtendedSpecialWeapons`。圣翼皓印的定义已经在上文中提供过，故此处提供特殊武器【幽浮】控制核心的定义，并将其添加到扩展特殊武器列表。
+与常规武器不同，像圣翼皓印这样的特殊武器没有固定的使用方法，因此必须手动指定。默认模式下使用的特殊武器列表为 `DefaultSpecialWeapons`{ .language-lua }，扩展模式下使用的特殊武器列表为 `ExtendedSpecialWeapons`{ .language-lua }。圣翼皓印的定义已经在上文中提供过，故此处提供特殊武器【幽浮】控制核心的定义，并将其添加到扩展特殊武器列表。
 
 ```lua
 ExtendedSpecialWeapons = {
@@ -362,7 +362,7 @@ ExtendedSpecialWeapons = {
         template_name = "【幽浮】控制核心",
         COOL_DOWN_TIME = 60,
         last_start_moment = 0,
-        ---为该武器重写 `use` 方法。
+        ---为该武器重写 `use`{ .language-lua } 方法。
         ---@param self Weapon
         use = function (self)
             local current_time = DateTime:get_local_timestamp()
