@@ -2,13 +2,13 @@
 title: 键盘操作
 ---
 
-**单例类** `Keyboard` 控制键盘操作。
+**单例类** `Keyboard`{ .language-lua } 控制键盘操作。
 
 ## 字段
 
 ### 键盘按键
 
-`Keyboard` 类中定义了下面罗列的键位常量。需要注意，这些常量并不代表字母或特定的字符串，而代表键盘上的键位。
+`Keyboard`{ .language-lua } 类中定义了下面罗列的键位常量。需要注意，这些常量并不代表字母或特定的字符串，而代表键盘上的键位。
 
 每个键盘按键均对应一个扫描码（scan code）。扫描码被操作系统获取后，根据操作系统中的键盘布局设置（如中国大陆地区采用的美式键盘布局）解释为相应的虚拟按键（virtual key）。例如，按下美式 QWERTY 布局键盘上的 Q 键后，键盘向操作系统发送一个扫描码，若操作系统的键盘布局为法国 AZERTY 布局，则这个扫描码会被映射到虚拟按键 A。**因此，键盘上的“按键名称”并不代表真实的按键，而是对应于某一个扫描码，按下某个特定按键，都会向操作系统发送这个扫描码。对该扫描码的解释方法由操作系统确定。**
 
@@ -20,31 +20,31 @@ title: 键盘操作
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.ESCAPE`|`"escape"`|转义键 ESC|
-|`Keyboard.F1`|`"f1"`|功能键 F1|
-|`Keyboard.F2`|`"f2"`|功能键 F2|
-|`Keyboard.F3`|`"f3"`|功能键 F3|
-|`Keyboard.F4`|`"f4"`|功能键 F4|
-|`Keyboard.F5`|`"f5"`|功能键 F5|
-|`Keyboard.F6`|`"f6"`|功能键 F6|
-|`Keyboard.F7`|`"f7"`|功能键 F7|
-|`Keyboard.F8`|`"f8"`|功能键 F8|
-|`Keyboard.F9`|`"f9"`|功能键 F9|
-|`Keyboard.F10`|`"f10"`|功能键 F10|
-|`Keyboard.F11`|`"f11"`|功能键 F11|
-|`Keyboard.F12`|`"f12"`|功能键 F12|
-|`Keyboard.F13`|`"f13"`|功能键 F13|
-|`Keyboard.F14`|`"f14"`|功能键 F14|
-|`Keyboard.F15`|`"f15"`|功能键 F15|
-|`Keyboard.F16`|`"f16"`|功能键 F16|
-|`Keyboard.F17`|`"f17"`|功能键 F17|
-|`Keyboard.F18`|`"f18"`|功能键 F18|
-|`Keyboard.F19`|`"f19"`|功能键 F19|
-|`Keyboard.F20`|`"f20"`|功能键 F20|
-|`Keyboard.F21`|`"f21"`|功能键 F21|
-|`Keyboard.F22`|`"f22"`|功能键 F22|
-|`Keyboard.F23`|`"f23"`|功能键 F23|
-|`Keyboard.F24`|`"f24"`|功能键 F24|
+|`Keyboard.ESCAPE`{ .language-lua }|`"escape"`{ .language-lua }|转义键 ESC|
+|`Keyboard.F1`{ .language-lua }|`"f1"`{ .language-lua }|功能键 F1|
+|`Keyboard.F2`{ .language-lua }|`"f2"`{ .language-lua }|功能键 F2|
+|`Keyboard.F3`{ .language-lua }|`"f3"`{ .language-lua }|功能键 F3|
+|`Keyboard.F4`{ .language-lua }|`"f4"`{ .language-lua }|功能键 F4|
+|`Keyboard.F5`{ .language-lua }|`"f5"`{ .language-lua }|功能键 F5|
+|`Keyboard.F6`{ .language-lua }|`"f6"`{ .language-lua }|功能键 F6|
+|`Keyboard.F7`{ .language-lua }|`"f7"`{ .language-lua }|功能键 F7|
+|`Keyboard.F8`{ .language-lua }|`"f8"`{ .language-lua }|功能键 F8|
+|`Keyboard.F9`{ .language-lua }|`"f9"`{ .language-lua }|功能键 F9|
+|`Keyboard.F10`{ .language-lua }|`"f10"`{ .language-lua }|功能键 F10|
+|`Keyboard.F11`{ .language-lua }|`"f11"`{ .language-lua }|功能键 F11|
+|`Keyboard.F12`{ .language-lua }|`"f12"`{ .language-lua }|功能键 F12|
+|`Keyboard.F13`{ .language-lua }|`"f13"`{ .language-lua }|功能键 F13|
+|`Keyboard.F14`{ .language-lua }|`"f14"`{ .language-lua }|功能键 F14|
+|`Keyboard.F15`{ .language-lua }|`"f15"`{ .language-lua }|功能键 F15|
+|`Keyboard.F16`{ .language-lua }|`"f16"`{ .language-lua }|功能键 F16|
+|`Keyboard.F17`{ .language-lua }|`"f17"`{ .language-lua }|功能键 F17|
+|`Keyboard.F18`{ .language-lua }|`"f18"`{ .language-lua }|功能键 F18|
+|`Keyboard.F19`{ .language-lua }|`"f19"`{ .language-lua }|功能键 F19|
+|`Keyboard.F20`{ .language-lua }|`"f20"`{ .language-lua }|功能键 F20|
+|`Keyboard.F21`{ .language-lua }|`"f21"`{ .language-lua }|功能键 F21|
+|`Keyboard.F22`{ .language-lua }|`"f22"`{ .language-lua }|功能键 F22|
+|`Keyboard.F23`{ .language-lua }|`"f23"`{ .language-lua }|功能键 F23|
+|`Keyboard.F24`{ .language-lua }|`"f24"`{ .language-lua }|功能键 F24|
 
 > 现代键盘上基本见不到 F13 ~ F24，但操作系统中仍为其保留了对应键码。
 
@@ -52,257 +52,257 @@ title: 键盘操作
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.BACKQUOTE`|`"tilde"`|&#60; 或 ~|
-|`Keyboard.ONE`|`"1"`|1 或 !|
-|`Keyboard.TWO`|`"2"`|2 或 @|
-|`Keyboard.THREE`|`"3"`|3 或 #|
-|`Keyboard.FOUR`|`"4"`|4 或 $|
-|`Keyboard.FIVE`|`"5"`|5 或 %|
-|`Keyboard.SIX`|`"6"`|6 或 ^|
-|`Keyboard.SEVEN`|`"7"`|7 或 &|
-|`Keyboard.EIGHT`|`"8"`|8 或 *|
-|`Keyboard.NINE`|`"9"`|9 或 \(|
-|`Keyboard.ZERO`|`"0"`|0 或 \)|
-|`Keyboard.MINUS`|`"minus"`|- 或 _|
-|`Keyboard.EQUAL`|`"equal"`|= 或 +|
-|`Keyboard.BACKSPACE`|`"backspace"`|退格键 BACKSPACE|
+|`Keyboard.BACKQUOTE`{ .language-lua }|`"tilde"`{ .language-lua }|&#60; 或 ~|
+|`Keyboard.ONE`{ .language-lua }|`"1"`{ .language-lua }|1 或 !|
+|`Keyboard.TWO`{ .language-lua }|`"2"`{ .language-lua }|2 或 @|
+|`Keyboard.THREE`{ .language-lua }|`"3"`{ .language-lua }|3 或 #|
+|`Keyboard.FOUR`{ .language-lua }|`"4"`{ .language-lua }|4 或 $|
+|`Keyboard.FIVE`{ .language-lua }|`"5"`{ .language-lua }|5 或 %|
+|`Keyboard.SIX`{ .language-lua }|`"6"`{ .language-lua }|6 或 ^|
+|`Keyboard.SEVEN`{ .language-lua }|`"7"`{ .language-lua }|7 或 &|
+|`Keyboard.EIGHT`{ .language-lua }|`"8"`{ .language-lua }|8 或 *|
+|`Keyboard.NINE`{ .language-lua }|`"9"`{ .language-lua }|9 或 \(|
+|`Keyboard.ZERO`{ .language-lua }|`"0"`{ .language-lua }|0 或 \)|
+|`Keyboard.MINUS`{ .language-lua }|`"minus"`{ .language-lua }|- 或 _|
+|`Keyboard.EQUAL`{ .language-lua }|`"equal"`{ .language-lua }|= 或 +|
+|`Keyboard.BACKSPACE`{ .language-lua }|`"backspace"`{ .language-lua }|退格键 BACKSPACE|
 
 > 严谨地说，"tilde" 指波浪 "~"，"backquote" 则指反引号 "\`"。""
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.TAB`|`"tab"`|制表键 TAB|
-|`Keyboard.Q`|`"q"`|q 或 Q|
-|`Keyboard.W`|`"w"`|w 或 W|
-|`Keyboard.E`|`"e"`|e 或 E|
-|`Keyboard.R`|`"r"`|r 或 R|
-|`Keyboard.T`|`"t"`|t 或 T|
-|`Keyboard.Y`|`"y"`|y 或 Y|
-|`Keyboard.U`|`"u"`|u 或 U|
-|`Keyboard.I`|`"i"`|i 或 I|
-|`Keyboard.O`|`"o"`|o 或 O|
-|`Keyboard.P`|`"p"`|p 或 P|
-|`Keyboard.LEFT_BRACKET`|`"lbracket"`|\[ 或 {|
-|`Keyboard.RIGHT_BRACKET`|`"rbracket"`|\] 或 }|
-|`Keyboard.BACKSLASH`|`"backslash"`|\\ 或 &#124;|
+|`Keyboard.TAB`{ .language-lua }|`"tab"`{ .language-lua }|制表键 TAB|
+|`Keyboard.Q`{ .language-lua }|`"q"`{ .language-lua }|q 或 Q|
+|`Keyboard.W`{ .language-lua }|`"w"`{ .language-lua }|w 或 W|
+|`Keyboard.E`{ .language-lua }|`"e"`{ .language-lua }|e 或 E|
+|`Keyboard.R`{ .language-lua }|`"r"`{ .language-lua }|r 或 R|
+|`Keyboard.T`{ .language-lua }|`"t"`{ .language-lua }|t 或 T|
+|`Keyboard.Y`{ .language-lua }|`"y"`{ .language-lua }|y 或 Y|
+|`Keyboard.U`{ .language-lua }|`"u"`{ .language-lua }|u 或 U|
+|`Keyboard.I`{ .language-lua }|`"i"`{ .language-lua }|i 或 I|
+|`Keyboard.O`{ .language-lua }|`"o"`{ .language-lua }|o 或 O|
+|`Keyboard.P`{ .language-lua }|`"p"`{ .language-lua }|p 或 P|
+|`Keyboard.LEFT_BRACKET`{ .language-lua }|`"lbracket"`{ .language-lua }|\[ 或 {|
+|`Keyboard.RIGHT_BRACKET`{ .language-lua }|`"rbracket"`{ .language-lua }|\] 或 }|
+|`Keyboard.BACKSLASH`{ .language-lua }|`"backslash"`{ .language-lua }|\\ 或 &#124;|
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.CAPS_LOCK`|`"capslock"`|大写锁定、解锁键 CAPS LOCK|
-|`Keyboard.A`|`"a"`|a 或 A|
-|`Keyboard.S`|`"s"`|s 或 S|
-|`Keyboard.D`|`"d"`|d 或 D|
-|`Keyboard.F`|`"f"`|f 或 F|
-|`Keyboard.G`|`"g"`|g 或 G|
-|`Keyboard.H`|`"h"`|h 或 H|
-|`Keyboard.J`|`"j"`|j 或 J|
-|`Keyboard.K`|`"k"`|k 或 K|
-|`Keyboard.L`|`"l"`|l 或 L|
-|`Keyboard.SEMICOLON`|`"semicolon"`|; 或 :|
-|`Keyboard.QUOTE`|`"quote"`|' 或 "|
-|`Keyboard.ENTER`|`"enter"`|回车键 ENTER|
+|`Keyboard.CAPS_LOCK`{ .language-lua }|`"capslock"`{ .language-lua }|大写锁定、解锁键 CAPS LOCK|
+|`Keyboard.A`{ .language-lua }|`"a"`{ .language-lua }|a 或 A|
+|`Keyboard.S`{ .language-lua }|`"s"`{ .language-lua }|s 或 S|
+|`Keyboard.D`{ .language-lua }|`"d"`{ .language-lua }|d 或 D|
+|`Keyboard.F`{ .language-lua }|`"f"`{ .language-lua }|f 或 F|
+|`Keyboard.G`{ .language-lua }|`"g"`{ .language-lua }|g 或 G|
+|`Keyboard.H`{ .language-lua }|`"h"`{ .language-lua }|h 或 H|
+|`Keyboard.J`{ .language-lua }|`"j"`{ .language-lua }|j 或 J|
+|`Keyboard.K`{ .language-lua }|`"k"`{ .language-lua }|k 或 K|
+|`Keyboard.L`{ .language-lua }|`"l"`{ .language-lua }|l 或 L|
+|`Keyboard.SEMICOLON`{ .language-lua }|`"semicolon"`{ .language-lua }|; 或 :|
+|`Keyboard.QUOTE`{ .language-lua }|`"quote"`{ .language-lua }|' 或 "|
+|`Keyboard.ENTER`{ .language-lua }|`"enter"`{ .language-lua }|回车键 ENTER|
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.LEFT_SHIFT`|`"lshift"`|左侧 SHIFT 键|
-|`Keyboard.NON_US_BACKSLASH`|`"non_us_slash"`|\\ 或 &#124;|
-|`Keyboard.Z`|`"z"`|z 或 Z|
-|`Keyboard.X`|`"x"`|x 或 X|
-|`Keyboard.C`|`"c"`|c 或 C|
-|`Keyboard.V`|`"v"`|v 或 V|
-|`Keyboard.B`|`"b"`|b 或 B|
-|`Keyboard.N`|`"n"`|n 或 N|
-|`Keyboard.M`|`"m"`|m 或 M|
-|`Keyboard.COMMA`|`"comma"`|, 或 <|
-|`Keyboard.PERIOD`|`"period"`|. 或 >|
-|`Keyboard.SLASH`|`"slash"`|/ 或 ?|
-|`Keyboard.RIGHT_SHIFT`|`"rshift"`|右侧 SHIFT 键|
+|`Keyboard.LEFT_SHIFT`{ .language-lua }|`"lshift"`{ .language-lua }|左侧 SHIFT 键|
+|`Keyboard.NON_US_BACKSLASH`{ .language-lua }|`"non_us_slash"`{ .language-lua }|\\ 或 &#124;|
+|`Keyboard.Z`{ .language-lua }|`"z"`{ .language-lua }|z 或 Z|
+|`Keyboard.X`{ .language-lua }|`"x"`{ .language-lua }|x 或 X|
+|`Keyboard.C`{ .language-lua }|`"c"`{ .language-lua }|c 或 C|
+|`Keyboard.V`{ .language-lua }|`"v"`{ .language-lua }|v 或 V|
+|`Keyboard.B`{ .language-lua }|`"b"`{ .language-lua }|b 或 B|
+|`Keyboard.N`{ .language-lua }|`"n"`{ .language-lua }|n 或 N|
+|`Keyboard.M`{ .language-lua }|`"m"`{ .language-lua }|m 或 M|
+|`Keyboard.COMMA`{ .language-lua }|`"comma"`{ .language-lua }|, 或 <|
+|`Keyboard.PERIOD`{ .language-lua }|`"period"`{ .language-lua }|. 或 >|
+|`Keyboard.SLASH`{ .language-lua }|`"slash"`{ .language-lua }|/ 或 ?|
+|`Keyboard.RIGHT_SHIFT`{ .language-lua }|`"rshift"`{ .language-lua }|右侧 SHIFT 键|
 
-> 对于非标准的美式 QWERTY 键盘布局，左侧 SHIFT 键右侧有时会存在一个反斜线键，即上表中的 `Keyboard.NON_US_BACKSLASH`。
+> 对于非标准的美式 QWERTY 键盘布局，左侧 SHIFT 键右侧有时会存在一个反斜线键，即上表中的 `Keyboard.NON_US_BACKSLASH`{ .language-lua }。
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.LEFT_CTRL`|`"lctrl"`|右侧 CTRL 键|
-|`Keyboard.LEFT_WIN`|`"lgui"`|左侧 Windows 徽标键|
-|`Keyboard.LEFT_ALT`|`"lalt"`|左侧 ALT 键|
-|`Keyboard.SPACE`|`"spacebar"`|空格键 SPACE|
-|`Keyboard.RIGHT_ALT`|`"ralt"`|右侧 ALT 键|
-|`Keyboard.RIGHT_WIN`|`"rgui"`|右侧 Windows 徽标键|
-|`Keyboard.APPS`|`"appkey"`|应用程序键|
-|`Keyboard.RIGHT_CTRL`|`"rctrl"`|右侧 CTRL 键|
+|`Keyboard.LEFT_CTRL`{ .language-lua }|`"lctrl"`{ .language-lua }|右侧 CTRL 键|
+|`Keyboard.LEFT_WIN`{ .language-lua }|`"lgui"`{ .language-lua }|左侧 Windows 徽标键|
+|`Keyboard.LEFT_ALT`{ .language-lua }|`"lalt"`{ .language-lua }|左侧 ALT 键|
+|`Keyboard.SPACE`{ .language-lua }|`"spacebar"`{ .language-lua }|空格键 SPACE|
+|`Keyboard.RIGHT_ALT`{ .language-lua }|`"ralt"`{ .language-lua }|右侧 ALT 键|
+|`Keyboard.RIGHT_WIN`{ .language-lua }|`"rgui"`{ .language-lua }|右侧 Windows 徽标键|
+|`Keyboard.APPS`{ .language-lua }|`"appkey"`{ .language-lua }|应用程序键|
+|`Keyboard.RIGHT_CTRL`{ .language-lua }|`"rctrl"`{ .language-lua }|右侧 CTRL 键|
 
 #### 控制区
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.PRINT_SCREEN`|`"printscreen"`|截屏键 PRINT SCREEN|
-|`Keyboard.SCROL_LLOCK`|`"scrolllock"`|滚动锁定、解锁键 SCROLL LOCK|
-|`Keyboard.PAUSE_BREAK`|`"pause"`|暂停、断点键 PAUSE/BREAK|
+|`Keyboard.PRINT_SCREEN`{ .language-lua }|`"printscreen"`{ .language-lua }|截屏键 PRINT SCREEN|
+|`Keyboard.SCROL_LLOCK`{ .language-lua }|`"scrolllock"`{ .language-lua }|滚动锁定、解锁键 SCROLL LOCK|
+|`Keyboard.PAUSE_BREAK`{ .language-lua }|`"pause"`{ .language-lua }|暂停、断点键 PAUSE/BREAK|
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.INSERT`|`"insert"`|插入键 INSERT|
-|`Keyboard.DELETE`|`"delete"`|删除键 DELETE|
-|`Keyboard.HOME`|`"home"`|返回页首键 HOME|
-|`Keyboard.END`|`"end"`|返回页尾键 END|
-|`Keyboard.PAGE_UP`|`"pageup"`|向上翻页键 PAGE UP|
-|`Keyboard.PAGE_DOWN`|`"pagedown"`|向下翻页键 PAGE DOWN|
+|`Keyboard.INSERT`{ .language-lua }|`"insert"`{ .language-lua }|插入键 INSERT|
+|`Keyboard.DELETE`{ .language-lua }|`"delete"`{ .language-lua }|删除键 DELETE|
+|`Keyboard.HOME`{ .language-lua }|`"home"`{ .language-lua }|返回页首键 HOME|
+|`Keyboard.END`{ .language-lua }|`"end"`{ .language-lua }|返回页尾键 END|
+|`Keyboard.PAGE_UP`{ .language-lua }|`"pageup"`{ .language-lua }|向上翻页键 PAGE UP|
+|`Keyboard.PAGE_DOWN`{ .language-lua }|`"pagedown"`{ .language-lua }|向下翻页键 PAGE DOWN|
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.UP`|`"up"`|向上键 ↑|
-|`Keyboard.LEFT`|`"left"`|向左键 ←|
-|`Keyboard.DOWN`|`"down"`|向下键 ↓|
-|`Keyboard.RIGHT`|`"right"`|向右键 →|
+|`Keyboard.UP`{ .language-lua }|`"up"`{ .language-lua }|向上键 ↑|
+|`Keyboard.LEFT`{ .language-lua }|`"left"`{ .language-lua }|向左键 ←|
+|`Keyboard.DOWN`{ .language-lua }|`"down"`{ .language-lua }|向下键 ↓|
+|`Keyboard.RIGHT`{ .language-lua }|`"right"`{ .language-lua }|向右键 →|
 
 #### 数字区
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.NUM_LOCK`|`"numlock"`|数字锁定、解锁 NUM LOCK|
-|`Keyboard.DIVIDE`|`"numslash"`|除法键 /|
-|`Keyboard.MULTIPLY`|`"numstar"`|乘法键 *|
-|`Keyboard.NUM_MINUS`|`"numminus"`|减法键 -|
-|`Keyboard.NUM_SEVEN`|`"num7"`|数字键 7 或 HOME|
-|`Keyboard.NUM_EIGHT`|`"num8"`|数字键 8 或 ↑|
-|`Keyboard.NUM_NINE`|`"num9"`|数字键 9  或 PAGE UP|
-|`Keyboard.NUM_PLUS`|`"numplus"`|加法键 +|
-|`Keyboard.NUM_FOUR`|`"num4"`|数字键 4 或 ← |
-|`Keyboard.NUM_FIVE`|`"num5"`|数字键 5|
-|`Keyboard.NUM_SIX`|`"num6"`|数字键 6 或 →|
-|`Keyboard.NUM_ONE`|`"num1"`|数字键 1 或 END|
-|`Keyboard.NUM_TWO`|`"num2"`|数字键 2 或 ↓|
-|`Keyboard.NUM_THREE`|`"num3"`|数字键 3 或 PAGE DOWN|
-|`Keyboard.NUM_ZERO`|`"num0"`|数字键 0 或 INSERT|
-|`Keyboard.NUM_PERIOD`|`"numperiod"`|小数点键 . 或数字区删除键|
-|`Keyboard.NUM_ENTER`|`"numenter"`|回车键 ENTER|
+|`Keyboard.NUM_LOCK`{ .language-lua }|`"numlock"`{ .language-lua }|数字锁定、解锁 NUM LOCK|
+|`Keyboard.DIVIDE`{ .language-lua }|`"numslash"`{ .language-lua }|除法键 /|
+|`Keyboard.MULTIPLY`{ .language-lua }|`"numstar"`{ .language-lua }|乘法键 *|
+|`Keyboard.NUM_MINUS`{ .language-lua }|`"numminus"`{ .language-lua }|减法键 -|
+|`Keyboard.NUM_SEVEN`{ .language-lua }|`"num7"`{ .language-lua }|数字键 7 或 HOME|
+|`Keyboard.NUM_EIGHT`{ .language-lua }|`"num8"`{ .language-lua }|数字键 8 或 ↑|
+|`Keyboard.NUM_NINE`{ .language-lua }|`"num9"`{ .language-lua }|数字键 9  或 PAGE UP|
+|`Keyboard.NUM_PLUS`{ .language-lua }|`"numplus"`{ .language-lua }|加法键 +|
+|`Keyboard.NUM_FOUR`{ .language-lua }|`"num4"`{ .language-lua }|数字键 4 或 ← |
+|`Keyboard.NUM_FIVE`{ .language-lua }|`"num5"`{ .language-lua }|数字键 5|
+|`Keyboard.NUM_SIX`{ .language-lua }|`"num6"`{ .language-lua }|数字键 6 或 →|
+|`Keyboard.NUM_ONE`{ .language-lua }|`"num1"`{ .language-lua }|数字键 1 或 END|
+|`Keyboard.NUM_TWO`{ .language-lua }|`"num2"`{ .language-lua }|数字键 2 或 ↓|
+|`Keyboard.NUM_THREE`{ .language-lua }|`"num3"`{ .language-lua }|数字键 3 或 PAGE DOWN|
+|`Keyboard.NUM_ZERO`{ .language-lua }|`"num0"`{ .language-lua }|数字键 0 或 INSERT|
+|`Keyboard.NUM_PERIOD`{ .language-lua }|`"numperiod"`{ .language-lua }|小数点键 . 或数字区删除键|
+|`Keyboard.NUM_ENTER`{ .language-lua }|`"numenter"`{ .language-lua }|回车键 ENTER|
 
-### `unreleased`
+### `unreleased`{ .language-lua }
 
-说明：已通过 `press` 按下，但未通过 `release` 或 `reset` 弹起的按键，类型为 `{ string | boolean |nil }`。当某个按键通过 `press` 按下，则在此表中该按键状态被记录为 `true`；后续若通过 `release` 弹起，则记录为 `nil`。
+说明：已通过 `press`{ .language-lua } 按下，但未通过 `release`{ .language-lua } 或 `reset`{ .language-lua } 弹起的按键，类型为 `{ string | boolean |nil }`{ .language-lua }。当某个按键通过 `press`{ .language-lua } 按下，则在此表中该按键状态被记录为 `true`{ .language-lua }；后续若通过 `release`{ .language-lua } 弹起，则记录为 `nil`{ .language-lua }。
 
-### `frozen`
+### `frozen`{ .language-lua }
 
-说明：键盘是否处于冻结状态，类型为 `boolean`。
+说明：键盘是否处于冻结状态，类型为 `boolean`{ .language-lua }。
 
-注解：冻结状态下，`Keyboard` 提供的除 `reset` 外所有键盘操作接口失效。
+注解：冻结状态下，`Keyboard`{ .language-lua } 提供的除 `reset`{ .language-lua } 外所有键盘操作接口失效。
 
 ## 方法
 
-### `freeze`
+### `freeze`{ .language-lua }
 
-说明：冻结键盘，冻结后所有的键盘操作（`reset` 除外）将被忽略。
+说明：冻结键盘，冻结后所有的键盘操作（`reset`{ .language-lua } 除外）将被忽略。
 
-原型：`Keyboard:freeze()`
+原型：`Keyboard:freeze()`{ .language-lua }
 
-### `unfreeze`
+### `unfreeze`{ .language-lua }
 
-说明：与 `freeze` 相对，解除键盘冻结状态。
+说明：与 `freeze`{ .language-lua } 相对，解除键盘冻结状态。
 
-原型：`Keyboard:unfreeze()`
+原型：`Keyboard:unfreeze()`{ .language-lua }
 
-### `is_frozen`
+### `is_frozen`{ .language-lua }
 
 说明：判断键盘是否冻结。
 
-原型：`Keyboard:is_frozen()`
+原型：`Keyboard:is_frozen()`{ .language-lua }
 
-返回：若处于冻结状态，返回 `true`；否则，返回 `false`。
+返回：若处于冻结状态，返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `is_key_name_valid`
+### `is_key_name_valid`{ .language-lua }
 
 说明：判断给定的按键名称是否有效（即在 [键盘按键](#键盘按键) 列出的键位中）。
 
-原型：`Keyboard:is_key_name_valid(key_name)`
+原型：`Keyboard:is_key_name_valid(key_name)`{ .language-lua }
 
-- `key_name`：待检查的按键名称，类型为 `any`。
+- `key_name`{ .language-lua }：待检查的按键名称，类型为 `any`{ .language-lua }。
 
-返回：若按键有效，返回 `true`；否则，返回 `false`。
+返回：若按键有效，返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `press`
+### `press`{ .language-lua }
 
 说明：按下一个或多个按键。
 
-原型：`Keyboard:press(key, delay, precise)`
+原型：`Keyboard:press(key, delay, precise)`{ .language-lua }
 
-- `key`：需要按下的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
-- `delay`：按下按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `key`{ .language-lua }：需要按下的按键或按键列表，类型为 `string | string[]`{ .language-lua }。可以为单个按键（如：`Keyboard.ESCAPE`{ .language-lua }），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`{ .language-lua }。
+- `delay`{ .language-lua }：按下按键后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-注解：调用该接口按下某个按键后，将在 `unreleased` 表中记录按下的按键。
+注解：调用该接口按下某个按键后，将在 `unreleased`{ .language-lua } 表中记录按下的按键。
 
-### `release`
+### `release`{ .language-lua }
 
 说明：弹起一个或多个按键。
 
-原型：`Keyboard:release(key, delay, precise)`
+原型：`Keyboard:release(key, delay, precise)`{ .language-lua }
 
-- `key`：需要弹起的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
-- `delay`：弹起按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `key`{ .language-lua }：需要弹起的按键或按键列表，类型为 `string | string[]`{ .language-lua }。可以为单个按键（如：`Keyboard.ESCAPE`{ .language-lua }），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`{ .language-lua }。
+- `delay`{ .language-lua }：弹起按键后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-注解：调用该接口弹起某个按键后，将在 `unreleased` 表中移除（若存在）该按键。
+注解：调用该接口弹起某个按键后，将在 `unreleased`{ .language-lua } 表中移除（若存在）该按键。
 
-### `click`
+### `click`{ .language-lua }
 
 说明：敲击（按下并弹起）某个按键。
 
-原型：`Keyboard:click(key, delay, precise)`
+原型：`Keyboard:click(key, delay, precise)`{ .language-lua }
 
-- `key`：需要敲击的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
-- `delay`：敲击按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `key`{ .language-lua }：需要敲击的按键或按键列表，类型为 `string | string[]`{ .language-lua }。可以为单个按键（如：`Keyboard.ESCAPE`{ .language-lua }），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`{ .language-lua }。
+- `delay`{ .language-lua }：敲击按键后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-### `click_several_times`
+### `click_several_times`{ .language-lua }
 
 说明：敲击（按下并弹起）指定按键若干次。
 
-原型：`Keyboard:click_several_times(key, times, interval, delay, precise)`
+原型：`Keyboard:click_several_times(key, times, interval, delay, precise)`{ .language-lua }
 
-- `key`：需要敲击的按键或按键列表，类型为 `string | string[]`。可以为单个按键（如：`Keyboard.ESCAPE`），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`。
-- `times`：重复次数，类型为 `integer | nil`，缺省值为 `0`。
-- `interval`：敲击间隔时间，类型为 `integer | nil`，单位为毫秒（最后一次敲击后不适用该间隔时间），缺省值为 `50`。
-- `delay`：敲击按键后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `key`{ .language-lua }：需要敲击的按键或按键列表，类型为 `string | string[]`{ .language-lua }。可以为单个按键（如：`Keyboard.ESCAPE`{ .language-lua }），也可以为若干按键形成的列表，如 `{ Keyboard.A, Keyboard.B, Keyboard.C }`{ .language-lua }。
+- `times`{ .language-lua }：重复次数，类型为 `integer | nil`{ .language-lua }，缺省值为 `0`{ .language-lua }。
+- `interval`{ .language-lua }：敲击间隔时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒（最后一次敲击后不适用该间隔时间），缺省值为 `50`{ .language-lua }。
+- `delay`{ .language-lua }：敲击按键后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-### `reset`
+### `reset`{ .language-lua }
 
-说明：重置键盘，即弹起 `unreleased` 中记录的所有按键。
+说明：重置键盘，即弹起 `unreleased`{ .language-lua } 中记录的所有按键。
 
-原型：`Keyboard:reset()`
+原型：`Keyboard:reset()`{ .language-lua }
 
-注解：该接口不受 `frozen` 影响。
+注解：该接口不受 `frozen`{ .language-lua } 影响。
 
-### `puts`
+### `puts`{ .language-lua }
 
 说明：通过键盘输入由字母和数字构成的字符串。
 
-原型：`Keyboard:puts(s)`
+原型：`Keyboard:puts(s)`{ .language-lua }
 
-- `s`：待输入的字符串，类型为 `string`。
+- `s`{ .language-lua }：待输入的字符串，类型为 `string`{ .language-lua }。
 
-注解：`s` 中非字母和数字的内容将被忽略。
+注解：`s`{ .language-lua } 中非字母和数字的内容将被忽略。
 
 > 此接口未来会被改进为支持输入标点。
 
-### `is_modifier_pressed`
+### `is_modifier_pressed`{ .language-lua }
 
 说明：判断修饰键是否被按下。
 
-原型：`Keyboard:is_modifier_pressed(modifier)`
+原型：`Keyboard:is_modifier_pressed(modifier)`{ .language-lua }
 
-- `modifier`：修饰键，包括 `Keyboard.LEFT_SHIFT`、`Keyboard.RIGHT_SHIFT`、`Keyboard.LEFT_CTRL`、`Keyboard.RIGHT_CTRL`、`Keyboard.LEFT_ALT`、`Keyboard.RIGHT_ALT`。
+- `modifier`{ .language-lua }：修饰键，包括 `Keyboard.LEFT_SHIFT`{ .language-lua }、`Keyboard.RIGHT_SHIFT`{ .language-lua }、`Keyboard.LEFT_CTRL`{ .language-lua }、`Keyboard.RIGHT_CTRL`{ .language-lua }、`Keyboard.LEFT_ALT`{ .language-lua }、`Keyboard.RIGHT_ALT`{ .language-lua }。
 
-返回：若指定的修饰键被按下，则返回 `true`；否则，返回 `false`。
+返回：若指定的修饰键被按下，则返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
 注解：若不关心修饰键的左右之分，可使用下列值（**注意：仅限此接口中使用**）。
 
 |字段|值|说明|
 |---|---|---|
-|`Keyboard.SHIFT`|`"shift"`|SHIFT 键|
-|`Keyboard.CTRL`|`"ctrl"`|CTRL 键|
-|`Keyboard.ALT`|`"alt"`|ALT 键|
+|`Keyboard.SHIFT`{ .language-lua }|`"shift"`{ .language-lua }|SHIFT 键|
+|`Keyboard.CTRL`{ .language-lua }|`"ctrl"`{ .language-lua }|CTRL 键|
+|`Keyboard.ALT`{ .language-lua }|`"alt"`{ .language-lua }|ALT 键|
 
 ## 资源回收
 
-`Keyboard` 通过 `Error` 注册了灾难故障处理函数。在发生灾难错误导致程序无法继续运行时（需要保证顶层由 `Error:catch` 处理所有异常，另请参阅 [错误处理](/CSOL-Utilities/Executor/error/)），将通过 `reset` 弹起所有已通过 `press` 按下但未弹起的按键。
+`Keyboard`{ .language-lua } 通过 `Error`{ .language-lua } 注册了灾难故障处理函数。在发生灾难错误导致程序无法继续运行时（需要保证顶层由 `Error:catch`{ .language-lua } 处理所有异常，另请参阅 [错误处理](/CSOL-Utilities/Executor/error/)），将通过 `reset`{ .language-lua } 弹起所有已通过 `press`{ .language-lua } 按下但未弹起的按键。

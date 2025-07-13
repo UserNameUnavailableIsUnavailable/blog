@@ -2,7 +2,7 @@
 title: 鼠标操作
 ---
 
-**单例类** `Mosue` 控制鼠标操作。
+**单例类** `Mosue`{ .language-lua } 控制鼠标操作。
 
 ## 字段
 
@@ -10,233 +10,233 @@ title: 鼠标操作
 
 |字段|值|说明|
 |---|---|---|
-|`Mouse.LEFT`|`1`|鼠标左键|
-|`Mouse.MIDDLE`|`2`|鼠标中键|
-|`Mouse.RIGHT`|`3`|鼠标右键|
-|`Mouse.BACKWARD`|`4`|鼠标侧键（向后）|
-|`Mouse.FORWARD`|`5`|鼠标侧键（向前）|
+|`Mouse.LEFT`{ .language-lua }|`1`{ .language-lua }|鼠标左键|
+|`Mouse.MIDDLE`{ .language-lua }|`2`{ .language-lua }|鼠标中键|
+|`Mouse.RIGHT`{ .language-lua }|`3`{ .language-lua }|鼠标右键|
+|`Mouse.BACKWARD`{ .language-lua }|`4`{ .language-lua }|鼠标侧键（向后）|
+|`Mouse.FORWARD`{ .language-lua }|`5`{ .language-lua }|鼠标侧键（向前）|
 
-### `DOUBLE_CLICK_INTERVAL`
+### `DOUBLE_CLICK_INTERVAL`{ .language-lua }
 
-说明：双击时间间隔，单位为毫秒，默认值为 `150`（人手双击时间间隔一般为此值）。
+说明：双击时间间隔，单位为毫秒，默认值为 `150`{ .language-lua }（人手双击时间间隔一般为此值）。
 
-### `unreleased`
+### `unreleased`{ .language-lua }
 
-说明：通过 `press` 按下，但未通过 `release` 或 `reset` 弹起的按钮，类型为 `{ integer: boolean | nil }`。若某个按钮通过 `press` 按下，则在此表中该按钮状态被记录为 `true`；后续若通过 `release` 弹起，则记录为 `nil`。
+说明：通过 `press`{ .language-lua } 按下，但未通过 `release`{ .language-lua } 或 `reset`{ .language-lua } 弹起的按钮，类型为 `{ integer: boolean | nil }`{ .language-lua }。若某个按钮通过 `press`{ .language-lua } 按下，则在此表中该按钮状态被记录为 `true`{ .language-lua }；后续若通过 `release`{ .language-lua } 弹起，则记录为 `nil`{ .language-lua }。
 
-### `frozen`
+### `frozen`{ .language-lua }
 
-说明：鼠标是否处于冻结状态，类型为 `boolean`。
+说明：鼠标是否处于冻结状态，类型为 `boolean`{ .language-lua }。
 
-注解：冻结状态下，`Mouse` 提供的除 `reset` 外所有鼠标操作接口失效。
+注解：冻结状态下，`Mouse`{ .language-lua } 提供的除 `reset`{ .language-lua } 外所有鼠标操作接口失效。
 
 ## 方法
 
-### `freeze`
+### `freeze`{ .language-lua }
 
-说明：冻结鼠标，冻结后所有的鼠标操作（`reset` 除外）将被忽略。
+说明：冻结鼠标，冻结后所有的鼠标操作（`reset`{ .language-lua } 除外）将被忽略。
 
-原型：`Mouse:freeze()`
+原型：`Mouse:freeze()`{ .language-lua }
 
-### `unfreeze`
+### `unfreeze`{ .language-lua }
 
-说明：与 `freeze` 相对，解除鼠标冻结状态。
+说明：与 `freeze`{ .language-lua } 相对，解除鼠标冻结状态。
 
-原型：`Mouse:unfreeze()`
+原型：`Mouse:unfreeze()`{ .language-lua }
 
-### `is_frozen`
+### `is_frozen`{ .language-lua }
 
 说明：判断鼠标是否处于冻结状态。
 
-原型：`Mouse:is_frozen()`
+原型：`Mouse:is_frozen()`{ .language-lua }
 
-返回：若处于冻结状态，返回 `true`；否则，返回 `false`。
+返回：若处于冻结状态，返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `locate`
+### `locate`{ .language-lua }
 
 说明：定位鼠标光标位置。
 
-原型：`Mouse:locate()`
+原型：`Mouse:locate()`{ .language-lua }
 
-返回：鼠标光标位置 `(x, y)`，`x` 为横坐标，`y` 为纵坐标，类型均为 `integer`。
+返回：鼠标光标位置 `(x, y)`{ .language-lua }，`x`{ .language-lua } 为横坐标，`y`{ .language-lua } 为纵坐标，类型均为 `integer`{ .language-lua }。
 
-### `is_position_valid`
+### `is_position_valid`{ .language-lua }
 
 说明：检查鼠标光标位置坐标是否有效。
 
-原型：`Mouse:is_position_valid(x, y)`
+原型：`Mouse:is_position_valid(x, y)`{ .language-lua }
 
-- `x`：横坐标。
-- `y`：横坐标。
+- `x`{ .language-lua }：横坐标。
+- `y`{ .language-lua }：横坐标。
 
-返回：有效返回 `true`，否则返回 `false`。
+返回：有效返回 `true`{ .language-lua }，否则返回 `false`{ .language-lua }。
 
 注解：坐标值 $x, y \in \left\{t \in \mathbb{N} \left|0 \le t \lt 65535\right.\right\}$ 时视作有效。
 
-### `is_button_value_valid`
+### `is_button_value_valid`{ .language-lua }
 
 说明：检查按钮值是否有效。
 
-原型：`Mouse:is_button_value_valid(button_value)`
+原型：`Mouse:is_button_value_valid(button_value)`{ .language-lua }
 
-- `button_value`：需要检查的按钮值，类型为 `any`。
+- `button_value`{ .language-lua }：需要检查的按钮值，类型为 `any`{ .language-lua }。
 
-返回：有效返回 `true`；否则，返回 `false`。
+返回：有效返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `place`
+### `place`{ .language-lua }
 
 说明：将鼠标光标置于指定坐标处。
 
-原型：`Mouse:place(x, y, delay, precise)`
+原型：`Mouse:place(x, y, delay, precise)`{ .language-lua }
 
-- `x`：横坐标。
-- `y`：横坐标。
-- `delay`：移动后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `x`{ .language-lua }：横坐标。
+- `y`{ .language-lua }：横坐标。
+- `delay`{ .language-lua }：移动后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
 注解：若坐标无效，则不进行操作，但延迟正常进行。
 
-### `move_relative`
+### `move_relative`{ .language-lua }
 
 说明：相对移动鼠标光标。
 
-原型：`Mouse:move_relative(rightward, downward, delay, precise)`
+原型：`Mouse:move_relative(rightward, downward, delay, precise)`{ .language-lua }
 
-- `rightward`：水平方向相对移动的偏移量，类型为 `integer | nil`。正数表示向右，负数表示向左，缺省值为 `0`。
-- `downward`：垂直方向相对移动的偏移量，类型为 `integer | nil`。正数表示向下，负数表示向上，缺省值为 `0`。
-- `delay`：相对移动后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `rightward`{ .language-lua }：水平方向相对移动的偏移量，类型为 `integer | nil`{ .language-lua }。正数表示向右，负数表示向左，缺省值为 `0`{ .language-lua }。
+- `downward`{ .language-lua }：垂直方向相对移动的偏移量，类型为 `integer | nil`{ .language-lua }。正数表示向下，负数表示向上，缺省值为 `0`{ .language-lua }。
+- `delay`{ .language-lua }：相对移动后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-### `press`
+### `press`{ .language-lua }
 
 说明：按下指定按钮。
 
-原型：`Mouse:press(button, delay, precise)`
+原型：`Mouse:press(button, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `delay`：按下按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`{ .language-lua }：按下按钮后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-注解：调用此接口按下的按钮将记录到 `unreleased` 中。
+注解：调用此接口按下的按钮将记录到 `unreleased`{ .language-lua } 中。
 
-### `release`
+### `release`{ .language-lua }
 
 说明：弹起指定按钮。
 
-原型：`Mouse:release(button, delay, precise)`
+原型：`Mouse:release(button, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `delay`：弹起按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`{ .language-lua }：弹起按钮后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-注解：调用此接口弹起的按钮将从 `unreleased`（若存在）中移除。
+注解：调用此接口弹起的按钮将从 `unreleased`{ .language-lua }（若存在）中移除。
 
-### `click`
+### `click`{ .language-lua }
 
 说明：单击指定按钮。
 
-原型：`Mouse:click(button, delay, precise)`
+原型：`Mouse:click(button, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `delay`：单击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`{ .language-lua }：单击按钮后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-### `click_on`
+### `click_on`{ .language-lua }
 
 说明：用指定按钮单击指定位置。
 
-原型：`Mouse:click_on(button, x, y, delay, precise)`
+原型：`Mouse:click_on(button, x, y, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `x`：横坐标。
-- `y`：纵坐标。
-- `delay`：单击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `x`{ .language-lua }：横坐标。
+- `y`{ .language-lua }：纵坐标。
+- `delay`{ .language-lua }：单击按钮后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
 注解：若坐标无效，则不进行操作，但延迟正常进行。
 
-### `double_click`
+### `double_click`{ .language-lua }
 
 说明：双击指定按钮。
 
-原型：`Mouse:double_click(button, delay, precise)`
+原型：`Mouse:double_click(button, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `delay`：双击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `delay`{ .language-lua }：双击按钮后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-注解：双击间隔为 `DOUBLE_CLICK_INTERVAL`。
+注解：双击间隔为 `DOUBLE_CLICK_INTERVAL`{ .language-lua }。
 
-### `double_click_on`
+### `double_click_on`{ .language-lua }
 
 说明：用指定按钮双击指定位置。
 
-原型：`Mouse:double_click_on(button, x, y, delay, precise)`
+原型：`Mouse:double_click_on(button, x, y, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `x`：横坐标。
-- `y`：纵坐标。
-- `delay`：双击按钮后的延迟时间，类型为 `integer | nil`，单位为毫秒，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `x`{ .language-lua }：横坐标。
+- `y`{ .language-lua }：纵坐标。
+- `delay`{ .language-lua }：双击按钮后的延迟时间，类型为 `integer | nil`{ .language-lua }，单位为毫秒，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
 注解：若坐标无效，则不进行操作，但延迟正常进行。
 
-### `click_several_times`
+### `click_several_times`{ .language-lua }
 
 说明：重复点击指定按钮若干次。
 
-原型：`Mouse:click_several_times(button, times, interval, delay, precise)`
+原型：`Mouse:click_several_times(button, times, interval, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `times`：点击次数，类型为 `integer | nil`，缺省值为 `0`。
-- `interval`：点击间隔时间，类型为 `integer | nil`（最后一次点击后不适用该间隔时间），缺省值为 `50`。
-- `delay`：操作完成后的延迟时间，类型为 `integer | nil`，缺省值为 `50`。
-- `precise`：间隔时间和延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `times`{ .language-lua }：点击次数，类型为 `integer | nil`{ .language-lua }，缺省值为 `0`{ .language-lua }。
+- `interval`{ .language-lua }：点击间隔时间，类型为 `integer | nil`{ .language-lua }（最后一次点击后不适用该间隔时间），缺省值为 `50`{ .language-lua }。
+- `delay`{ .language-lua }：操作完成后的延迟时间，类型为 `integer | nil`{ .language-lua }，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：间隔时间和延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
-### `click_several_times_on`
+### `click_several_times_on`{ .language-lua }
 
 说明：用指定按钮重复点击指定位置若干次。
 
-原型：`Mouse:click_several_times_on(button, x, y, times, interval, delay, precise)`
+原型：`Mouse:click_several_times_on(button, x, y, times, interval, delay, precise)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
-- `x`：横坐标。
-- `y`：纵坐标。
-- `times`：点击次数，类型为 `integer | nil`，缺省值为 `0`。
-- `interval`：点击间隔时间，类型为 `integer | nil`（最后一次点击后不适用该间隔时间），缺省值为 `50`。
-- `delay`：操作完成后的延迟时间，类型为 `integer | nil`，缺省值为 `50`。
-- `precise`：间隔时间和延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `x`{ .language-lua }：横坐标。
+- `y`{ .language-lua }：纵坐标。
+- `times`{ .language-lua }：点击次数，类型为 `integer | nil`{ .language-lua }，缺省值为 `0`{ .language-lua }。
+- `interval`{ .language-lua }：点击间隔时间，类型为 `integer | nil`{ .language-lua }（最后一次点击后不适用该间隔时间），缺省值为 `50`{ .language-lua }。
+- `delay`{ .language-lua }：操作完成后的延迟时间，类型为 `integer | nil`{ .language-lua }，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：间隔时间和延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
 注解：若坐标无效，则不进行操作，但延迟正常进行。
 
-### `reset`
+### `reset`{ .language-lua }
 
-说明：重置鼠标，即弹起 `unreleased` 中记录的所有按键。
+说明：重置鼠标，即弹起 `unreleased`{ .language-lua } 中记录的所有按键。
 
-原型：`Mouse:reset()`
+原型：`Mouse:reset()`{ .language-lua }
 
-注解：该接口不受 `frozen` 影响。
+注解：该接口不受 `frozen`{ .language-lua } 影响。
 
-### `is_pressed`
+### `is_pressed`{ .language-lua }
 
 说明：判断指定按钮是否按下。
 
-原型：`Mouse:is_pressed(button)`
+原型：`Mouse:is_pressed(button)`{ .language-lua }
 
-- `button`：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
+- `button`{ .language-lua }：鼠标按钮，有效值列举在 [鼠标按钮](#鼠标按钮) 中。
 
-返回：若 `button` 处于按下状态，返回 `true`；否则，返回 `false`。
+返回：若 `button`{ .language-lua } 处于按下状态，返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `roll`
+### `roll`{ .language-lua }
 
 说明：滚动鼠标滚轮。
 
-原型：`Mouse:roll(times, delay, precise)`
+原型：`Mouse:roll(times, delay, precise)`{ .language-lua }
 
-- `times`：滚动滚轮的次数，类型为 `integer | nil`。正数表示向上滚动，负数表示向下滚动，缺省值为 `0`。
-- `delay`：滚动后的延迟时间，类型为 `integer | nil`，缺省值为 `50`。
-- `precise`：延迟时间是否需要精确定时，类型为 `boolean | nil`。
+- `times`{ .language-lua }：滚动滚轮的次数，类型为 `integer | nil`{ .language-lua }。正数表示向上滚动，负数表示向下滚动，缺省值为 `0`{ .language-lua }。
+- `delay`{ .language-lua }：滚动后的延迟时间，类型为 `integer | nil`{ .language-lua }，缺省值为 `50`{ .language-lua }。
+- `precise`{ .language-lua }：延迟时间是否需要精确定时，类型为 `boolean | nil`{ .language-lua }。
 
 ## 资源回收
 
-`Mouse` 通过 `Error` 注册了灾难故障处理函数。在发生灾难错误导致程序无法继续运行时（需要保证顶层由 `Error:catch` 处理所有异常，另请参阅 [错误处理](/CSOL-Utilities/Executor/error/)），将通过 `reset` 弹起所有已通过 `press` 按下但未弹起的按钮。
+`Mouse`{ .language-lua } 通过 `Error`{ .language-lua } 注册了灾难故障处理函数。在发生灾难错误导致程序无法继续运行时（需要保证顶层由 `Error:catch`{ .language-lua } 处理所有异常，另请参阅 [错误处理](/CSOL-Utilities/Executor/error/)），将通过 `reset`{ .language-lua } 弹起所有已通过 `press`{ .language-lua } 按下但未弹起的按钮。

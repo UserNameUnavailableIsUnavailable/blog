@@ -13,8 +13,6 @@ sidebar:
     - title: 执行器
       href: /CSOL-Utilities/Executor/index.html
       children:
-      - title: 概述
-        href: /CSOL-Utilities/Executor/index.html
       - title: 模块化编程
         href: /CSOL-Utilities/Executor/module.html
       - title: 运行时

@@ -6,7 +6,7 @@ This is a question I asked on Stack Overflow: [C++ format string compile-time va
 
 In my CSOL-Utilities project, I implemented a function that "translates" a string based on the current locale. The mechanism of `Translate` is straightforward. At runtime, a language package is loaded based on the locale specified by the user, e.g., `--language zh-CN`.
 
-```c++
+```cpp
 std::unordered_map<std::string, std::string> g_LanguagePackage;
 ```
 
@@ -14,7 +14,7 @@ The program prints the translated string by passing a `key` to `Translate`, whic
 
 During the initial design of CSOL-Utilities, I recognized the importance of **statically identifying** the number of format parameters. To achieve this, the `key` must have a `@N` suffix to indicate the number of format parameters (`@0` can be omitted). This helps reduce incorrect usage of `Translate`.
 
-```c++
+```cpp
 template <typename... VA>
 std::string Translate(const std::string& key, VA&&... va);
 ```
@@ -27,7 +27,7 @@ Initially, I explored C++20's `<format>` implementation for inspiration, but it 
 
 First, I tried these two approaches, but neither worked:
 
-```c++
+```cpp
 template <typename... VA>
 std::string Translate(constexpr std::string& key, VA&&... va); // std::string is not constexpr-able
 template <typename... VA>
@@ -40,14 +40,14 @@ The solution is quite ingenious. C++20 introduced the `consteval` keyword, which
 
 To leverage this, we need to define a compile-time class:
 
-```c++
+```cpp
 template <typename... VA>
 class TranslationKey;
 ```
 
 Using the `VA` template parameter, we can determine at compile time how many arguments are passed to the function. Additionally, we need a `consteval` constructor:
 
-```c++
+```cpp
 template <typename... VA>
 class TranslationKey
 {
@@ -91,7 +91,7 @@ private:
 
 Note that we use `m_KeyName` because `key_name` may not be `constexpr`, but `m_KeyName` must be evaluated at compile time for a `consteval` constructor. Consider this example:
 
-```c++
+```cpp
 consteval auto foo(int anything)
 {
     return 100;
@@ -100,7 +100,7 @@ consteval auto foo(int anything)
 
 You can pass any value to `anything` at runtime, but the function is still evaluated at compile time. The `consteval` keyword ensures the entire function is evaluated at compile time unless it encounters a statement that cannot be evaluated at compile time (in which case the compiler raises an error).
 
-```c++
+```cpp
 consteval auto foo(int anything)
 {
     if (anything > 100) {
@@ -121,7 +121,7 @@ int main()
 
 Returning to the `Translate` function:
 
-```c++
+```cpp
 template <typename... VA>
 std::string Translate(TranslationKey<VA...> translation_key, VA&&... va)
 {
@@ -133,7 +133,7 @@ std::string Translate(TranslationKey<VA...> translation_key, VA&&... va)
 
 This implementation is still incomplete because `VA` is deduced twice: once for `TranslationKey<VA...>` and again for `VA&&...`. This leads to a deduction mismatch:
 
-```c++
+```cpp
 Translate("HELLO@1", "foo"); // Candidate template ignored: could not match 'TranslationKey<VA...>' against 'const char *'
 ```
 
@@ -141,7 +141,7 @@ The issue arises because type deduction for `VA` happens independently for both 
 
 Since `VA...` is only used to count the number of format parameters, the exact types are irrelevant. To prevent type deduction for `TranslationKey<VA...>`, we can use C++20's `std::identity_t`. The final implementation of `Translate` looks like this:
 
-```c++
+```cpp
 template <typename... VA>
 std::string Translate(TranslationKey<std::type_identity_t<VA>...> translation_key, VA&&... va)
 {

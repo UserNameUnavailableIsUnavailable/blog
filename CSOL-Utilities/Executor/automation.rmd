@@ -2,81 +2,81 @@
 title: 自动操作
 ---
 
-**单例类** `Automation` 在执行器所有关键组件的基础上，进一步提供了关键的游戏内自动化操作功能。
+**单例类** `Automation`{ .language-lua } 在执行器所有关键组件的基础上，进一步提供了关键的游戏内自动化操作功能。
 
 ## 字段
 
-### `default_player`
+### `default_player`{ .language-lua }
 
-说明：默认挂机模式使用的玩家实例，类型为 `Player`。
+说明：默认挂机模式使用的玩家实例，类型为 `Player`{ .language-lua }。
 
-### `extended_player`
+### `extended_player`{ .language-lua }
 
-说明：扩展挂机模式使用的玩家实例，类型为 `Player`。
+说明：扩展挂机模式使用的玩家实例，类型为 `Player`{ .language-lua }。
 
 ## 方法
 
-### `create_game_room`
+### `create_game_room`{ .language-lua }
 
 说明：自动创建游戏房间。
 
-原型：`Automation:create_game_room()`
+原型：`Automation:create_game_room()`{ .language-lua }
 
-### `start_game_room`
+### `start_game_room`{ .language-lua }
 
 说明：开始游戏。
 
-原型：`Automation:start_game_room()`
+原型：`Automation:start_game_room()`{ .language-lua }
 
-### `choose_character`
+### `choose_character`{ .language-lua }
 
 说明：游戏加载完成后选择角色。
 
-原型：`Automation:choose_character()`
+原型：`Automation:choose_character()`{ .language-lua }
 
-### `try_confirm`
+### `try_confirm`{ .language-lua }
 
 说明：尝试进行游戏结算确认。
 
-原型：`Automation:try_confirm()`
+原型：`Automation:try_confirm()`{ .language-lua }
 
-### `choose_golden_zombie_reward`
+### `choose_golden_zombie_reward`{ .language-lua }
 
 说明：自动选择黄金僵尸击败奖励。
 
-原型：`Automation:choose_golden_zombie_reward`
+原型：`Automation:choose_golden_zombie_reward`{ .language-lua }
 
-### `combine_parts`
+### `combine_parts`{ .language-lua }
 
 说明：批量合成配件。
 
-原型：`Automation:combine_parts()`
+原型：`Automation:combine_parts()`{ .language-lua }
 
-### `purchase_item`
+### `purchase_item`{ .language-lua }
 
 说明：批量购买指定商店物品。
 
-原型：`Automation:purchase_item(buy_button_x, buy_button_y)`
+原型：`Automation:purchase_item(buy_button_x, buy_button_y)`{ .language-lua }
 
-- `buy_button_x`：兑换按钮横坐标，类型为 `integer | nil`。
-- `buy_button_y`：兑换按钮纵坐标，类型为 `integer | nil`。
+- `buy_button_x`{ .language-lua }：兑换按钮横坐标，类型为 `integer | nil`{ .language-lua }。
+- `buy_button_y`{ .language-lua }：兑换按钮纵坐标，类型为 `integer | nil`{ .language-lua }。
 
 注解：每次调用该接口都会记录本次提供的坐标参数。调用本接口时，坐标值可以缺省，此时将复用最近一次提供的坐标值。
 
-### `locate_cursor`
+### `locate_cursor`{ .language-lua }
 
 说明：提供定位鼠标光标位置的功能。
 
-原型：`Automation:locate_cursor`
+原型：`Automation:locate_cursor`{ .language-lua }
 
-注解：在 `CTRL` 与 `ALT` 同时按下，且 `SHIFT` 处于弹起状态时（这样设计是为了避免与控制器模式切换造成不必要的冲突），在控制台输出当前鼠标光标位置。
+注解：在 `CTRL`{ .language-lua } 与 `ALT`{ .language-lua } 同时按下，且 `SHIFT`{ .language-lua } 处于弹起状态时（这样设计是为了避免与控制器模式切换造成不必要的冲突），在控制台输出当前鼠标光标位置。
 
-## `Automation` 注册的中断处理
+## `Automation`{ .language-lua } 注册的中断处理
 
-- 手动接管功能：当用户按下左侧 `CTRL` 与右侧 `CTRL` 后，冻结后续键鼠操作；按下左侧 `ALT` 与右侧 `ALT` 解冻；
+- 手动接管功能：当用户按下左侧 `CTRL`{ .language-lua } 与右侧 `CTRL`{ .language-lua } 后，冻结后续键鼠操作；按下左侧 `ALT`{ .language-lua } 与右侧 `ALT`{ .language-lua } 解冻；
 - 复活、回合重置功能：在游戏内每隔 8 秒尝试执行复活或回合重置操作（需在配置文件中启用此功能）；
-- 命令变更即时响应功能：定期检查命令文件，当命令名称发生变更时，抛出 `COMMAND_CHANGED` 错误。
+- 命令变更即时响应功能：定期检查命令文件，当命令名称发生变更时，抛出 `COMMAND_CHANGED`{ .language-lua } 错误。
 
-## `Automation` 注册的错误处理
+## `Automation`{ .language-lua } 注册的错误处理
 
-- `COMMAND_CHANGED`：处理命令变更错误。
+- `COMMAND_CHANGED`{ .language-lua }：处理命令变更错误。

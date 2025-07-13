@@ -23,7 +23,7 @@ title: CSOL 集成工具开发者文档
 
 ## 概述
 
-CSOL-Utilities 共分为控制器（Controller）和执行器（Executor）两部分。控制器使用 C++ 实现，执行器使用 Lua 实现。执行器运行于 Logitech G Hub 控制器运行后，实时向 `$~cmd.lua` 写入命令，执行器定期从 `$~cmd.lua` 中取出命令并解释执行。因此，执行器的行为由控制器决定。
+CSOL-Utilities 共分为控制器（Controller）和执行器（Executor）两部分。控制器使用 C++ 实现，执行器使用 Lua 实现。执行器运行于 Logitech G Hub 控制器运行后，实时向 \$~cmd.lua 写入命令，执行器定期从 \$~cmd.lua 中取出命令并解释执行。因此，执行器的行为由控制器决定。
 
 ## 其他
 

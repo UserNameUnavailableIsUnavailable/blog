@@ -2,102 +2,102 @@
 title: 中断
 ---
 
-**多例类** `Interrupt` 提供了创建**中断对象**的功能。中断对象可以通过 `Runtime:register_interrupt` 方法注册到中断列表中，进而在执行器运行期间进行中断处理。
+**多例类** `Interrupt`{ .language-lua } 提供了创建**中断对象**的功能。中断对象可以通过 `Runtime:register_interrupt`{ .language-lua } 方法注册到中断列表中，进而在执行器运行期间进行中断处理。
 
 ## 概念
 
-执行器中存在两种中断：**可屏蔽中断（maskable interrupt）**和**不可屏蔽中断（non-maskable interrupt）**。`Runtime` 中允许开发者开、关中断。关中断后，将不会触发可屏蔽中断，但不可屏蔽中断不受中断开关的影响。除了重要程度很高的中断事件，一般中断应设置为可屏蔽中断。
+执行器中存在两种中断：**可屏蔽中断（maskable interrupt）**和**不可屏蔽中断（non-maskable interrupt）**。`Runtime`{ .language-lua } 中允许开发者开、关中断。关中断后，将不会触发可屏蔽中断，但不可屏蔽中断不受中断开关的影响。除了重要程度很高的中断事件，一般中断应设置为可屏蔽中断。
 
 > 执行器的手动接管功能就采用不可屏蔽中断实现。
 
 ## 字段
 
-### `name`
+### `name`{ .language-lua }
 
-说明：中断名称，类型为 `string`。
+说明：中断名称，类型为 `string`{ .language-lua }。
 
-注解：构造时可缺省，缺省值为 `"ANONYMOUS"`。
+注解：构造时可缺省，缺省值为 `"ANONYMOUS"`{ .language-lua }。
 
-### `handler`
+### `handler`{ .language-lua }
 
-说明：中断处理函数，类型为 `function`。
+说明：中断处理函数，类型为 `function`{ .language-lua }。
 
 注解：构造时可缺省，缺省时提供默认的空处理函数。
 
-### `parameters`
+### `parameters`{ .language-lua }
 
-说明：中断处理函数接收的参数列表，类型为 `any[]`。
+说明：中断处理函数接收的参数列表，类型为 `any[]`{ .language-lua }。
 
 注解：构造时可缺省，缺省时提供空参数列表。
 
-### `maskable`
+### `maskable`{ .language-lua }
 
-说明：中断对象可屏蔽性，类型为 `boolean`。
+说明：中断对象可屏蔽性，类型为 `boolean`{ .language-lua }。
 
-注解：构造时可缺省，缺省值为 `true`，即默认为可屏蔽中断。将不可屏蔽中断对象注册到 `Runtime` 的中断列表后，即使处于关中断状态，不可屏蔽中断对象依旧触发中断。
+注解：构造时可缺省，缺省值为 `true`{ .language-lua }，即默认为可屏蔽中断。将不可屏蔽中断对象注册到 `Runtime`{ .language-lua } 的中断列表后，即使处于关中断状态，不可屏蔽中断对象依旧触发中断。
 
-### `alive`
+### `alive`{ .language-lua }
 
-说明：中断对象是否有效，类型为 `boolean`。
+说明：中断对象是否有效，类型为 `boolean`{ .language-lua }。
 
-注解：构造时可缺省，缺省值为 `true`，即默认有效。
+注解：构造时可缺省，缺省值为 `true`{ .language-lua }，即默认有效。
 
-### `result`
+### `result`{ .language-lua }
 
-说明：最近一次执行 `handler` 的返回值。
+说明：最近一次执行 `handler`{ .language-lua } 的返回值。
 
-注解：若 `handler` 无返回值，则此字段为 `nil`。
+注解：若 `handler`{ .language-lua } 无返回值，则此字段为 `nil`{ .language-lua }。
 
 ## 方法
 
-### `new`
+### `new`{ .language-lua }
 
 说明：构造中断对象。
 
-原型：`Interrupt:new(init)`
+原型：`Interrupt:new(init)`{ .language-lua }
 
-- `init`：初始化列表，或中断处理函数，类型为 `table | function`。当 `init` 为 `table` 时，表中可包含本文所述的 `name`、`handler`、`parameters`、`maskable`、`alive` 字段（其余字段**丢弃**）；当 `init` 为 `function` 时，`handler` 被设置为 `init` ，其余字段保持缺省值。
+- `init`{ .language-lua }：初始化列表，或中断处理函数，类型为 `table | function`{ .language-lua }。当 `init`{ .language-lua } 为 `table`{ .language-lua } 时，表中可包含本文所述的 `name`{ .language-lua }、`handler`{ .language-lua }、`parameters`{ .language-lua }、`maskable`{ .language-lua }、`alive`{ .language-lua } 字段（其余字段**丢弃**）；当 `init`{ .language-lua } 为 `function`{ .language-lua } 时，`handler`{ .language-lua } 被设置为 `init`{ .language-lua } ，其余字段保持缺省值。
 
-返回：中断对象，类型为 `Interrupt`。
+返回：中断对象，类型为 `Interrupt`{ .language-lua }。
 
 注解：
 
-### `is_alive`
+### `is_alive`{ .language-lua }
 
-说明：判断中断对象是否有效（`alive` 字段）。
+说明：判断中断对象是否有效（`alive`{ .language-lua } 字段）。
 
-原型：`Interrupt:is_alive`
+原型：`Interrupt:is_alive`{ .language-lua }
 
-返回：若有效，返回 `true`；否则，返回 `false`。
+返回：若有效，返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `is_maskable`
+### `is_maskable`{ .language-lua }
 
-说明：判断中断对象是否可屏蔽（`maskable` 字段）。
+说明：判断中断对象是否可屏蔽（`maskable`{ .language-lua } 字段）。
 
-原型：`Interrupt:is_maskable()`
+原型：`Interrupt:is_maskable()`{ .language-lua }
 
-返回：若该中断可屏蔽，则返回 `true`；否则，返回 `false`。
+返回：若该中断可屏蔽，则返回 `true`{ .language-lua }；否则，返回 `false`{ .language-lua }。
 
-### `kill`
+### `kill`{ .language-lua }
 
 说明：“杀死”中断对象。
 
-注解：调用后，相应中断的 `alive` 被置为 `false`。
+注解：调用后，相应中断的 `alive`{ .language-lua } 被置为 `false`{ .language-lua }。
 
-### `handle`
+### `handle`{ .language-lua }
 
-说明：调用构造时提供的中断处理函数 `handler`。
+说明：调用构造时提供的中断处理函数 `handler`{ .language-lua }。
 
-原型：`Interrupt:handle()`
+原型：`Interrupt:handle()`{ .language-lua }
 
-返回：与 `handler` 保持一致。
+返回：与 `handler`{ .language-lua } 保持一致。
 
-注解：`result` 中也会保存 `handler` 的返回值。若 `handler` 存在多个返回值，`result` 则将其封装为列表。
+注解：`result`{ .language-lua } 中也会保存 `handler`{ .language-lua } 的返回值。若 `handler`{ .language-lua } 存在多个返回值，`result`{ .language-lua } 则将其封装为列表。
 
-### `get_result`
+### `get_result`{ .language-lua }
 
-说明：获取最近一次中断处理结果（即 `result`）。
+说明：获取最近一次中断处理结果（即 `result`{ .language-lua }）。
 
-原型：`Interrupt:get_result()`
+原型：`Interrupt:get_result()`{ .language-lua }
 
-返回：中断处理结果。对于单个返回值，类型与 `handler` 返回值类型相同；对于多个返回值，`result` 则将其封装为列表。
+返回：中断处理结果。对于单个返回值，类型与 `handler`{ .language-lua } 返回值类型相同；对于多个返回值，`result`{ .language-lua } 则将其封装为列表。

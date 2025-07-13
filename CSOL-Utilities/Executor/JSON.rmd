@@ -2,33 +2,33 @@
 title: JSON 解析
 ---
 
-**单例类** `JSON` 提供了 JSON 编解码模块，该模块基于 GitHub 开源项目 [rxi/json.lua](https://github.com/rxi/json.lua) 修改而来。
+**单例类** `JSON`{ .language-lua } 提供了 JSON 编解码模块，该模块基于 GitHub 开源项目 [rxi/json.lua](https://github.com/rxi/json.lua) 修改而来。
 
 ## 方法
 
-### `encode`
+### `encode`{ .language-lua }
 
-说明：将 `table` 编码为 JSON 字符串。
+说明：将 `table`{ .language-lua } 编码为 JSON 字符串。
 
-原型：`JSON.encode(t)`
+原型：`JSON.encode(t)`{ .language-lua }
 
-- `t`：待编码为 JSON 字符串的表，类型为 `table`。
+- `t`{ .language-lua }：待编码为 JSON 字符串的表，类型为 `table`{ .language-lua }。
 
 注解：JSON 对象的字段值支持如下基础类型：
 
-- `nil`
-- `string`
-- `number`
-- `boolean`
+- `nil`{ .language-lua }
+- `string`{ .language-lua }
+- `number`{ .language-lua }
+- `boolean`{ .language-lua }
 
 JSON 对象的字段值可以是上述基础类型，或由上述基础类型构成元组或嵌套的子 JSON 对象。
 
-### `decode`
+### `decode`{ .language-lua }
 
 说明：将 JSON 字符串解析为 JSON 对象。
 
-原型：`JSON.decode(s)`
+原型：`JSON.decode(s)`{ .language-lua }
 
-- `s`：JSON 字符串，类型为 `string`。
+- `s`{ .language-lua }：JSON 字符串，类型为 `string`{ .language-lua }。
 
-返回：JSON 对象，类型为 `table`。
+返回：JSON 对象，类型为 `table`{ .language-lua }。
