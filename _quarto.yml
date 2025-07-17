@@ -2,8 +2,8 @@ project:
   output-dir: blog
   type: website
   title: "Macrohard"
-  post-render:
-    - python sidebar.py
+  # post-render:
+  #   - python sidebar.py
 author: admin
 website:
   page-navigation: true
