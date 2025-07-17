@@ -87,21 +87,21 @@ R Markdown 预览可使用 Quarto 提供的插件，详见 [Quarto 官网](https
 ```markdown
 :::: { #custom-block .columns width="200" }
 ::: { .column }
-### 第一栏
+第一栏
 
 第一栏
 
 第一栏
 :::
 ::: { .column }
-### 第二栏
+第二栏
 
 第二栏
 
 第二栏
 :::
 ::: { .column }
-### 第三栏
+第三栏
 
 第三栏
 
