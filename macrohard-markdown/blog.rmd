@@ -206,6 +206,70 @@ printf("hello, world!");
 
 若要在代码块中使用 `` ``` ``，则代码块限定符中的反引号**至少**需要 4 个，以此类推，若代码块中反引号连续出现次数最大值为 $N$，则代码块限定符中的反引号**至少**需要 $N + 1$ 个。
 
+## 标注块
+
+标注块是对 Markdown 引用块的增强，支持更丰富的标注类型，结合使用容器与属性语法 `::: { .callout-type } :::` 可以定义一个标注块，其中 `callout-type` 可以是以下类型之一：
+
+### `callout-note`
+
+```markdown
+::: {.callout-note}
+一些笔记。
+:::
+```
+
+::: {.callout-note}
+一些笔记。
+:::
+
+### `callout-tip`
+
+```markdown
+::: {.callout-tip}
+一些贴士。
+:::
+```
+
+::: {.callout-tip}
+一些贴士。
+:::
+
+### `callout-important`
+
+```markdown
+::: {.callout-important}
+谨记，毋忘！
+:::
+```
+
+::: {.callout-important}
+谨记，毋忘！
+:::
+
+### `callout-warning`
+
+```markdown
+::: {.callout-warning}
+可能存在潜在问题。
+:::
+```
+
+::: {.callout-warning}
+可能存在潜在问题。
+:::
+
+### `callout-caution`
+
+```markdown
+::: {.callout-caution}
+绝对不要这样做！
+:::
+```
+
+::: {.callout-caution}
+绝对不要这样做！
+:::
+
 ## 公式
 
 本扩展支持使用 `$...$`（**推荐**）及 `\(...\)` 作为行内公式定界符，`$$...$$`（**推荐**）及 `\[...\]` 作为块级公式定界符。

@@ -1,7 +1,8 @@
 ---
 title: 基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 的 R Markdown 扩展语法实现
-work-source: "[Macrohard](https://macrohard.fun/)"
-citations: 114514 citations
+additional:
+    - "https://macrohard.fun/"
+    - 114,514 citations
 format: revealjs
 author:
     - Foo^1^
@@ -225,6 +226,68 @@ y = \boldsymbol{w}^\mathsf{T}\boldsymbol{x} + b
 y = ax+b
 \end{equation}
 $$
+
+## 标注块
+
+### `callout-note`
+
+```markdown
+::: {.callout-note}
+一些笔记。
+:::
+```
+
+::: {.callout-note}
+一些笔记。
+:::
+
+### `callout-tip`
+
+```markdown
+::: {.callout-tip}
+一些贴士。
+:::
+```
+
+::: {.callout-tip}
+一些贴士。
+:::
+
+### `callout-important`
+
+```markdown
+::: {.callout-important}
+谨记，毋忘！
+:::
+```
+
+::: {.callout-important}
+谨记，毋忘！
+:::
+
+### `callout-warning`
+
+```markdown
+::: {.callout-warning}
+可能存在潜在问题。
+:::
+```
+
+::: {.callout-warning}
+可能存在潜在问题。
+:::
+
+### `callout-caution`
+
+```markdown
+::: {.callout-caution}
+绝对不要这样做！
+:::
+```
+
+::: {.callout-caution}
+绝对不要这样做！
+:::
 
 ## 流程图
 

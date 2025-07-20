@@ -2,7 +2,7 @@
 title: A `Translate` Example
 ---
 
-This is a question I asked on Stack Overflow: [C++ format string compile-time validity check](https://stackoverflow.com/questions/79622326/c-format-string-compile-time-validity-check).
+This is a question I asked on Stack Overflow: [C++ format string compile-time validity check](https://stackoverflow.com/questions/79622326/c-format-string-compile-time-validity-check){ target="_blank" }.
 
 In my CSOL-Utilities project, I implemented a function that "translates" a string based on the current locale. The mechanism of `Translate` is straightforward. At runtime, a language package is loaded based on the locale specified by the user, e.g., `--language zh-CN`.
 

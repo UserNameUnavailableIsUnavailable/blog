@@ -3,9 +3,9 @@ sidebar:
   - title: Back
     href: /index.html
   - title: C++ 笔记
-    href: /cpp-notes/index.html
+    href: /cpp/index.html
     children:
     - title: Value Categories
-      href: /cpp-notes/value-categories/index.html
+      href: /cpp/value-categories/index.html
     - title: A `Translate` Example
-      href: /cpp-notes/a-translate-example/index.html
+      href: /cpp/a-translate-example/index.html
