@@ -1,2 +1,9 @@
+website:
+  name: Macrohard Blog
+  homepage: https://blog.macrohard.fun
+  description: "Macrohard Blog - A blog about technology, programming, and more."
+  favicon: /favicon.ico
+
 format: html
+csl: /ieee.csl
 footer: /footer.rmd

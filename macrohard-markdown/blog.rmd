@@ -12,7 +12,7 @@ institute:
     - Ipsum^1^
     - Dolor^2^
     - Sit^3^
-bibliography: /macrohard-markdown/references.bib
+bibliography: references.bib
 ---
 
 ## 概述
