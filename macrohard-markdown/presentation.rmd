@@ -5,14 +5,14 @@ additional:
     - 114,514 citations
 format: revealjs
 author:
-    - Foo^1^
-    - Bar^2^
-    - Baz^2^
-    - Qux^3^
+    - 田所浩二^1^
+    - 远野^1^
+    - 淳平^2^
+    - 德川^2^
+    - 我修院^2^
 institute:
-    - Ipsum^1^
-    - Dolor^2^
-    - Sit^3^
+    - 下北沢沼气研究所^1^
+    - 会员制餐饮有限公司^2^
 bibliography: references.bib
 ---
 
