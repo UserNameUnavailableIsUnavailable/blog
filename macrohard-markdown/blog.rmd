@@ -13,6 +13,8 @@ institute:
     - Dolor^2^
     - Sit^3^
 bibliography: references.bib
+footnotes-location: footnotes
+references-location: references
 ---
 
 ## 概述
@@ -328,9 +330,35 @@ graph TD
 
 另外，点击图片后可以使用 ImageViewer 工具查看图片，该工具支持图片放大、缩小、旋转等功能。
 
-## 引用
+## 定义脚注
 
-```plain
+```markdown
+这是一个脚注示例 [^FootnoteExample]。
+
+[^FootnoteExample]: 这是脚注的内容。
+```
+
+这是一个脚注示例 [^FootnoteExample]。
+
+[^FootnoteExample]: 这是脚注的内容。
+
+当鼠标悬停在脚注链接上时，将会显示脚注的内容。默认情况下，脚注内容将放置在页面底端。若要自定义脚注内容显示的位置，可以在文档元信息中填写 `footnotes-location: footnotes` 并创建一个容器，将其 id 设置为 `footnotes` 即可自动生成脚注列表（`footnotes` 根据需要进行修改）。
+
+```yaml
+footnotes-location: footnotes
+```
+
+```markdown
+## 脚注
+::: {#footnotes}
+:::
+```
+
+## 定义引用
+
+要定义引用，需要提供一个 BibTeX 文件（例如 `references.bib`），并在文档元信息中指定 `bibliography: references.bib`。引用的语法为 `[@citation-key]`，其中 `citation-key` 是 BibTeX 中定义的引用键。例如：
+
+```markdown
 [@shao2024explore; @fu2024featup] 提出了 xxx 方法
 
 [@zhou2022extract] 提出了 xxx 方法
@@ -346,10 +374,13 @@ graph TD
 
 [@shao2024explore]  探索了 xxx
 
+当鼠标悬停在引用链接上时，将会显示引用的详细信息。默认情况下，不会为引用生成单独的章节，若要列出引用的内容，可以在文档元信息中填写 `references-location: references` 并创建一个容器，将其 id 设置为 `references` 即可自动生成参考文献列表（`references` 根据需要进行修改）：
+
+```yaml
+references-location: references
+```
+
 ```markdown
-
-创建一个容器，将其 id 设置为 `references` 即可自动生成参考文献列表：
-
 ## 参考文献
 
 ::: {#references}
@@ -360,4 +391,9 @@ graph TD
 ## 参考文献
 
 :::{#references}
+:::
+
+## 脚注
+
+::: {#footnotes}
 :::

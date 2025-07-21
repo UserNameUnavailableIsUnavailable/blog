@@ -350,15 +350,3 @@ flowchart TD
 ```markdown
 
 创建一个容器，将其 id 设置为 `references` 即可自动生成参考文献列表：
-
-## 参考文献
-
-::: {#references}
-<!-- 参考文献在此处生成 -->
-:::
-```
-
-## 参考文献
-
-:::{#references}
-:::
