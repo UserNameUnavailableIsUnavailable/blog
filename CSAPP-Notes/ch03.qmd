@@ -1,0 +1,76 @@
+---
+title: CSAPP 第三章笔记
+---
+
+## 摘要
+
+这一章主要介绍了程序的机器级表示，介绍了 x86_64 汇编的基本知识和一些常见的技巧。
+
+## 清零惯用法（Zeroing Idiom）
+
+`xor rax, rax`{.language-nasm} 是将寄存器清零的惯用法，与符合直觉的 `mov rax, 0`{.language-nasm} 相比，主要有如下优势：
+
+- 指令字长更短；
+- 现代 CPU 对这一惯用法有特殊优化，执行速度更快。
+
+不过，这种惯用法也不是万能的：
+- `xor` 作为逻辑运算指令，会对标志位寄存器的状态产生影响，在使用时需要注意；
+- 这一惯用法仅能用于清空寄存器，不能用于清空内存。
+
+## 零检查惯用法（Zero Checking Idiom）
+
+`cmp` 和 `test` 都是比较指令，`cmp` 在作用效果上与不修改目标操作数的 `sub` 等价，`test` 在作用效果上与不修改目标操作数的 `and` 等价。
+
+一个很特殊的情况是将操作数与 `0` 进行大小比较，这种情况一般采用 `test` 指令实现（下例假定 `rax` 中存放一个有符号数）：
+
+```nasm
+test rax, rax
+```
+
+执行后，标志位寄存器会发生如下变化：
+
+- 若 `rax == 0`，则 `ZF = 1`；
+- 若 `rax > 0`，则 `ZF = 0` 且 `SF = 0`；
+- 若 `rax < 0`，则 `ZF = 0` 且 `SF = 1`。
+  
+上述变化与 `cmp rax, 0` 的变化相同，但 `test` 指令的指令字长更短，执行速度更快。
+
+## 条件赋值
+
+对于 CPU 来说，跳转是一件代价很高的事情。一条指令的执行宏观上可以分为取指、译码、执行三个阶段，CPU 将连续的指令的不同执行步骤排列在一条流水线中以充分利用 CPU 资源。跳转指令的存在会导致当前流水线被清空，导致 15 ~ 30 个时钟周期的浪费。现代 CPU 通过分支预测逻辑（branch prediction logic）来缓解跳转指令造成的上述问题，但这种方式不确定性很大，只能一定程度上减小性能开销。条件赋值指令 `cmov` 则能够在不使用跳转的情况下，在不影响流水线的情况下实现带条件判断的赋值。
+
+```c
+long abs_diff(int x, int y)
+{
+    return x < y ? y - x : x - y;
+}
+```
+
+上述代码有两种汇编实现方案：
+
+一种是传统的条件分支方案：
+
+```nasm
+abs_diff:
+    cmp rdi, rsi ; rdi = x, rsi = y
+    jl .L1
+    sub rdi, rsi
+    mov rax, rdi
+    ret
+.L1: ; x < y
+    sub rsi, rdi
+    mov rax, rsi
+    ret
+```
+
+另一种是使用条件赋值指令的方案，该方案同时计算 `x - y` 与 `y - x`，将非负结果保留在 `rax` 中返回：
+
+```nasm
+abs_diff:
+    mov rax, rsi ; rax = y
+    sub rax, rdi ; rax = y - x
+    sub rdi, rsi ; rdi = x - y
+    test rdi, rdi ; check if x - y is positive
+    cmovg rax, rdi ; if x - y > 0, rax = x - y
+    ret
+```

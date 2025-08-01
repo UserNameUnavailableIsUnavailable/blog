@@ -1,4 +1,5 @@
   sidebar:
+    children:
     - title: Back
       href: /index.html
     - title: Vector Calculus

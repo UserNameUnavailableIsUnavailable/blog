@@ -1,0 +1,8 @@
+sidebar:
+  children:
+  - title: Back
+    href: /index.html
+  - title: Digital Image Processing
+    href: /Digital-Image-Processing/index.html
+  - title: Chapter 2 Notes
+    href: /Digital-Image-Processing/ch02.html

@@ -1,0 +1,56 @@
+---
+title: Chapter 2 Notes
+---
+
+## Basic Relationships between Pixels
+
+### Neighbor
+
+From a spatial perspective, the pixel at coordinate $(x, y)$ has four neighbors in the horizontal and vertical directions, called **4-neighbors** and denoted by $N_4(p)$. It also has four diagonal neighbors, denoted by $N_D(p)$. The set of all eight neighbors is referred to as $N_8(p)$.
+
+### Adjacency
+
+Neighborhood describes only the spatial relationship between pixels. Often, we are also interested in the semantic relationship between pixels. For example, in a binary image where zero-valued pixels represent the background and one-valued pixels represent the foreground, we focus on the neighboring pixels that also have a value of one. These pixels are said to be **adjacent** to $p$.
+
+To define adjacency, we introduce a set $V$ of intensity values of interest, such as $V = \{1\}$ for foreground pixels in a binary image.
+
+Similar to neighbors, a pixel $p$ can have 4-adjacent or 8-adjacent pixels, but adjacency requires that the neighboring pixels also have values in $V$.
+
+Adjacency helps us identify semantic relationships between pixels, such as extracting regions of interest by tracing their borders. In practice, 4-adjacency may not be sufficient to identify borders, while 8-adjacency can sometimes cause ambiguity. To address this, **m-adjacency** (mixed adjacency) is introduced and defined as follows:
+
+Two pixels $p$ and $q$ with values in $V$ are m-adjacent if:
+1. $q \in N_4(p)$, or
+2. $q \in N_D(p)$ and $N_4(p) \cap N_4(q)$ contains no pixels with values in $V$.
+
+This definition resolves ambiguity by prioritizing 4-adjacency. If $p$ and $q$ are diagonal neighbors and share one or more 4-neighbors, they are not m-adjacent. The intuition is that $p$ can be reached from $q$ via their shared 4-neighbors.
+
+### Digital Path (Curve)
+
+A sequence of **distinct** pixels $(x_0, y_0), (x_1, y_1), \cdots, (x_n, y_n)$ forms a digital path if each pair $(x_i, y_i)$ and $(x_{i+1}, y_{i+1})$ ($0 \le i \le n-1$) are adjacent. The path is **closed** if $(x_0, y_0) = (x_n, y_n)$.
+
+### Connectivity, Regions, and Boundaries
+
+Given a subset $S$ of pixels in an image, two pixels $p$ and $q$ are connected if there exists a digital path between them consisting entirely of pixels in $S$. By definition, a pixel is always connected to itself.
+
+For any pixel $p$ in $S$, the set of all pixels connected to $p$ is called the **connected component** of $p$ in $S$. If $S$ contains only one connected component, it is called a **connected set** or a **region** of the image.
+
+Given regions $R_i$ and $R_j$, they are **adjacent** if $R_i \cap R_j$ forms a connected set; otherwise, they are **disjoint**.
+
+The **boundary** (also called **border** or **contour**) of a region $R$ is the set of pixels in $R$ that are adjacent to pixels in $R^\mathrm{C}$. More strictly, this is called the **inner border** to distinguish it from the **outer border**. This distinction is important in border-following algorithms.
+
+### Distance
+
+The definition of distance between pixels is similar to the definition of a norm, and must satisfy three basic properties. Given three pixels $p$, $q$, and $r$ in an image, the distance function $d(p, q)$ must satisfy:
+
+- **Non-negativity**: $d(p, q) \ge 0$ for all pixels $p$ and $q$, and $d(p, q) = 0$ if and only if $p = q$.
+- **Symmetry**: $d(p, q) = d(q, p)$ for all pixels $p$ and $q$.
+- **Triangle inequality**: $d(p, q) \le d(p, r) + d(r, q)$ for all pixels $p$, $q$, and $r$.
+
+Given $p(a, b)$ and $q(x, y)$, three common distance metrics used in digital image processing are:
+
+- **Euclidean Distance**: $D_e(p, q) = \sqrt{(x - a)^2 + (y - b)^2}$. All points $q$ with the same Euclidean distance from $p$ form a disk centered at $p$, with radius equal to the distance.
+- **City-Block Distance**: $D_4(p, q) = |x - a| + |y - b|$. All points $q$ with the same city-block distance from $p$ form a diamond-shaped square centered at $p$, with half the diagonal equal to the distance. This case corresponds to 4-adjacency.
+- **Chessboard Distance**: $D_8(p, q) = \max(|x - a|, |y - b|)$. All points $q$ with the same chessboard distance from $p$ form a square centered at $p$, with half the side length equal to the distance. This case corresponds to 8-adjacency.
+
+For m-adjacency, the $D_m$ distance is defined as the length of the shortest m-path between two pixels.
+   

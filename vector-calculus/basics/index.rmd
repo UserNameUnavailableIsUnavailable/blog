@@ -24,41 +24,37 @@ The set of elements that the function may produce and must be at least as big as
 - **Surjective（满射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is onto (or **surjective**) if $\forall\; y \in \boldsymbol{Y}$ there $\exists\; x \in \boldsymbol{X}$ such that $f(x)=y$.
 - **Bijective（双射）**: A function is bijective (or **invertible**) if it is *both injective and surjective*. For an invertible mapping $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$, we say its inverse image is $f^{-1}:\boldsymbol{Y}\mapsto\boldsymbol{X}$.
 
+::: {.callout-important}
+- For injective mappings, *in-* stands for "into". When throwing darts at a board, each dart hits a unique spot without overlapping. There may exist some $y$ in the codomain that cannot get mapped to by any $x$ in the domain, i.e., the range is a subset of the domain. If $y$ can be mapped from $x$, then $x$ must be unique.
+- For surjective mappings, *sur-* is the French "on". Every element in the codomain is hit by at least one input. The board is fully covered by darts, overlappings are allowed, i.e., the entire codomain is covered by the range. Every $y$ in the codomain must be mapped to by **at least one** $x$ in the domain. This means the range is equal to the codomain, but there may be multiple $x$ that map to the same $y$.
+- Bijective mappings combines the one-to-one property of injective mappings with the onto property of surjective mappings.
+:::
 
 ## Vectors, matrices, and derivatives
 
-::: {#def-subspace}
 ### Subspace of $\mathbb{R}^n$
 
 A subspace (or **vector subspace**) of $\mathbb{R}^n$ is a subset of $\mathbb{R}^n$ such that it is closed under addition and multiplication by scalars.
-:::
 
-::: {#def-vector-field}
 ### Vector field
 
 A vector field is a function that take a point in $\mathbb{R}^n$ as input and outputs a vector in $\mathbb{R}^n$ **emanating from that point（从那个点发散出）**.
-:::
 
 ## Linearity
 
-:::{#def-linear-transformation}
 ### The Definition of Linear Transformation
 
 For a transformation $T: \mathbb{R}^m \mapsto \mathbb{R}^n$, if $\forall \boldsymbol{u}, \boldsymbol{v} \in \mathbb{R}$ and $\forall$ scalars $a$:
 
-$T(\boldsymbol{u} + \boldsymbol{v}) = T(\boldsymbol{u} + \boldsymbol{v})$ and $T(a\boldsymbol{u}) = aT(\boldsymbol{u})$, then we say $T$ is a linear transformation.
-:::
+$T(\boldsymbol{u} + \boldsymbol{v}) = T(\boldsymbol{u} + \boldsymbol{v})$ and $T(a\boldsymbol{u}) = aT(\boldsymbol{u})$, then we say $T$ is a linear transformation. These two properties are called **additivity** and **homogeneity**,aa respectively.
 
 :::{.callout-important}
 Not all linear transformations are invertible.
 :::
 
-:::{#cor-inverse-of-linear-transformation}
 ### The Inverse of Linear Transformation
 
 If a linear transformation $T$ is invertible, then its inverse $T^{-1}$ is also linear.
-
-:::{.proof}
 
 To show this, recall that for a linear transformation, the following equation holds:
 
@@ -69,14 +65,10 @@ $$a\boldsymbol{u} + b\boldsymbol{v} = T\left(aT^{-1}\left(\boldsymbol{u}\right) 
 Combine these two equations, we see that: $T\left(T^{-1}\left(a\boldsymbol{u} + b\boldsymbol{v}\right)\right) = T\left(aT^{-1}\left(\boldsymbol{u}\right) + bT^{-1}\left({v}\right)\right)$.
 
 Since $T$ is invertible, so $T^{-1}\left(a\boldsymbol{u} + b\boldsymbol{v}\right) = aT^{-1}\left(\boldsymbol{u}\right) + bT^{-1}\left({v}\right)$, thus $T^{-1}$ is linear.
-:::
-:::
 
-::: {#exm-invertibility-of-linear-transformation}
 A linear transformation $T: \mathbb{R}^m \mapsto \mathbb{R}^n$ is invertible iff. the corresponding $m \times n$ matrix $[T]$ is invertible.
 
-:::{.proof}
-By @cor-inverse-of-linear-transformation, we see that if the inverse of $T$ exists, then $T^{-1}$ is also linear. So, $T^{-1}$ corresponds to a $m \times n$ matrix $[T^{-1}]$. And, because $T \circ T^{-1}(\cdot) = \cdot$ and $T^{-1} \circ T(\cdot) = \cdot$, so $[T][T^{-1}] = [T^{-1}][T] = \boldsymbol{I}$. Therefore, $T$ is invertible, and $m = n$ must hold. ($\Rightarrow$)
+As is aforementioned, if the inverse of $T$ exists, then $T^{-1}$ is also linear. So, $T^{-1}$ corresponds to a $m \times n$ matrix $[T^{-1}]$. And, because $T \circ T^{-1}(\cdot) = \cdot$ and $T^{-1} \circ T(\cdot) = \cdot$, so $[T][T^{-1}] = [T^{-1}][T] = \boldsymbol{I}$. Therefore, $T$ is invertible, and $m = n$ must hold. ($\Rightarrow$)
 
 Let $[S] = [T^{-1}]$, For $T$ to be invertible, it needs to be both one-to-one and onto.
 
@@ -93,5 +85,3 @@ To show onto holds, for any $\boldsymbol{y} \in \mathbb{R}^n$, we have:
 $$\boldsymbol{y} = [T][S]\boldsymbol{y} = \boldsymbol{y},$$
 
 which indicates $T\left(S\left(\boldsymbol{y}\right)\right) = \boldsymbol{y}$, i.e., for any $\boldsymbol{y} \in \mathbb{R}^n$, there exists a vector $S(\boldsymbol{y}) \in \mathbb{R}^m$ that can satisfy mapping $T$. ($\Leftarrow$)
-:::
-:::
