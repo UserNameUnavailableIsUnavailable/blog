@@ -1,9 +1,9 @@
 sidebar:
   children:
-  - title: Linux 备忘录
-    href: /linux-memo/index.html
   - title: 返回
     href: /
+  - title: Linux 备忘录
+    href: /linux-memo/index.html
     children:
     - title: 设置 Ubuntu 默认终端
       href: /linux-memo/set-ubuntu-default-terminal/index.html

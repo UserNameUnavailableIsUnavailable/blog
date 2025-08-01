@@ -1,5 +1,6 @@
 ---
 title: 个人博客
+title-numbering: false
 format: html
 sidebar: null
 ---

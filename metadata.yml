@@ -4,6 +4,7 @@ website:
   description: "Macrohard Blog - A blog about technology, programming, and more."
   logo: /favicon.ico
 format: html
+title-numbering: true
 csl: /ieee.csl
 footer: /footer.rmd
 favicon: /favicon.ico

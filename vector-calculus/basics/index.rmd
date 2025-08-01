@@ -18,14 +18,14 @@ Both terms can be used to describe the set of all outputs that the function can 
 
 The set of elements that the function may produce and must be at least as big as the range. Unlike domain, there is no such thing as "natrual codomain", so codomain is always choosed manually.
 
-### Special cases
+### Important Mappings
 
 - **Injective（单射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is injective (or **one-to-one**) if $\forall\; y \in \boldsymbol{Y}$ there is at most one $x \in \boldsymbol{X}$ such that $f(x) = y$.
 - **Surjective（满射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is onto (or **surjective**) if $\forall\; y \in \boldsymbol{Y}$ there $\exists\; x \in \boldsymbol{X}$ such that $f(x)=y$.
 - **Bijective（双射）**: A function is bijective (or **invertible**) if it is *both injective and surjective*. For an invertible mapping $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$, we say its inverse image is $f^{-1}:\boldsymbol{Y}\mapsto\boldsymbol{X}$.
 
 ::: {.callout-important}
-- For injective mappings, *in-* stands for "into". When throwing darts at a board, each dart hits a unique spot without overlapping. There may exist some $y$ in the codomain that cannot get mapped to by any $x$ in the domain, i.e., the range is a subset of the domain. If $y$ can be mapped from $x$, then $x$ must be unique.
+- For injective mappings, *in-* stands for "into". When throwing darts at a board, each dart hits a unique spot without overlapping. There may exist some $y$ in the codomain that cannot get mapped to by any $x$ in the domain, i.e., the range is a subset of the domain. But, if $y$ can be mapped to by some $x$, then it must be mapped to by exactly one $x$.
 - For surjective mappings, *sur-* is the French "on". Every element in the codomain is hit by at least one input. The board is fully covered by darts, overlappings are allowed, i.e., the entire codomain is covered by the range. Every $y$ in the codomain must be mapped to by **at least one** $x$ in the domain. This means the range is equal to the codomain, but there may be multiple $x$ that map to the same $y$.
 - Bijective mappings combines the one-to-one property of injective mappings with the onto property of surjective mappings.
 :::
