@@ -1,0 +1,10 @@
+sidebar:
+  children:
+  - title: 返回
+    href: /index.html
+  - title: 炼丹速成
+    href: /Deep-Learning-Crash-Course/index.html
+    children:
+    - title: PyTorch 基础
+      href: /Deep-Learning-Crash-Course/pytorch-basics.html
+

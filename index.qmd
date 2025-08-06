@@ -38,6 +38,7 @@ sidebar: null
 
 ## 炼丹
 
+- [炼丹速成](/Deep-Learning-Crash-Course/)
 - [数字图像处理（英）](/Digital-Image-Processing/)
 - [模式识别与机器学习](/machine-learning/)
 

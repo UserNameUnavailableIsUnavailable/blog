@@ -1,0 +1,54 @@
+---
+title: "`blink.cmp` 无法下载预构建二进制文件的问题"
+---
+
+## 相关配置
+
+根据文档，设置版本为 `"1.*"` 时，会自动下载预构建好的二进制文件。
+
+```lua
+local completion = { -- Code completion
+	"saghen/blink.cmp",
+	version = "1.*",
+    event = "InsertEnter",
+	dependencies = {
+		"rafamadriz/friendly-snippets",
+	},
+	opts_extend = {
+		"sources.completion.enabled_providers",
+		"sources.compat",
+		"sources.default",
+	},
+	opts = {
+		fuzzy = {
+			implementation = "prefer_rust_with_warning",
+		},
+        sources = {
+            default = { "lsp", "path", "snippets", "buffer" },
+        },
+		keymap = {
+			preset = "super-tab",
+			["<Up>"] = { "select_prev", "fallback" },
+			["<Down>"] = { "select_next", "fallback" },
+		},
+	},
+}
+```
+
+## 问题描述
+
+lazy.nvim 加载 blink.cmp 报如下错误：
+
+![报错](assets/error.avif){.center}
+
+> blink.cmp  No fuzzy matching library found! Try building from source via  build = 'cargo build --release'  in your lazy.nvim spec and re-installing (requires Rust nightly), or switch to a git tag via  version = '1.\*'  in your lazy.nvim spec, or set fuzzy.prebuilt_binaries.force_version
+
+## 解决方案
+
+参见 [Rust implementation of fuzzy matcher fails to download with configuration shown in docs #1534](https://github.com/Saghen/blink.cmp/issues/1534#issue-2958688269)，lazy.nvim 初次下载 blink.cmp 后，没有 checkout 到相应版本的分支导致错误，输入 `:Lazy` 命令打开插件管理界面，卸载 blink.cmp 后重启 neovim 重装 blink.cmp 插件即可正确 checkout 到正确分支，下载预构建的二进制文件。
+
+一般来说，建议将 blink.cmp 的触发摸索设置为 `event = "InsertEnter"`{.language-lua}，即输入时才触发 blink.cmp 插件。否则，若插件处于已加载状态，在 Windows 平台下可能会因为文件占用 [^file_lock] 问题导致无法正常卸载 blink.cmp。或者，也可以在插件定义中添加 `enabled = false` 选项，这样插件就不会被加载。
+
+[^file_lock]: 文件占用是 Windows 独有的机制。在 Linux 平台下，当某个文件被正在运行的其他进程占用时，仍然可以删除这个文件。当引用此文件的进程数量减少为 0 时，文件就会被删除（我个人认为这是一个很糟糕的设计）。
+
+![成功](assets/success.avif){.center}

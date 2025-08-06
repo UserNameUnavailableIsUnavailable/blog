@@ -27,6 +27,31 @@ references-location: references
 
 R Markdown 预览可使用 Quarto 提供的插件，详见 [Quarto 官网](https://quarto.org/) 及 [VSCode Quarto 插件](https://marketplace.visualstudio.com/items?itemName=quarto.quarto)。
 
+## 基本格式规范
+
+按照 R Markdown 规范，每一篇 Markdown 文章开始都应具有如下形式的 YAML 元数据，元数据具有如下所示的形式：
+
+```plain
+---
+title: '`std::cout << "Hello, world!" << std::endl;`'
+---
+```
+
+每篇 R Markdown 文章都**必须**定义 `title`，即文章的标题。上面的文章标题在处理后将形成像下面这样的 Markdown 一级标题：
+
+```markdown
+# `std::cout << "Hello, world!" << std::endl;`
+```
+
+有关元数据的相关规范参见 [元数据](/macrohard-markdown/metadata.html)，不在本节讨论范围。
+
+::: {.callout-important}
+使用者应该严格区分**文章标题**和**章节标题**。
+需要指出，每一篇文章**有且仅有**一个文章标题，文章标题通过一级标题（如：`# 文章标题`{.language-markdown}）进行定义。
+由于一级标题的作用是定义**整篇文章**的标题，而在 R Markdown 中，一级标题已经通过元数据的方式定义了（渲染框架处理后会在文章内容中嵌入这样一个唯一的一级标题），因此，文章中**不应该**出现任何一级标题的定义。
+文章的**章节标题**通过 `##`、`###` …… 进行定义，最多达到 `######`，分别代表一级章节标题、二级章节标题、……、五级章节标题。
+:::
+
 ## 基本扩展
 
 |扩展|语法|效果|

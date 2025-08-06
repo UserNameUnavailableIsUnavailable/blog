@@ -1,0 +1,31 @@
+---
+title: 隐藏在 Windows 11 24H2 中的狗屎——Microsoft PC Manager
+---
+
+## 摸索
+
+自从使用 Windows 11 24H2 以来，总感觉哪里不对劲。在 Windows 24H2 下使用像 `git`、`nvim` 等命令行工具，卡得简直离了大谱。用 `oh-my-posh` 这样的工具美化 PowerShell，PowerShell 的加载速度居然能达到数十秒之久，我曾一度怀疑是 `oh-my-posh` 本身的性能问题、PowerShell 的性能问题、Windows Defender 检测病毒的问题、火绒的问题，最后还花了若干天的时间尝试优化 Powershell 的 `profile.ps1`，勉强将启动时间优化到两秒左右。重装系统后，这种情况反而还加剧了，命令行工具的运行速度又慢了一个数量级，以往构建一个几千行的前端项目只要几秒钟，重装后竟然需要几分钟之久。其他问题包括但不限于：
+
+- 浏览器有概率出现极端卡顿情况，鼠标几乎无法正常移动；
+- 使用 Visual Studio 调试时有概率出现极端卡顿情况；
+- ……
+  
+最近几天，Windows 下的 `neovim` 的启动速度慢到令人发指，遂抛弃了开箱即用的 LazyVim，自己从头开始配置 `neovim`，配置过程中发现 Git for Windows 拉取代码的速度极其慢，尝试若干解决方案都无功而返。
+
+最后，从一个不知名的论坛找到了一些蛛丝马迹。
+
+![蛛丝马迹](assets/hint.avif)
+
+死马当活马医，在 Windows 服务里把 Microsoft PC Manager 禁用后，`neovim` 直接秒开，PowerShell 也是秒加载，真是人都麻了。
+
+![禁用 Microsoft PC Manager 服务](assets/disable.avif){.center}
+
+罪魁祸首就是这个从 Windows 24H2（可能从 23H2 就自带了）之后默认自带的微软电脑管家，直接反手一个卸载。
+
+![卸载](assets/uninstall.avif){.center}
+
+## 另请参阅
+
+- [git 各种命令执行很慢是什么原因导致的？](https://www.v2ex.com/t/1148799)
+- [Microsoft's brand new PC Manager could actually slow down your PC](https://www.xda-developers.com/microsoft-pc-manager-slow-down-pc/)
+- [Microsoft's app that promises Windows performance improvements has some shady stuff inside](https://www.neowin.net/news/microsofts-app-that-promises-windows-performance-improvements-has-some-shady-stuff-inside/)

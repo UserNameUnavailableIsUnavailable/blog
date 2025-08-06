@@ -2,10 +2,14 @@
     children:
     - title: 返回
       href: /index.html
-    - title: 琐碎记录
+    - title: 琐碎问题记录
       href: /trivial/index.html
       children:
-      - title: 前言
-        href: /trivial/index.html
-      - title: Chocolatey 安装
-        href: /trivial/chocolatey/index.html
+      - title: "2025"
+        children:
+        - title: Chocolatey 安装
+          href: /trivial/2025/chocolatey/index.html
+        - title: 隐藏在 Windows 11 24H2 中的狗屎——Microsoft PC Manager
+          href: /trivial/2025/Bullshit-Microsoft-PC-Manager/index.html
+        - title: 解决 “blink.cmp  No fuzzy matching library found!”
+          href: /trivial/2025/blink_cmp-prebuilt-binaries-issue/index.html

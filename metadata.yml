@@ -6,5 +6,5 @@ website:
 format: html
 title-numbering: true
 csl: /ieee.csl
-footer: /footer.rmd
+footer: /footer.md
 favicon: /favicon.ico
