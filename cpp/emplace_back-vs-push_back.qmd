@@ -1,0 +1,177 @@
+---
+title: "`emplace_back` 与 `push_back`"
+---
+
+`emplace_back` 是 C++ 11 容器中引入的新方法，用于向在容器的末端添加元素。
+该方法旨在解决 C++ 11 之前 `push_back` 方法存在的性能问题。
+本节以 vector 容器为例，分析 `push_back` 存在的性能问题，解释引入 `emplace_back` 的原因，并探讨这两种方法的实现细节。
+
+## `push_back`
+
+除了经过特殊优化的 `std::vector<bool>`，vector 容器中的元素是连续存储的 [^contiguous]。
+因此，即便已经持有构造好的“东西”，要想把东西插入到容器中，还是得在容器指定位置在复制一遍。
+
+[^contiguous]: <https://en.cppreference.com/w/cpp/container/vector.html>{target="_blank"}
+
+在向容器中插入新元素时，有如下两种情景：
+
+- 已经有一个实例元素，需要以“复制”或“移动”的方式将该实例添加到容器中（由于移动的本质仍然是复制，因此后文不再严格区分二者）；
+- 没有实例元素，但有能够“构造”出实例的参数。
+
+以字符串情形为例：
+
+```cpp
+std::vector<std::string> v;
+std::string s("hello");
+v.push_back(v); // A. 复制
+v.push_back(std::string("world")); // B. 移动
+v.push_back("!"); // C. 隐式构造（字符串字面量作为参数） + 移动
+```
+
+其中，情形 A 和 B 很好理解。在情形 C 中由于传入的是字符串字面量，而字符串可由字符串字面量 **隐式构造** 得到。
+隐式构造产生了新的临时匿名字符串实例，该构造的过程发生在调用 `push_back` 之前。
+这样的匿名实例具备右值特性，因此会调用重载 (2)。
+由于 vector 具有连续存储特性，因此在重载 (2) 内，需要将匿名实例中的内容复制到容器末端预留的位置。
+所以，`v.push_back("!")` 实际上做了如下的事情：
+
+- 在自由存储空间（free storage）申请一块内存，构造临时的匿名字符串对象；
+- 把字符串对象复制到容器末尾。
+
+::: {.callout-tip}
+对于 `push_back` 而言，调用前必须自己找一个盆，在盆里把沙拉拌好。
+执行时，把做好的沙拉倒进盆里。
+:::
+
+## `emplace_back`
+
+在上面的例子中，`v.push_back("!")`{.language-cpp} 构造了一个匿名的对象，然后把这个冗余的对象复制到容器末尾。
+对于普通的 `int`、指针这样的基本类型数据，上述的过程实际上并没有什么开销（基本数据类型可以直接存放在寄存器中，与访存开销相比可忽略不计）。
+然而对于字符串这样的数据，以及自定义的一些结构体数据，上面的开销就非常大了。
+_因此，性能差异的关键在于是否在 push 操作前构造了临时对象，以及这个临时对象的构造是否产生了实质性的性能开销（基本数据类型不存在真正意义上的构造）。_
+
+很显然，这个匿名对象的构造是多余的，我们完全可以直接在容器末尾使用构造参数就地构造 [^placement_new] 出这样的对象。
+
+[^placement_new]: Placement new 特性可以帮助实现这一点。
+
+于是，从 C++ 11 开始，引入了新的 `emplace_back`，它接收用于构造出实例的参数：
+
+```cpp
+template< class... Args >
+void emplace_back( Args&&... args ); // Until C++17
+template< class... Args >
+reference emplace_back( Args&&... args ); // Since C++ 17
+```
+
+::: {.callout-tip}
+对于 `emplace_back` 而言，调用前可以只准备原料。
+执行时，直接在盆子里把沙拉拌好。
+:::
+
+## 源码分析
+
+在 MSVC 的 STL 实现中， `void push_back(T&& val)`{.language-cpp} 与 `void emplace_back(Args&&... args)`{.language-cpp} 在形式上并没有本质区别。
+关键性的差异在于 `val` 是一个已经构造好的对象，而 `args` 是构造函数接收的参数（这个参数当然也可以是一个已经构造好的对象，这时 `push_back` 和 `emplace_back` 就没有区别了）。
+
+::: {.callout-important}
+从这里可以直观看出，这两个方法的性能差异并不在于方法的实现本身，而在于方法调用前是否产生了冗余的构造。
+随后，`push_back` 需要把这个冗余的对象再复制到指定位置，而 `emplace_back` 则直接在指定位置进行构造。
+:::
+
+```cpp
+template <class... _Valty>
+_CONSTEXPR20 _CONTAINER_EMPLACE_RETURN emplace_back(_Valty&&... _Val) {
+    // insert by perfectly forwarding into element at end, provide strong guarantee
+    _Ty& _Result = _Emplace_one_at_back(_STD forward<_Valty>(_Val)...);
+#if _HAS_CXX17
+    return _Result;
+#else // ^^^ _HAS_CXX17 / !_HAS_CXX17 vvv
+    (void) _Result;
+#endif // ^^^ !_HAS_CXX17 ^^^
+}
+
+
+_CONSTEXPR20 void push_back(_Ty&& _Val) {
+    // insert by moving into element at end, provide strong guarantee
+    _Emplace_one_at_back(_STD move(_Val));
+}
+```
+
+调用 `_Emplace_one_at_back` 后，并在容量充足的情况下（`_Mylast` 指向下个插入位置，`_My_data._Myend` 指向容器末尾，因此二者相等时说明容器已满）调用 `_Emplace_back_with_unused_capacity` 插入新元素。
+
+```cpp
+template <class... _Valty>
+_CONSTEXPR20 _Ty& _Emplace_one_at_back(_Valty&&... _Val) {
+    // insert by perfectly forwarding into element at end, provide strong guarantee
+    auto& _My_data   = _Mypair._Myval2;
+    pointer& _Mylast = _My_data._Mylast;
+
+    if (_Mylast != _My_data._Myend) { // 容量足够
+        return _Emplace_back_with_unused_capacity(_STD forward<_Valty>(_Val)...);
+    }
+
+    return *_Emplace_reallocate(_Mylast, _STD forward<_Valty>(_Val)...);
+}
+```
+
+在 `_Emplace_back_with_unused_capacity` 内，通过 `_Construct_in_place` 实现元素就地构造（也就是 Placement New）。
+
+```cpp
+template <class... _Valty>
+_CONSTEXPR20 _Ty& _Emplace_back_with_unused_capacity(_Valty&&... _Val) {
+    // insert by perfectly forwarding into element at end, provide strong guarantee
+    auto& _My_data   = _Mypair._Myval2;
+    pointer& _Mylast = _My_data._Mylast;
+    _STL_INTERNAL_CHECK(_Mylast != _My_data._Myend); // check that we have unused capacity
+    if constexpr (conjunction_v<is_nothrow_constructible<_Ty, _Valty...>,
+                      _Uses_default_construct<_Alloc, _Ty*, _Valty...>>) {
+        _ASAN_VECTOR_MODIFY(1);
+        _STD _Construct_in_place(*_Mylast, _STD forward<_Valty>(_Val)...); // 就地构造
+    } else {
+        _ASAN_VECTOR_EXTEND_GUARD(static_cast<size_type>(_Mylast - _My_data._Myfirst) + 1);
+        _Alty_traits::construct(_Getal(), _Unfancy(_Mylast), _STD forward<_Valty>(_Val)...);
+        _ASAN_VECTOR_RELEASE_GUARD;
+    }
+
+    _Orphan_range(_Mylast, _Mylast);
+    _Ty& _Result = *_Mylast;
+    ++_Mylast;
+
+    return _Result;
+}
+```
+
+就情形 C 而言，从始至终，`_Val` 都是一个临时的匿名字符串对象，因此就地构造从根本上说就是把这个临时对象复制到预先安排好的位置。
+
+```cpp
+template <class _Ty, class... _Types>
+_CONSTEXPR20 void _Construct_in_place(_Ty& _Obj, _Types&&... _Args)
+    noexcept(is_nothrow_constructible_v<_Ty, _Types...>) {
+#if _HAS_CXX20
+    if (_STD is_constant_evaluated()) {
+        _STD construct_at(_STD addressof(_Obj), _STD forward<_Types>(_Args)...); // C++ 20 的 construct_at
+    } else
+#endif // _HAS_CXX20
+    {
+        ::new (static_cast<void*>(_STD addressof(_Obj))) _Ty(_STD forward<_Types>(_Args)...);
+    }
+}
+```
+
+## 总结
+
+`push_back` 和 `emplace_back` 的性能差异并不体现在方法本身，而在于调用这二者的方式。
+`push_back` 只接受一个已经构造好的对象，执行时将传入的对象复制到容器末尾，而 `emplace_back` 则可以使用提供的参数直接进行就地构造，没有在自由存储空间申请内存以及冗余复制的额外开销。
+
+|方法|调用前|执行时|
+|---|---|---|
+|`push_back`|提供参数、_在自由存储空间申请内存_、在申请的内存块中构造实例|_把构造的实例复制到指定位置_|
+|`emplace_back`|提供参数|在指定位置构造实例|
+
+特别地，在已经持有构造好的对象的前提下，`push_back` 与 `emplace_back` 在性能上没有任何差异，例如：
+
+```cpp
+std::vector<std::string> v;
+std::string("hello");
+v.push_back(v);
+v.emplace_back(v);
+```

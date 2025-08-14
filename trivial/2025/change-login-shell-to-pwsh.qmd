@@ -1,0 +1,15 @@
+---
+title: Linux 修改登录 shell 为 PowerShell
+---
+
+`/etc/shells` 中记录所有的有效 shells 的路径，在安装 PowerShell 后，需要在该文件中添加 PowerShell 路径：
+
+```bash
+which pwsh | sudo tee -a /etc/shells
+```
+
+然后，运行 `chsh --shell $(which pwsh)`{.language-bash} 即可。若输出 “You may not change the shell for \$USER.”，则说明当前用户没有修改登录 shell 的权限，应换用：
+
+```powershell
+sudo chsh --shell $(which pwsh) $USER
+```

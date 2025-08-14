@@ -1,0 +1,38 @@
+---
+title: "调查：PowerShell 对外部程序输出数据的处理方式"
+---
+
+不论 Windows 还是 Linux，操作系统层面提供的管道都是 **面向字节流** 的，即操作系统对进程间输送的字节流原样转发，对内容不做任何额外处理。
+操作系统的管道和 shell 的管道是两个不完全等同的概念，在 PowerShell 中，管道操作符可以：
+
+1. 连接两个 shell 内置的命令；
+2. 连接 shell 内置的命令和外部程序；
+3. 连接两个外部程序。
+
+对于第一种情形，由于内置命令的执行直接发生在 shell 进程内部，因此从概念上来讲，内置命令之间并不存在传统意义上的管道，这是由于管道是进程间的通信方式，但这里只存在一个shell 进程。在进程内部，左侧的命令输出可直接在进程内部通过某个内存块传递给右侧的命令作为输入。
+在 PowerShell 这样一个面向对象的 shell 中，当内置的命令之间用管道连接时，由于 shell 内置命令直接运行于 shell 进程内部，管道中的数据传递是直接以面向对象的方式进行传递的，即在 shell 进程内部直接传递 shell 命令所产生的 .NET 对象；
+
+另两种情形由于分别涉及到两个和多个进程，而进程之间无法像单一进程内部那样方便地共享内存，因此必须借助于操作系统提供的系统级管道。
+在系统级管道两端的两个不同的进程之间并不存在数据传递的格式约定，因此数据无法方便地以面向对象的方式进行传递，而是会经过 **序列化** 和 **反序列化** 的步骤，这种步骤所带来的最大问题是对管道中传递数据（尤其是纯字节流数据）的污染。
+举例来说，在 PowerShell 5.1 版本中，若对二进制文件 `a.exe` 执行下述命令，尝试将 `a.exe` 另存为 `b.exe`，执行后 `b.exe` 的大小会大于 `a.exe` 的大小：
+
+```powershell
+# Windows 平台下 cat 是 Get-Content 的别名，先将其移除，以使用外部的 cat 程序
+Remove-Alias -Name cat -Force
+cat a.exe > b.exe
+```
+
+需要指出，`cat` 是一个外部程序（Linux 平台自带，Windows 需要下载 MSYS2 等工具链来提供这个程序），用于读取文件的内容。
+Windows 下的 PowerShell 默认会将 `cat` 设置为 `Get-Content` 的别名，而 `Get-Content` 这个命令默认情况下在读取文件时会将文件视作文本文件进行读取，即认为文件具有某种编码（通过 `-Encoding` 选项课调节），也就是会经过字符解码的过程，导致读取到错误的内容 [^AsByteStream]。
+与 `Get-Content` 不同，`cat` 程序会将指定的文件原样按字节读取，并且将读取到的字节流原样写入标准输出流（standard output），因此 `cat` 程序是 **二进制安全** 的。
+尽管 `cat` 是二进制安全的，PowerShell 5 的管道和重定向运算符仍然会对外部进程传入的字节流进行编解码，将其构造成 .NET 字符串对象，而这一过程会污染输入的字节流。
+为了解决这个问题，PowerShell 7.4 引入了一项实验特性 [^pwsh-7.4] 来规范化管道操作符和重定向操作符对外部进程输入的处理。
+从 PowerShell 7.5 开始，这个特性已经成为了 PowerShell 标准特性的一部分，因此从今以后 PowerShell 再也不会对外部进程输入的字节流进行额外的处理，因此 `b.exe` 的内容会与 `a.exe` 保持一致。该特性带来的好处远不止这一点，它甚至允许我们做如下的事情：
+
+[^AsByteStream]: 为了解决此问题，从 PowerShell 7 起，`Get-Content` 引入了新的 `-AsByteStream` 选项，使用该选项后，命令会原样读取文件内容，并返回一个存放原始字节流的 `Byte[]` 对象，而不使用该选项时返回的是 `String[]` 对象，即对文件内容以预设的编码格式进行解码。
+
+[^pwsh-7.4]: 参阅 [Using native commands in the pipeline](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_pipelines?view=powershell-7.5#using-native-commands-in-the-pipeline)。
+
+```powershell
+(Invoke-WebRequest $uri).Content | tar -xzvf - -C .
+```

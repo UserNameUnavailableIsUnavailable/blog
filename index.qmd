@@ -16,7 +16,7 @@ sidebar: null
 
 ## 开发
 
-- [C++ 笔记](/cpp-notes/)
+- [C++ 笔记](/cpp/)
 - [Win32 应用开发](/win32-app-develop/)
 - [Java](/java/)
 

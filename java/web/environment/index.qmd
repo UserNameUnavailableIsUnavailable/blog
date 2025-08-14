@@ -119,7 +119,7 @@ Artifact id 代表了项目的标识，与上面所示的项目结构中的 `<ar
 该变动的原因是 Tomcat 10 废弃了原有的 `javax` 命名空间，事情的起因要追溯到 Oracle 将 Java EE 移交给 Eclipse，由于版权原因，Java EE 更名为了 Jakarta EE，引发了一系列后续的变动。
 
 最后，也是最为关键的——找到 `build` 选项，在其中添加 `sourceDirectory` 字段（网上的一堆教程没有提及这一点，导致初次配置一直没有办法产生正确的打包，后续有时间一定要去看一下 Maven 的官方文档）。
-`sourceDirectory` 的添加设计到项目文件结构，Maven 根据 archetype 自动创建的项目结构下并没有提供存放 Java 源码的目录，需要手动创建。具体来说，是先在 `blog/src/main/` 里创建 `java/`，然后在其中创建 `fun/macrohard/`，对应于项目的 group id。
+`sourceDirectory` 的添加设计到项目文件结构，Maven 根据 archetype 自动创建的项目结构下并没有提供存放 Java 源码的目录，需要手动创建。具体来说，是先在 `src/main/` 里创建 `java/`，然后在其中创建 `fun/macrohard/`，对应于项目的 group id。
 
 为了让 Maven 能够正确编译 `java/` 目录下的源代码，需要在 `build` 选项内添加：
 
@@ -127,7 +127,7 @@ Artifact id 代表了项目的标识，与上面所示的项目结构中的 `<ar
 <sourceDirectory>src/main/java</sourceDirectory>
 ```
 
-然后，可以创建一个简易的 `IndexBlog.java` 文件。**需要注意，如果使用的是 Tomcat 10 以下的版本，下面的引入的包命名空间 `jakarta` 需要改为 `javax`**:
+然后，可以创建一个简易的 `Hello.java` 文件。**需要注意，如果使用的是 Tomcat 10 以下的版本，下面的引入的包命名空间 `jakarta` 需要改为 `javax`**:
 
 ```java
 package fun.macrohard;
@@ -139,8 +139,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 
-@WebServlet("/test")
-public class IndexBlog implements Servlet {
+@WebServlet("/hello")
+public class Hello implements Servlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         System.out.println("hello");
@@ -164,7 +164,7 @@ public class IndexBlog implements Servlet {
 }
 ```
 
-其中，`@WebServelet("/test")` 注解表示当用户访问 `<origin>/<artifact-id>/test` （对应到本文，也即 `http://localhost:8080/blog/test`）时，服务器（Apache Tomcat）会将请求转发到 `IndexBlog` 这个最简服务器，由 `IndexBlog.service` 方法处理该请求。
+其中，`@WebServelet("/hello")` 注解表示当用户访问 `<origin>/<artifact-id>/hello` （对应到本文，也即 `http://localhost:8080/blog/hello`）时，服务器（Apache Tomcat）会将请求转发到 `Hello` 这个最简服务器，由 `Hello.service` 方法处理该请求。
 
 然后，在左下角找到 Maven 选项卡，点开“Plugins > war > exploded”，右键后点击“Run”（这里的“Debug”与调试上面 Java 代码没有关系）来编译并“打包”本项目（实际并未打包）。
 
@@ -175,10 +175,9 @@ public class IndexBlog implements Servlet {
 ![打包](assets/exploded.avif){ .center }
 
 
-Maven 会自动处理并编译项目，然后“打包”。在 `target/blog/` 目录下，可以看到构建的所有文件，其中就有 `IndexBlog.class`。
+Maven 会自动处理并编译项目，然后“打包”。在 `target/blog/` 目录下，可以看到构建的所有文件，其中就有相应的 Java 字节码文件。
 
 ![生成的目标文件](assets/target.avif){.center }
-
 
 ### 使用 Community Server Connectors 部署项目
 

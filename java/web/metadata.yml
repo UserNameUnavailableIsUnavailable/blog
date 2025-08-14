@@ -8,4 +8,6 @@ sidebar:
       - title: 环境准备
         href: /java/web/environment/index.html
       - title: 深入理解 Servlet
-        href: /java/web/servlet-lifecycle/index.html
+        href: /java/web/understanding-servlet/index.html
+      - title: Web 应用的目录结构
+        href: /java/web/directory-structure/index.html

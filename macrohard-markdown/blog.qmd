@@ -93,6 +93,12 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 
 一般而言，仅建议使用该语法来定义 `id`、`class` 以及 `width` 这样的简单属性，**不建议**定义过于复杂的属性（比如 `styles="color: red; display: block;"` 就过于复杂），以免导致意料之外的问题。
 
+此特性还有一种常见的使用场景，比如下面的这个例子就可以实现在新页面打开链接：
+
+```markdown
+[Macrohard](https://www.macrohard.fun){target="_blank"}
+```
+
 解析器中预定义了 `left`（左对齐）、`center`（居中）、`right`（右对齐），可以通过下面的代码实现混合对齐效果：
 
 ```markdown

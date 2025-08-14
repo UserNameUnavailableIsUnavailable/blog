@@ -1,0 +1,70 @@
+---
+title: 缓冲模式
+---
+
+## 一个例子
+
+在 Linux 下，编写如下 C 语言代码：
+
+```c
+#include <stdio.h>
+#include <stdbool.h>
+
+int main(int argc, char *argv[])
+{
+    printf("hello\nhello");
+    while (true);
+    return 0;
+}
+```
+
+编译链接后运行，终端只输出一个 `hello`。
+同样是这段代码，在 Windows 下执行就能过正确打印出两个 `hello`。
+
+## 原因分析
+
+造成上述不同行为的原因在于 Linux 和 Windows 两个系统在处理输出时的缓冲模式。在 C 语言标准库中规定了如下三种缓冲模式，可通过 `setvbuf` 来进行设置：
+
+- `_IOFBF`：全缓冲模式。输出的内容先写入到大小为 `size` 的缓冲区，当缓冲区满时刷新缓冲区，这种缓冲模式一般用于文件流；
+- `_IOLBUF`：行缓冲模式。输出的内容先写入到大小为 `size` 的缓冲区，当需要换行（`\n`、`\r`、`\r\n`）或缓冲区满时刷新缓冲区，这种缓冲模式一般用于标准输出流；
+- `_IONBUF`：无缓冲模式。输出的内容直接写入目标流。
+
+在 Windows 平台下，是不支持 `_IOLBUF` 这种缓冲模式的，因此 `printf` 要么使用无缓冲，要么使用行缓冲模式。对于标准输出流，默认采用无缓冲模式。
+在 Linux 平台下，`_IOLBUF` 是标准输出流的默认缓冲模式。
+
+## 另一个例子
+
+下面展示一个老生常谈的例子来更进一步地说明不同的缓冲策略会带来的问题。在 Linux 平台下，编写如下代码：
+
+```c
+#include <unistd.h>
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    for (int i = 0; i < 2; i++)
+    {
+        fork();
+        puts("hello");
+    }
+    return 0;
+}
+```
+
+在终端中直接运行，会看到输出 6 个 “hello”，而使用 `wc -l` 统计输出的行数，结果为 8。
+
+```bash
+./hello | wc -l
+```
+
+造成上述问题的根本原因是管道操作符 `|`，它将 `hello` 进程的输出重定向到 `wc` 进程中。我们知道，`fork` 的行为是将当前正在运行的进程原封不动地复制一份，形成新的进程，这个进程具有与原进程完全相同的状态（所以新的 `hello` 进程输出仍然重定向到 `wc` 进程）。在需要重定向时，`puts` 的缓冲模式就不再是行缓冲了，而是写入文件流时采用的全缓冲模式，因此每次 `fork` 都会将当前的缓冲区原样复制一份，最终的结果就是产生了 8 个 “hello”。
+
+::: {.callout-note}
+从上面这个例子可以看出，`fork` 的这种行为会带来相当麻烦的并发问题。
+有兴趣可阅读 [A `fork()` in the road](https://www.microsoft.com/en-us/research/wp-content/uploads/2019/04/fork-hotos19.pdf)。
+:::
+
+## 参考资料
+
+- [`setvbuf`](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setvbuf)
+- [`setbuf`(3) — Linux manual page](https://man7.org/linux/man-pages/man3/setbuf.3.html)

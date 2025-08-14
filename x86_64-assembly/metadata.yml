@@ -3,11 +3,11 @@ sidebar:
   - title: 返回
     href: /index.html
   - title: x86_64 汇编
-    href: /x86_64-Assembly/index.html
+    href: /x86_64-assembly/index.html
     children:
     - title: PROLOG 和 EPILOG
-      href: /x86_64-Assembly/prolog-and-epilog.html
+      href: /x86_64-assembly/prolog-and-epilog.html
     - title: “你好，世界！”
-      href: /x86_64-Assembly/hello-world.html
+      href: /x86_64-assembly/hello-world.html
     - title: 动态重定位
-      href: /x86_64-Assembly/relocation/index.html
+      href: /x86_64-assembly/relocation/index.html
