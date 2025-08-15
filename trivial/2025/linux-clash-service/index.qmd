@@ -1,0 +1,128 @@
+---
+title: 在 Linux 服务器内部署 Clash 服务
+---
+
+## 动机
+
+由于一些不可抗力因素，需要在云服务器上部署 Clash 服务。
+
+## 预备知识
+
+Clash Mihomo 是 Clash Meta 删库跑路后的的续作（以下统称为 Clash 内核）。
+Clash 内核本身只是一个命令行程序，主要通过配置文件来控制其各项功能，命令行选项中只暴露部分较为重要的可覆写选项。
+由于配置文件无法灵活控制 Clash 的各项功能，Clash 除了提供基础的代理服务，还提供了一种名为 **外部控制** 的服务，通过提供 RESTful API 来实现对 Clash 的实时管理和控制。
+因此，要使用 Clash 内核，除了基础的配置文件外，往往还需要搭配一个前端界面，通过调用 RESTful API 来实现对 Clash 内核的实时管理。
+目前，较为常用的前端界面有：
+
+- [METACUBEXD](https://github.com/metacubex/metacubexd)
+- [yacd](https://github.com/haishanh/yacd)
+- [zashboard](https://github.com/Zephyruso/zashboard)
+
+以上前端界面的功能大同小异，其中的 METACUBEXD 前端界面是 Clash Mihomo 官方 MetaCubeX 开发的。
+我个人需要将服务部署到 `https://www.macrohard.fun/proxy` 下使用，在尝试部署 METACUBEXD 和 yacd 后，发现 yacd 在前端路由上存在一些问题，在 HTTP 服务器中设置 `/proxy` 路由后，yacd 无法正确加载静态资源，METACUBEXD 则能正常使用，因此，本文采用 METACUBEXD。
+
+## 核心配置
+
+首先，从 [MetaCubeX/mihomo](https://github.com/MetaCubeX/mihomo) 下载最新的 Clash 内核。
+
+由于需要使用 Clash 内核提供的 DNS 功能，防止 DNS 污染，而 DNS 服务需要运行在 53 这个知名端口，因此 Clash 服务需要以 root 用户运行。
+一个比较好的策略是将 Clash 内核作为系统服务运行，这样一劳永逸。
+
+在解压后，先将可执行文件重命名为 `clash`，移动到 `/usr/bin` 目录下。
+然后，将配置文件保存到 `/etc/clash` 目录下。
+
+我个人使用的 Clash 配置文件托管在 [My Personal Configurations](https://git.macrohard.fun/root/configuration)，拉取后将配置文件存放到 `/etc/clash` 目录下，名称为 `main.yaml`。
+
+::: {.callout-important}
+安全起见，建议为 Clash 配置外部控制的访问秘钥。
+:::
+
+接下来，创建一个名为 `clash.service` 的 systemd 服务文件，内容如下：
+
+```ini
+[Unit]
+Description=Clash Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/clash -f /etc/clash/main.yaml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+将该文件保存为 `/etc/systemd/system/clash.service`。
+
+接下来这一步稍微有些麻烦，由于 Clash 初次运行需要下载地理 IP 归属地数据库，而这些数据库因不可抗力因素有时无法正常下载（尤其是在云服务器上），进而导致 Clash 服务无法正确初始化，因此需要先在 PC 上手动下载后再传到服务器。
+在 Linux 平台下，Clash 内核会将地理数据保存到 `/root/.config/mihomo` 目录下，若事先提供了地理数据文件，Clash 服务在启动后就不会再尝试从上述地址下载地理数据。
+所以，接下来要做的就是根据 [Custom GEO Download Address](https://wiki.metacubex.one/en/config/general/#custom-geo-download-address) 提供的地理数据的下载地址，手动下载需要的地理数据文件，并将这些文件传送到服务器。
+
+```powershell
+$urls = @(
+    "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
+    "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
+    "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb",
+    "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+)
+
+# 需要使用 PC 上的代理下载
+foreach ($url in $urls) {
+    $file_name = $url.Split("/")[-1]
+    Invoke-WebRequest -Uri $url -OutFile $file_name -Proxy "<本机代理 URL>"
+    scp "$file_name" "<用户名>@<服务器地址>:/tmp"
+}
+```
+
+在服务器端，将 `/tmp` 目录下的地理数据文件移动到 `/root/.config/mihomo` 目录下即可。
+
+现在，就可以通过 `sudo systemctl start clash`{.language-bash} 启动 Clash 服务了。从 `sudo systemctl status clash` 输出的日志中可以看到，Clash 正确加载了预先提供的地理数据文件：
+
+![查看运行状态](assets/status.avif){.center}
+
+## 外部控制
+
+默认情况下，Clash Mihomo 内核的外部控制端口是 9097，前端界面通过该接口来与 Clash 内核进行通信。
+由于通信时采用 HTTP 协议，存在很大安全风险。
+因此，在 HTTP 服务器中配置一个 HTTPS 的反向代理，端口号设定为 9090（这也是已跑路的 Clash Meta 默认采用的外部控制端口），将 Clash 内核的外部控制端口 9097 映射到 HTTPS 的 `/proxy` 路由下。
+接下来，在防火墙中放通 9090 端口（ **9097 端口绝对不能对外放通！** ）。
+
+::: {.callout-note}
+腾讯云提供了防火墙控制台，我的服务器内部还有一层 `ufw` 控制的防火墙，因此需要在这两处都放通 9090 端口。
+:::
+
+在 HTTP 服务器中配置反向代理，Apache 虚拟主机配置如下：
+
+```apacheconf
+<VirtualHost *:9090>
+    ServerName <域名>
+    SSLEngine on
+    SSLCertificateFile <证书文件路径>
+    SSLCertificateKeyFile <证书密钥文件路径>
+    SSLCertificateChainFile <证书链文件路径>
+    ProxyPreserveHost On
+    ProxyPass / http://localhost:9097/
+    ProxyPassReverse / http://localhost:9097/
+    RequestHeader set Origin "http://localhost:9097"
+</VirtualHost>
+```
+
+另外，Apache 默认不监听 9090 端口，需要在 `/etc/apache2/ports.conf` 中添加：
+
+```apacheconf
+<IfModule ssl_module>
+        Listen 443
+        Listen 9090 # 新增对 9090 端口的监听
+</IfModule>
+```
+
+然后，使用 `sudo systemctl reload apache2` 重新加载 Apache 服务。
+
+## 图形化界面
+
+从 [METACUBEXD](https://github.com/metacubex/metacubexd) 下载发布的前端界面，解压到的 Web 资源文件（如 `/srv/web/www`），并将文件夹名称修改为 `proxy`。
+由于 `proxy` 就在 `www` 虚拟主机的文档根目录下，因此无需额外配置即可访问。
+
+![效果展示](assets/effect.avif){.center}
