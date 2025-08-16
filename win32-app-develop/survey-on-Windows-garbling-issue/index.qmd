@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 
 ![注入效果对比](assets/injection.avif){.center}
 
-## 适配 Linux 移植而来的程序
+### 适配 Linux 移植而来的程序
 
 前面提到，在 Windows 平台下像 `fopen` 这样的标准库接口在创建文件时上会调用 `CreateFileA`，创建时传入的文件名字符串 `lpFileName` 在并不是 ANSI 编码的字符串，而是 UTF-8 编码的字符串（除非开启全局 UTF-8，这时 ANSI 代码页就是 UTF-8 了），因此，对于从 Linux 移植而来的程序，需要一个代码页为 UTF-8 的运行环境。
 我们通过下面的例子来验证这一点：
@@ -156,6 +156,56 @@ int main (int argc, char *argv[])
 注入后，运行后创建的文件名称正确显示：
 
 ![注入 UTF-8 代码页清单后运行效果](assets/after-injection.avif){.center}
+
+### 适配使用其他本地代码页的程序
+
+在这个例子里，我们编写一个创建日语文件名称的程序，比较清单注入前后的效果。
+由于测试环境是区域格式是简体中文，因此没有直接的办法编译一个使用日语 SHIFT-JIS 编码的源代码。
+所以，下面的代码实现取了个巧，将日语字符串“真夏の夜の淫梦”在 SHIFT-JIS 下的编码直接存入一个字节数组中，然后使用 `CreateFileA` 创建文件。
+
+```c
+#include <Windows.h>
+
+int main(int argc, char *argv[])
+{
+    const char filename[] = {
+        0x90, 0x5E, 0x89, 0xC4, 0x82,
+        0xCC, 0x96, 0xE9, 0x82, 0xCC,
+        0x88, 0xFA, 0x9A, 0xEB, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+    HANDLE h = CreateFileA(
+        filename,
+        GENERIC_WRITE,
+        0,
+        NULL,
+        CREATE_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    CloseHandle(h);
+    return 0;
+}
+```
+
+直接运行编译链接后的可执行文件，创建的文件名现乱码：
+
+![注入 ja-JP 代码页清单前运行效果](assets/japan-before.avif){.center}
+
+这是很显然的，`CreateFileA` 函数使用了当前代码页（936）对文件名进行解码。
+
+![注入 ja-JP 代码页清单后运行效果](assets/japan-after.avif){.center}
+
+可以看到，注入了 `activeCodePage` 为 ja-JP 的清单后，文件名正确显示。
+
+## 一些思考
+
+清单注入是一个非常有用的功能，可以解决 Windows 平台下的乱码问题。
+清单注入存在的一个局限性是需要修改可执行文件，所以如果可执行文件启动的时候执行校验的话就会出问题。
+
+::: {.callout-tip}
+目前没遇到过，主要是像这种启动的时候还知道要校验的程序开发的时候都比较规范，对 Unicode 的支持基本没啥问题。
+:::
 
 ## 另请参阅
 
