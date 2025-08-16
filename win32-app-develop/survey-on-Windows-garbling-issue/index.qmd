@@ -25,7 +25,7 @@ footnotes-location: footnotes
 沿着这一思路，后来出现了 [Locale Emulator](https://github.com/xupefei/Locale-Emulator)（目前已归档，但基本功能完善，在涉及程序 UI 时存在瑕疵，但总体上是不错的）这样的解决方案，通过 DLL 注入的方式，使用钩子技术 hook 与区域格式相关的 Windows API 来实现运行环境的模拟。
 到这里，对于从 Linux 移植而来的程序，其乱码问题仍没有得到很好的解决，这些程序需要一个代码页为 UTF-8 的运行环境。
 
-从 Windows 1903 开始，微软提供了全局 UTF-8 的选项，对于没有指定区域格式的应用程序，默认使用 UTF-8 作为代码页 [@utf8-code-pages] 可较好地解决 Linux 平台移植而来的程序乱码问题。
+从 Windows 10 1903 开始，微软提供了全局 UTF-8 的选项，对于没有指定区域格式的应用程序，默认使用 UTF-8 作为代码页 [@utf8-code-pages] 可较好地解决 Linux 平台移植而来的程序乱码问题。
 然而，一旦开启此选项，依赖 ANSI 代码页的程序又会出现乱码问题。
 
 ![全局 UTF-8 选项](assets/global-utf8.avif){.center}
