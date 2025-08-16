@@ -10,13 +10,13 @@ footnotes-location: footnotes
 乱码问题一直是 Windows 系统的老大难问题，究其原因，主要有如下几点：
 
 1. 程序源代码的编码格式：以 Microsoft Visual Studio 为例，若开发者在开发时未规范地使用 UTF-8 等 [^unicode-formats] Unicode 文件编码格式作为源代码文件编码，而是采用默认的 ANSI 编码（如 GB2312），则在编译链接后的可执行文件中，多字节字符串（例如使用 `const char*` 类型声明的字符串）就会以 ANSI 编码保存，这进一步导致程序与 Windows 代码页深度绑定，一旦在其他代码页环境下运行，就会导致乱码。一个典型的例子就是使用 `printf` 打印字符串到终端：`printf` 函数的行为是将多字节字符串的字节流原封不动地“搬”到终端，假定源文件以 GB2312 编码，那么终端进程就必须以 GB2312 （对应于 936 代码页）进行解码才能正确显示字符串。这种情况下，如果同时有 A、B、C 三个程序，其源代码分别以 GB2312、SHIFT-JIS、ISO-8859-1 进行编码，就会不可避免造成冲突。对于这样的情形，只能为每个进程进行适配，即 A 进程运行时用 GB2312，B 进程运行时用 SHIFT-JIS，以此类推。这种思路推而广之就是为每个进程模拟出其所需要的区域格式和代码页 [^locale-cp]。
-2. 字符串相关的 Windows API：在现代 Windows 程序开发中，应该完全摒弃 `A` 后缀的 ANSI Windows API，转而使用 `W` 后缀的 UTF-16 Windows API（除非开发者知道自己在做什么）。另外，C / C++ 中像 `fopen` 这样的语言标准库接口，不可避免地调用 `WriteFileA`，进而导致编码问题 [^std]。对于从 Linux 等平台移植而来的程序，这一问题尤为明显，这些程序虽然采用 UTF-8 字符编码，但却调用了 ANSI Windows API，进而使得 UTF-8 字符串以 ANSI 格式进行解码。要处理这样的问题，只能让程序在代码页和区域格式设定为 UTF-8（65001）的环境下运行。
+2. 字符串相关的 Windows API：在现代 Windows 程序开发中，应该完全摒弃 `A` 后缀的 ANSI Windows API，转而使用 `W` 后缀的宽字符 UTF-16 Windows API（除非开发者知道自己在做什么）。，然而，C / C++ 中像 `fopen` 这样的语言标准库接口，不可避免地调用 `WriteFileA`，进而导致编码问题 [^std]。对于从 Linux 等平台移植而来的程序，这一问题尤为明显，这些程序虽然采用 UTF-8 字符编码，但却调用了 ANSI Windows API，进而使得 UTF-8 字符串以 ANSI 格式进行解码。要处理这样的问题，只能让程序在代码页和区域格式设定为 UTF-8（65001）的环境下运行。
 
 [^locale-cp]: Windows 平台下，区域格式（locale）和代码页（code page）深度绑定，因此文中可能会交换使用这两个概念。但是，严格来说，这二者是不可混淆的。
 
 [^unicode-formats]: 其他的 Unicode 文件编码格式（如 UTF-16）较为少见。
 
-[^std]: 微软一般为这样的接口提供了宽字符版本，现代 C++ 中也有像 `<filesystem>` 这样的解决方案，然而这并不能解决现存的大量老旧代码中的问题。
+[^std]: 微软一般为这样的接口提供了宽字符版本，现代 C++ 中也有像 `<filesystem>` 这样的解决方案，然而这些并不能解决 Linux 程序移植到 Windows 平台以及现存大量不规范的老旧代码的问题。
 
 ## 解决方案
 
@@ -94,11 +94,12 @@ function InjectLocale([String[]]$FilePath, [String]$Locale="UTF-8")
 }
 ```
 
-使用上述时，需要确保 `mt.exe` 在 `$Env:PATH` 中。
+使用上述 PowerShell 函数时，需要确保 `mt.exe` 包含在 `$Env:PATH` 列出的路径中。
+复制上述代码到剪切板，在 PowerShell 中执行：`Get-Clipboard | Out-String | Invoke-Expression`，即可将函数定义导入到当前 PowerShell 会话中。
 运行时，可以使用下面的命令将指定了区域格式的清单注入到指定的一个或多个可执行文件中：
 
 ```powershell
-InjectLocale -FilePath "C:\Path\To\Your\foo.exe","C:\Path\To\Your\bar.exe" -Locale "UTF-8"
+InjectLocale -FilePath "C:\Path\To\foo.exe","C:\Path\To\bar.exe" -Locale "UTF-8"
 ```
 
 ::: {.callout-important}
