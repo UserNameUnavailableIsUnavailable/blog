@@ -7,3 +7,5 @@
       children:
       - title: 字符编码
         href: /win32-app-develop/character-encoding/index.html
+      - title: Windows 乱码问题研究
+        href: /win32-app-develop/survey-on-Windows-garbling-issue/index.html

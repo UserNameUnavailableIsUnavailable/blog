@@ -1,0 +1,169 @@
+---
+title: Windows 乱码问题研究
+bibliography: references.bib
+references-location: references
+footnotes-location: footnotes
+---
+
+## 乱码问题
+
+乱码问题一直是 Windows 系统的老大难问题，究其原因，主要有如下几点：
+
+1. 程序源代码的编码格式：以 Microsoft Visual Studio 为例，若开发者在开发时未规范地使用 UTF-8 等 [^unicode-formats] Unicode 文件编码格式作为源代码文件编码，而是采用默认的 ANSI 编码（如 GB2312），则在编译链接后的可执行文件中，多字节字符串（例如使用 `const char*` 类型声明的字符串）就会以 ANSI 编码保存，这进一步导致程序与 Windows 代码页深度绑定，一旦在其他代码页环境下运行，就会导致乱码。一个典型的例子就是使用 `printf` 打印字符串到终端：`printf` 函数的行为是将多字节字符串的字节流原封不动地“搬”到终端，假定源文件以 GB2312 编码，那么终端进程就必须以 GB2312 （对应于 936 代码页）进行解码才能正确显示字符串。这种情况下，如果同时有 A、B、C 三个程序，其源代码分别以 GB2312、SHIFT-JIS、ISO-8859-1 进行编码，就会不可避免造成冲突。对于这样的情形，只能为每个进程进行适配，即 A 进程运行时用 GB2312，B 进程运行时用 SHIFT-JIS，以此类推。这种思路推而广之就是为每个进程模拟出其所需要的区域格式和代码页 [^locale-cp]。
+2. 字符串相关的 Windows API：在现代 Windows 程序开发中，应该完全摒弃 `A` 后缀的 ANSI Windows API，转而使用 `W` 后缀的 UTF-16 Windows API（除非开发者知道自己在做什么）。另外，C / C++ 中像 `fopen` 这样的语言标准库接口，不可避免地调用 `WriteFileA`，进而导致编码问题 [^std]。对于从 Linux 等平台移植而来的程序，这一问题尤为明显，这些程序虽然采用 UTF-8 字符编码，但却调用了 ANSI Windows API，进而使得 UTF-8 字符串以 ANSI 格式进行解码。要处理这样的问题，只能让程序在代码页和区域格式设定为 UTF-8（65001）的环境下运行。
+
+[locale-cp]: Windows 平台下，区域格式（locale）和代码页（code page）深度绑定，因此文中可能会交换使用这两个概念。但是，严格来说，这二者是不可混淆的。
+
+[^unicode-formats]: 其他的 Unicode 文件编码格式（如 UTF-16）较为少见。
+
+[^std]: 微软一般为这样的接口提供了宽字符版本，现代 C++ 中也有像 `<filesystem>` 这样的解决方案，然而这并不能解决现存的大量老旧代码中的问题。
+
+## 解决方案
+
+可以看到要想比较完美地乱码问题，一个非常自然的解决思路就是为每个进程单独模拟一个区域格式和代码页环境。
+微软最开始提供了 AppLocale 来实现这种功能，但是很快就烂尾了。
+沿着这一思路，后来出现了 [Locale Emulator](https://github.com/xupefei/Locale-Emulator)（目前已归档，但基本功能完善，在涉及程序 UI 时存在瑕疵，但总体上是不错的）这样的解决方案，通过 DLL 注入的方式，使用钩子技术 hook 与区域格式相关的 Windows API 来实现运行环境的模拟。
+到这里，对于从 Linux 移植而来的程序，其乱码问题仍没有得到很好的解决，这些程序需要一个代码页为 UTF-8 的运行环境。
+
+从 Windows 1903 开始，微软提供了全局 UTF-8 的选项，对于没有指定区域格式的应用程序，默认使用 UTF-8 作为代码页 [@utf8-code-pages] 可较好地解决 Linux 平台移植而来的程序乱码问题。
+然而，一旦开启此选项，依赖 ANSI 代码页的程序又会出现乱码问题。
+于是，连同此选项一起出现的还有 **应用程序清单（App Manifest）** 中的 `activeCodePage` 属性 [@utf8-code-pages; @app-manifest]，可以强制某个程序使用 UTF-8 代码页。
+要使用该功能，需要 Windows SDK 中的 `mt.exe` 程序 [^SDK]，并编写一份像下面这样的清单：
+
+[^SDK]: Microsoft Visual Studio 中随附 Windows SDK，也可从 [此处](https://developer.microsoft.com/zh-cn/windows/downloads/windows-sdk/) 单独下载 Windows SDK。
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+    <assemblyIdentity type="win32" name="..." version="6.0.0.0"/>
+    <application>
+      <windowsSettings>
+        <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">UTF-8</activeCodePage>
+      </windowsSettings>
+    </application>
+  </assembly>
+```
+
+然后，在 shell 中执行下面的命令：
+
+```powershell
+mt.exe -manifest <MANIFEST> -outputresource:"<EXE>;#1"
+```
+
+其中，`<MANIFEST>` 为清单文件，`<EXE>` 为需要强制使用 UTF-8 代码页的程序，`#1` 表示清单文件序号 [^number]。
+执行后，会将 `activeCodePage` 信息注入指定的可执行文件中，之后再运行指定程序时就会使用 UTF-8 代码页。
+
+[^number]: 可执行文件的清单序号需要设置为 `#1`。
+
+从 Windows 11 开始，`activeCodePage` 还可以设置为像 zh-CN、ja-JP、en-US 这样的区域格式，注入后，会使用该区域格式对应的默认代码页（如 en-US 对应的代码页就是 1252）。
+有了这样的功能，就可以可以先将系统代码页全局设定为 UTF-8，并对不支持 UTF-8 的程序单独注入清单。
+
+为了更方便地实现清单注入，可实现这样一个 PowerShell 函数：
+
+```powershell
+function InjectLocale([String[]]$FilePath, [String]$Locale="UTF-8")
+{
+    try
+    {
+        $mt = Get-Command -Name mt -ErrorAction Stop
+        $spec = @"
+          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+            <assemblyIdentity type="win32" name="..." version="6.0.0.0"/>
+            <application>
+              <windowsSettings>
+                <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">$Locale</activeCodePage>
+              </windowsSettings>
+            </application>
+          </assembly>
+"@
+        $tmp = New-TemporaryFile
+        $spec | Out-File -FilePath $tmp -Encoding utf8
+        $FilePath | ForEach-Object -Process {
+            &$mt -manifest $tmp -outputresource:"$_;#1"
+            Write-Output "Injected manifest (activeCodePage = `"$Locale`") into $_ successfully."
+        }
+    }
+    catch
+    {
+        Write-Output $_
+    }
+}
+```
+
+使用上述时，需要确保 `mt.exe` 在 `$Env:PATH` 中。
+运行时，可以使用下面的命令将指定了区域格式的清单注入到指定的一个或多个可执行文件中：
+
+```powershell
+InjectLocale -FilePath "C:\Path\To\Your\foo.exe","C:\Path\To\Your\bar.exe" -Locale "UTF-8"
+```
+
+::: {.callout-important}
+如上文所述，注入除 UTF-8 以外的区域格式需要 Windows 11 及以上版本，否则只能注入 UTF-8 或 Legacy 代码页。详见 [`activeCodePage`](https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage)。
+:::
+
+## 几个例子
+
+我们可以编写几个例子来观察清单注入功能带来的影响，测试所用的系统区域格式为 zh-CN，即简体中文（中国），对应代码页 936。
+
+### `setlocale` 获取默认区域格式
+
+```c
+// locale.c
+#include <locale.h>
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    const char* locale = setlocale(LC_ALL, "");
+    printf("Current locale: %s", locale);
+    return 0;
+}
+```
+
+注入前后对比效果如下（ja-JP 对应代码页为 932）：
+
+![注入效果对比](assets/injection.avif){.center}
+
+## 适配 Linux 移植而来的程序
+
+前面提到，在 Windows 平台下像 `fopen` 这样的标准库接口在创建文件时上会调用 `CreateFileA`，创建时传入的文件名字符串 `lpFileName` 在并不是 ANSI 编码的字符串，而是 UTF-8 编码的字符串（除非开启全局 UTF-8，这时 ANSI 代码页就是 UTF-8 了），因此，对于从 Linux 移植而来的程序，需要一个代码页为 UTF-8 的运行环境。
+我们通过下面的例子来验证这一点：
+
+```c
+#include <Windows.h>
+#include <stdio.h>
+
+int main (int argc, char *argv[])
+{
+    HANDLE hFile = CreateFileA("测试", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile) CloseHandle(hFile);
+
+    FILE* pf = NULL;
+    fopen_s(&pf, "验证", "w");
+    if (pf) fclose(pf);
+    return 0;
+}
+```
+
+在注入清单前，运行后创建的文件名称出现乱码：
+
+![注入 UTF-8 代码页清单前运行效果](assets/before-injection.avif){.center}
+
+注入后，运行后创建的文件名称正确显示：
+
+![注入 UTF-8 代码页清单后运行效果](assets/after-injection.avif){.center}
+
+## 另请参阅
+
+[Code Pages](https://learn.microsoft.com/en-us/windows/win32/intl/code-pages)
+
+## 参考文献
+
+:::{#references}
+:::
+
+## 脚注
+
+:::{#footnotes}
+:::
