@@ -27,6 +27,9 @@ footnotes-location: footnotes
 
 从 Windows 1903 开始，微软提供了全局 UTF-8 的选项，对于没有指定区域格式的应用程序，默认使用 UTF-8 作为代码页 [@utf8-code-pages] 可较好地解决 Linux 平台移植而来的程序乱码问题。
 然而，一旦开启此选项，依赖 ANSI 代码页的程序又会出现乱码问题。
+
+![全局 UTF-8 选项](assets/global-utf8.avif){.center}
+
 于是，连同此选项一起出现的还有 **应用程序清单（App Manifest）** 中的 `activeCodePage` 属性 [@utf8-code-pages; @app-manifest]，可以强制某个程序使用 UTF-8 代码页。
 要使用该功能，需要 Windows SDK 中的 `mt.exe` 程序 [^SDK]，并编写一份像下面这样的清单：
 
