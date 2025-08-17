@@ -19,8 +19,9 @@ Similar to neighbors, a pixel $p$ can have 4-adjacent or 8-adjacent pixels, but 
 Adjacency helps us identify semantic relationships between pixels, such as extracting regions of interest by tracing their borders. In practice, 4-adjacency may not be sufficient to identify borders, while 8-adjacency can sometimes cause ambiguity. To address this, **m-adjacency** (mixed adjacency) is introduced and defined as follows:
 
 Two pixels $p$ and $q$ with values in $V$ are m-adjacent if:
-1. $q \in N_4(p)$, or
-2. $q \in N_D(p)$ and $N_4(p) \cap N_4(q)$ contains no pixels with values in $V$.
+
+- $q \in N_4(p)$, or
+- $q \in N_D(p)$ and $N_4(p) \cap N_4(q)$ contains no pixels with values in $V$.
 
 This definition resolves ambiguity by prioritizing 4-adjacency. If $p$ and $q$ are diagonal neighbors and share one or more 4-neighbors, they are not m-adjacent. The intuition is that $p$ can be reached from $q$ via their shared 4-neighbors.
 
