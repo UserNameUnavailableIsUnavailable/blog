@@ -97,7 +97,7 @@ function InjectLocale([String[]]$FilePath, [String]$Locale="UTF-8")
 ```
 
 使用上述 PowerShell 函数时，需要确保 `mt.exe` 包含在 `$Env:PATH` 列出的路径中。
-复制上述代码到剪切板，在 PowerShell 中执行：`Get-Clipboard | Out-String | Invoke-Expression`，即可将函数定义导入到当前 PowerShell 会话中。
+复制上述代码到剪切板，在 PowerShell 中执行：`Get-Clipboard | Out-String | Invoke-Expression`{.language-powershell}，即可将函数定义导入到当前 PowerShell 会话中。
 运行时，可以使用下面的命令将指定了区域格式的清单注入到指定的一个或多个可执行文件中：
 
 ```powershell

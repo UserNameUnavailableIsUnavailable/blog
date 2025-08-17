@@ -93,7 +93,8 @@ foreach ($url in $urls) {
 腾讯云提供了防火墙控制台，我的服务器内部还有一层 `ufw` 控制的防火墙，因此需要在这两处都放通 9090 端口。
 :::
 
-在 HTTP 服务器中配置反向代理，Apache 虚拟主机配置如下：
+Clash 外部控制服务同时支持 HTTP 协议和 WebSocket 协议，前者用于调用 RESTful API，后者用于实时推送 Clash 内核的状态信息并在前端绘制可视化资源占用图。
+在 Apache 服务器中配置反向代理，并对 WebSocket 连接进行重写处理，虚拟主机配置如下：
 
 ```apacheconf
 <VirtualHost *:9090>
@@ -102,9 +103,16 @@ foreach ($url in $urls) {
     SSLCertificateFile <证书文件路径>
     SSLCertificateKeyFile <证书密钥文件路径>
     SSLCertificateChainFile <证书链文件路径>
+    # 启用反向代理
     ProxyPreserveHost On
     ProxyPass / http://localhost:9097/
     ProxyPassReverse / http://localhost:9097/
+    # 检测 WebSocket 连接
+    RewriteEngine on
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule /(.*) ws://localhost:9097/$1 [P,L]
+    # 设置 Origin 头部，防止跨域问题
     RequestHeader set Origin "http://localhost:9097"
 </VirtualHost>
 ```

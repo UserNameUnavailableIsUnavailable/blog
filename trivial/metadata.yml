@@ -19,5 +19,3 @@
           href: /trivial/2025/external-commands-in-pwsh/index.html
         - title: Linux 修改登录 shell 为 PowerShell
           href: /trivial/2025/change-login-shell-to-pwsh.html
-        - title: 在 Linux 服务器内部署 Clash 服务
-          href: /trivial/2025/linux-clash-service/index.html
