@@ -1,8 +1,5 @@
 ---
 title: Windows 乱码问题研究
-bibliography: references.bib
-references-location: references
-footnotes-location: footnotes
 ---
 
 ## 乱码问题
@@ -22,20 +19,20 @@ footnotes-location: footnotes
 
 要想比较完美地解决乱码问题，一个非常自然的思路就是为每个进程单独模拟一个区域格式和代码页环境。
 微软最开始提供了 AppLocale 来实现这种功能，但是很快就烂尾了，网络上虽然有 AppLocale 可供下载，但在新系统上由于兼容性问题已经无法正常使用。
-后来，还出现了 [Locale Emulator](https://github.com/xupefei/Locale-Emulator) 这样的解决方案 [^locale-emulator]。Locale Emulator 通过 DLL 注入的方式，使用钩子技术 hook 与区域格式相关的 Windows API 来实现运行环境的模拟。Locale Emulator 在涉及程序 UI 显示时存在一些瑕疵，不过总体上还是非常不错的。
+后来，还出现了 [Locale Emulator](https://github.com/xupefei/Locale-Emulator){target="_blank"} 这样的解决方案 [^locale-emulator]。Locale Emulator 通过 DLL 注入的方式，使用钩子技术 hook 与区域格式相关的 Windows API 来实现运行环境的模拟。Locale Emulator 在涉及程序 UI 显示时存在一些瑕疵，不过总体上还是非常不错的。
 
 [^locale-emulator]: 该项目目前已归档，不再有后续的更新支持。
 
 到这里，对于从 Linux 移植而来的程序，其乱码问题仍没有得到很好的解决。前面已经提到过,这些程序需要一个代码页为 UTF-8 的运行环境。
-微软也意识到了这个问题，因此从 Windows 10 1903 开始，微软提供了全局 UTF-8 的选项，对于没有指定区域格式的应用程序，默认使用 UTF-8 作为代码页 [@utf8-code-pages]。该方案可较好地解决 Linux 平台移植而来的程序乱码问题。
+微软也意识到了这个问题，因此从 Windows 10 1903 开始，微软提供了全局 UTF-8 的选项，对于没有指定区域格式的应用程序，默认使用 UTF-8 作为代码页（参阅 [Use UTF-8 code pages in Windows apps](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page){target="_blank"}）。该方案可较好地解决 Linux 平台移植而来的程序乱码问题。
 然而，一旦开启此选项，依赖 ANSI 代码页的程序又会出现乱码问题。
 
 ![全局 UTF-8 选项](assets/global-utf8.avif){.center}
 
-于是，连同此选项一起出现的还有 **应用程序清单（App Manifest）** 中的 `activeCodePage` 属性 [@utf8-code-pages; @app-manifest]，可以强制某个程序使用 UTF-8 代码页。
+于是，连同此选项一起出现的还有 **应用程序清单（App Manifest）** 中的 `activeCodePage` 属性（参阅 [Use UTF-8 code pages in Windows apps](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page){target="_blank"}、[Application manifests](https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage){target="_blank"}），可以强制某个程序使用 UTF-8 代码页。
 要使用该功能，需要 Windows SDK 中的 `mt.exe` 程序 [^SDK]，并编写一份像下面这样的清单：
 
-[^SDK]: Microsoft Visual Studio 中随附 Windows SDK，也可从 [此处](https://developer.microsoft.com/zh-cn/windows/downloads/windows-sdk/) 单独下载 Windows SDK。
+[^SDK]: Microsoft Visual Studio 中随附 Windows SDK，也可从 [此处](https://developer.microsoft.com/zh-cn/windows/downloads/windows-sdk/){target="_blank"} 单独下载 Windows SDK。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -63,49 +60,77 @@ mt.exe -manifest <MANIFEST> -outputresource:"<EXE>;#1"
 从 Windows 11 开始，`activeCodePage` 还可以设置为像 zh-CN、ja-JP、en-US 这样的区域格式，注入后，会使用该区域格式对应的默认代码页（如 en-US 对应的代码页就是 1252）。
 有了这样的功能，就可以可以先将系统代码页全局设定为 UTF-8，并对不支持 UTF-8 的程序单独注入清单。
 
+清单注入有两种方法：
+
+- **内嵌清单**：将清单通过 `mt.exe` 程序嵌入到可执行文件中，这样在运行时不需要额外的清单文件。
+- **外部清单**：将清单文件存放在可执行文件所在目录下，命名为 `<EXE>.1.manifest`（可执行文件的 `.1` 可省略，即 `<EXE>.manifest`），装载器在运行时会自动加载该清单。[^condition]
+
+::: {.callout-important}
+需要指出，外部清单方式并不总是有效，具体取决于程序链接时的选项。
+内嵌清单拥有比外部清单更高的优先级，因此如果可执行文件自身已经内嵌了清单，则外部清单无效。
+要了解更多细节，请参阅：[`/MANIFEST` (Create side-by-side assembly manifest)](https://learn.microsoft.com/en-us/cpp/build/reference/manifest-create-side-by-side-assembly-manifest){target="_blank"}。
+一般而言，先尝试注入外部清单，如果外部清单无效，再尝试通过内嵌方式进行注入。
+:::
+
 为了更方便地实现清单注入，可实现这样一个 PowerShell 函数：
 
 ```powershell
-function InjectLocale([String[]]$FilePath, [String]$Locale="UTF-8")
+function InjectLocale([String[]]$FilePath, [String]$Locale="UTF-8", [Switch]$External)
 {
+    $spec = @"
+      <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+        <assemblyIdentity type="win32" name="..." version="6.0.0.0"/>
+        <application>
+          <windowsSettings>
+            <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">$Locale</activeCodePage>
+          </windowsSettings>
+        </application>
+      </assembly>
+"@
     try
     {
-        $mt = Get-Command -Name mt -ErrorAction Stop
-        $spec = @"
-          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-          <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
-            <assemblyIdentity type="win32" name="..." version="6.0.0.0"/>
-            <application>
-              <windowsSettings>
-                <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">$Locale</activeCodePage>
-              </windowsSettings>
-            </application>
-          </assembly>
-"@
         $tmp = New-TemporaryFile
         $spec | Out-File -FilePath $tmp -Encoding utf8
-        $FilePath | ForEach-Object -Process {
-            &$mt -manifest $tmp -outputresource:"$_;#1"
-            Write-Output "Injected manifest (activeCodePage = `"$Locale`") into $_ successfully."
+        if (-not $External) # 清单内嵌到 exe 中
+        {
+            $mt = Get-Command -Name mt -ErrorAction Stop # 检查 mt.exe 是否可用
+            $FilePath | ForEach-Object -Process {
+                &$mt -manifest $tmp -outputresource:"$_;#1"
+                Write-Output "`n"
+            }
         }
+        else # 清单存放到 exe 所在目录下
+        {
+            $FilePath | ForEach-Object -Process {
+                $manifest_file_name = $_ + ".manifest"
+                Copy-Item -Path $tmp.FullName -Destination $manifest_file_name
+            }
+        }
+        Remove-Item $tmp
     }
     catch
     {
-        Write-Output $_
+        Write-Error $_
     }
 }
+
 ```
 
-使用上述 PowerShell 函数时，需要确保 `mt.exe` 包含在 `$Env:PATH` 列出的路径中。
+::: {.callout-important}
+使用上述 PowerShell 函数创建内嵌清单时，需要预装 Windows SDK，并确保 `mt.exe` 包含在 `$Env:PATH` 列出的路径中。
+:::
+
 复制上述代码到剪切板，在 PowerShell 中执行：`Get-Clipboard | Out-String | Invoke-Expression`{.language-powershell}，即可将函数定义导入到当前 PowerShell 会话中。
 运行时，可以使用下面的命令将指定了区域格式的清单注入到指定的一个或多个可执行文件中：
 
 ```powershell
-InjectLocale -FilePath "C:\Path\To\foo.exe","C:\Path\To\bar.exe" -Locale "UTF-8"
+InjectLocale -FilePath "C:\Path\To\foo.exe","C:\Path\To\bar.exe" -Locale "UTF-8" -External # 内嵌清单（需要预装 `mt.exe`）
+InjectLocale -FilePath "C:\Path\To\foo.exe","C:\Path\To\bar.exe" -Locale "UTF-8" # 外部清单
 ```
 
 ::: {.callout-important}
-如上文所述，注入除 UTF-8 以外的区域格式需要 Windows 11 及以上版本，否则只能注入 UTF-8 或 Legacy 代码页。详见 [`activeCodePage`](https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage)。
+如上文所述，注入除 UTF-8 以外的区域格式需要 Windows 11 及以上版本，否则只能注入 UTF-8 或 Legacy 代码页。详见 [`activeCodePage`](https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage){target="_blank"}。
 :::
 
 ## 几个例子
@@ -216,14 +241,4 @@ int main(int argc, char *argv[])
 
 ## 另请参阅
 
-[Code Pages](https://learn.microsoft.com/en-us/windows/win32/intl/code-pages)
-
-## 参考文献
-
-:::{#references}
-:::
-
-## 脚注
-
-:::{#footnotes}
-:::
+[Code Pages](https://learn.microsoft.com/en-us/windows/win32/intl/code-pages){target="_blank"}
