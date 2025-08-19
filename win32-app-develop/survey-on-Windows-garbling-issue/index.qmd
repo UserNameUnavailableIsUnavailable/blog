@@ -78,56 +78,46 @@ mt.exe -manifest <MANIFEST> -outputresource:"<EXE>;#1"
 为了更方便地实现清单注入，可编写如下 PowerShell 脚本，实现工具函数 `InjectLocale`：
 
 ```powershell
-function MergeXMLs
-{
-<#
-    .SYNOPSIS
-        合并两个 XML 对象。
-    .DESCRIPTION
-        合并两个 XML 对象，将 `$Source` 中的节点并入 `$Target` 中。如果 `$Target` 中已经存在同名节点，则递归地合并这两个节点，直至遇到叶子节点。合并过程中有在 `$Source` 或 `$Target` 中遇到叶子节点时，使用源节点替换目标节点。
-    .PARAMETER Target
-        目标 XML 对象。
-    .PARAMETER Source
-        源 XML 对象。
-    .OUTPUTS
-        合并后的 `$Target` 对象。
-#>
-    param([XML]$Target, [XML]$Source)
-    function MergeXMLNodes($TargetNode, $SourceNode)
-    {
-        $SourceNode.ChildNodes | ForEach-Object -Process { # 将 $SourceNode 中的节点依次合并到 $TargetNode
-            $match = $TargetNode.SelectSingleNode("*[local-name() = '$($_.LocalName)']") # 检查 $TargetNode 内是否已经存在相应节点（采用局部名称比较，避开命名空间）
-            if ($match) # $Target 中已经存在同名节点
-            {
-                if ($_.HasChildNodes -and $match.HasChildNodes) # $_ 和 $match 都有子节点，递归合并这两个子节点
-                {
-                    MergeXMLNodes($match, $_)
-                }
-                else # $_ 或 $match 是叶子节点
-                {
-                    # $match 是叶子节点、$_ 也是叶子节点
-                    # $match 不是叶子节点、$_ 不是叶子节点
-                    # $match 是叶子节点、$_ 不是叶子节点
-                    # 不论那种情况，$_ 都具有更高的优先级，故用 $_ 替换 $match
-                    $import = $Target.ImportNode($_, $true) # 将 $SourceNode 中的 $_ 跨文档深度复制为 $import
-                    $TargetNode.ReplaceChild($import, $match) | Out-Null # 替换 $match 节点
-                }
-            }
-            else
-            {
-                $import = $Target.ImportNode($_, $true) # 将 $SourceNode 中的 $_ 跨文档深度复制为 $import
-                $TargetNode.AppendChild($import) | Out-Null
-            }
-        }
+function EmbedLocaleInManifest {
+    param([XML]$Manifest, [String]$Locale = "UTF-8")
+
+    $asm_Namespace = "urn:schemas-microsoft-com:asm.v1"
+    $WindowsSettings_Namespace = "http://schemas.microsoft.com/SMI/2019/WindowsSettings"
+
+    # <assembly>
+    $assemblyNode = $Manifest.assembly
+    if (-not $assemblyNode) {
+        $assemblyNode = $Manifest.CreateElement("assembly", $asm_Namespace)
+        $Manifest.DocumentElement.AppendChild($assemblyNode) | Out-Null
     }
-    MergeXMLNodes $Target.DocumentElement $Source.DocumentElement 
-    return $Target
+
+    # <application>
+    $applicationNode = $Manifest.application
+    if (-not $applicationNode) {
+        $applicationNode = $Manifest.CreateElement("application")
+        $assemblyNode.AppendChild($applicationNode) | Out-Null
+    }
+
+    # <windowsSettings>
+    $windowsSettingsNode = $applicationNode.windowsSettings
+    if (-not $windowsSettingsNode) {
+        $windowsSettingsNode = $Manifest.CreateElement("windowsSettings")
+        $applicationNode.AppendChild($windowsSettingsNode) | Out-Null
+    }
+
+    # <activeCodePage>
+    $activeCodePageNode = $windowsSettingsNode.activeCodePage
+    if (-not $activeCodePageNode) {
+        $activeCodePageNode = $Manifest.CreateElement("activeCodePage", $WindowsSettings_Namespace)
+        $windowsSettingsNode.AppendChild($activeCodePageNode) | Out-Null
+    }
+    $activeCodePageNode.InnerText = $Locale
+    return $Manifest
 }
 
-function InjectLocale
-{
-    param([String[]]$FilePath, [String]$Locale="UTF-8", [Switch]$External)
-    $activeCodePageManifest = (@"
+function InjectLocale {
+    param([String[]]$FilePath, [String]$Locale = "UTF-8", [Switch]$External)
+    $activeCodePage_Manifest = (@"
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
       <assemblyIdentity type="win32" name="..." version="6.0.0.0"/>
@@ -138,67 +128,50 @@ function InjectLocale
         </application>
       </assembly>
 "@).Trim()
-    try
-    {
-        $manifest = New-TemporaryFile
-        $activeCodePageManifest | Out-File -FilePath $manifest -Encoding utf8
-
-        if (-not $External) # 清单内嵌到 exe 中
-        {
+    try {
+        $ManifestFile = New-TemporaryFile
+        if (-not $External) {
+            # 清单内嵌到 exe 中
             $mt = Get-Command -Name mt -ErrorAction Stop
             $FilePath | ForEach-Object -Process {
-                try
-                {
-                    $existing_manifest = New-TemporaryFile
-                    # 合并已有清单
-                    $result = $null
-                    &$mt -inputresource:"$FilePath;#1" -out:$existing_manifest.FullName # 导出现有的清单
-
-                    if ($existing_manifest.Length -gt 0) # 可执行文件存在内嵌清单
-                    {
-                        $result = [XML](Get-Content -Path $existing_manifest)
-                        $assemblyIdentityName = "..."
-                        if ($result.assembly.assemblyIdentity.name) # 如果存在 assembly/assemblyIdentity 属性，则保留其名称
-                        {
-                            $assemblyIdentityName = $result.assembly.assemblyIdentity.name
-                        }
-                        [XML]$acp_xml = $activeCodePageManifest
-                        $result = MergeXMLs $result $acp_xml  # 与设置了 activeCodePage 的清单合并
-                        $result.assembly.assemblyIdentity.name = $assemblyIdentityName # 恢复原有的 assemblyIdentity/assemblyIdentity 的 name 属性
+                try {
+                    $EmbededManifestFile = New-TemporaryFile # 可执行文件内嵌的清单
+                    $Manifest = $null # 清单对象
+                    &$mt -inputresource:"$FilePath;#1" -out:"$($EmbededManifestFile.FullName)" # 导出内嵌清单
+                    if ($EmbededManifestFile.Length -gt 0) {
+                        # 内嵌清单存在
+                        $Manifest = [XML](Get-Content $EmbededManifestFile.FullName)
+                        EmbedLocaleInManifest -Manifest $Manifest -Locale $Locale | Out-Null # 嵌入 locale 信息
+                        $Manifest.Save($ManifestFile.FullName) # 保存修改后的清单
                     }
-                    if (-not $result)
-                    {
-                        $result = [XML]($activeCodePageManifest)
+                    else {
+                        # 内嵌清单不存在
+                        $activeCodePage_Manifest | Out-File -FilePath $ManifestFile.FullName -Encoding UTF8
                     }
-                    $result.Save($manifest.FullName) # 保存合并后的清单
-
-                    &$mt -manifest $manifest -outputresource:"$_;#1"
+                    &$mt -manifest "$($ManifestFile.FullName)" -outputresource:"$_;#1"
                 }
-                catch
-                {
+                catch {
                     Write-Output $_
                 }
-                finally
-                {
-                    Remove-Item $existing_manifest
+                finally {
+                    if ($EmbededManifestFile) { Remove-Item $EmbededManifestFile }
                 }
             }
         }
-        else # 清单存放到 exe 所在目录下
-        {
+        else {
+            $activeCodePage_Manifest | Out-File -FilePath $ManifestFile.FullName -Encoding UTF8
             $FilePath | ForEach-Object -Process {
-                $manifest_file_name = $_ + ".manifest"
-                Copy-Item -Path $manifest.FullName -Destination $manifest_file_name
+                # 添加 .manifest 后缀后保存为副本
+                $ManifestCopyName = "{}.manifest" -f $_.FullName
+                Copy-Item -Path $ManifestFile.FullName -Destination $ManifestCopyName
             }
         }
     }
-    catch
-    {
+    catch {
         Write-Error $_
     }
-    finally
-    {
-        Remove-Item $manifest
+    finally {
+        if ($ManifestFile) { Remove-Item $ManifestFile }
     }
 }
 ```
