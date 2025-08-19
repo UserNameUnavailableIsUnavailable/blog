@@ -116,7 +116,7 @@ function EmbedLocaleInManifest {
 }
 
 function InjectLocale {
-    param([String[]]$FilePath, [String]$Locale = "UTF-8", [Switch]$External)
+    param([String[]]$FilePath, [String]$Locale = "UTF-8", [Switch]$Embed)
     $activeCodePage_Manifest = (@"
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
@@ -129,24 +129,26 @@ function InjectLocale {
       </assembly>
 "@).Trim()
     try {
-        $ManifestFile = New-TemporaryFile
-        if (-not $External) {
-            # 清单内嵌到 exe 中
+        if ($Embed) { # 清单内嵌到 exe 中
             $mt = Get-Command -Name mt -ErrorAction Stop
-            $FilePath | ForEach-Object -Process {
+            ForEach-Object -InputObject $FilePath {
+                if (-not (Test-Path $_)) {
+                    Write-Error "File not found: $_"
+                    continue
+                }
+                $ManifestFile = $null
                 try {
-                    $EmbededManifestFile = New-TemporaryFile # 可执行文件内嵌的清单
+                    $ManifestFile = New-TemporaryFile # 创建临时清单，供 mt 使用
                     $Manifest = $null # 清单对象
-                    &$mt -inputresource:"$FilePath;#1" -out:"$($EmbededManifestFile.FullName)" # 导出内嵌清单
-                    if ($EmbededManifestFile.Length -gt 0) {
+                    &$mt -inputresource:"$FilePath;#1" -out:"$($ManifestFile.FullName)" # 导出内嵌清单
+                    if ($ManifestFile.Length -gt 0) {
                         # 内嵌清单存在
-                        $Manifest = [XML](Get-Content $EmbededManifestFile.FullName)
+                        $Manifest = [XML](Get-Content $ManifestFile.FullName)
                         EmbedLocaleInManifest -Manifest $Manifest -Locale $Locale | Out-Null # 嵌入 locale 信息
                         $Manifest.Save($ManifestFile.FullName) # 保存修改后的清单
                     }
                     else {
-                        # 内嵌清单不存在
-                        $activeCodePage_Manifest | Out-File -FilePath $ManifestFile.FullName -Encoding UTF8
+                        Out-File -InputObject $activeCodePage_Manifest -FilePath $ManifestFile.FullName -Encoding UTF8
                     }
                     &$mt -manifest "$($ManifestFile.FullName)" -outputresource:"$_;#1"
                 }
@@ -154,24 +156,24 @@ function InjectLocale {
                     Write-Output $_
                 }
                 finally {
-                    if ($EmbededManifestFile) { Remove-Item $EmbededManifestFile }
+                    if ($ManifestFile) { Remove-Item $ManifestFile }
                 }
             }
         }
         else {
-            $activeCodePage_Manifest | Out-File -FilePath $ManifestFile.FullName -Encoding UTF8
-            $FilePath | ForEach-Object -Process {
+            ForEach-Object -InputObject $FilePath {
+                if (-not (Test-Path $_)) {
+                    Write-Error "File not found: $_"
+                    continue
+                }
                 # 添加 .manifest 后缀后保存为副本
-                $ManifestCopyName = "{}.manifest" -f $_.FullName
-                Copy-Item -Path $ManifestFile.FullName -Destination $ManifestCopyName
+                $ManifestFileName = "$_.manifest"
+                Out-File -InputObject $activeCodePage_Manifest -FilePath $ManifestFileName -Encoding UTF8
             }
         }
     }
     catch {
         Write-Error $_
-    }
-    finally {
-        if ($ManifestFile) { Remove-Item $ManifestFile }
     }
 }
 ```
