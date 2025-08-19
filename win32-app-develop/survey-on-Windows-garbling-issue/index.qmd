@@ -178,20 +178,18 @@ function InjectLocale {
 }
 ```
 
-::: {.callout-important}
-使用上述 PowerShell 函数创建内嵌清单时，需要预装 Windows SDK，并确保 `mt.exe` 包含在 `$Env:PATH` 列出的路径中。
-:::
-
 复制上述代码到剪切板，在 PowerShell 中执行：`Get-Clipboard | Out-String | Invoke-Expression`{.language-powershell}，即可将函数定义导入到当前 PowerShell 会话中。
 运行时，可以使用下面的命令将指定了区域格式的清单注入到指定的一个或多个可执行文件中：
 
 ```powershell
-InjectLocale -FilePath "C:\Path\To\foo.exe","C:\Path\To\bar.exe" -Locale "UTF-8" -External # 内嵌清单（需要预装 `mt.exe`）
+InjectLocale -FilePath "C:\Path\To\foo.exe","C:\Path\To\bar.exe" -Locale "UTF-8" -Embed # 内嵌清单（需要预装 `mt.exe`）
 InjectLocale -FilePath "C:\Path\To\foo.exe","C:\Path\To\bar.exe" -Locale "UTF-8" # 外部清单
 ```
 
 ::: {.callout-important}
-如上文所述，注入除 UTF-8 以外的区域格式需要 Windows 11 及以上版本，否则只能注入 UTF-8 或 Legacy 代码页。详见 [`activeCodePage`](https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage){target="_blank"}。
+上述支持同时处理一个或多个可执行文件。默认情况下创建外部清单，创建内嵌清单需要手动指定 `-Embed` 选项。
+创建内嵌清单时，需要预装 Windows SDK，并确保 `mt.exe` 包含在 `$Env:PATH` 列出的路径中。
+另外，如上文所述，注入除 UTF-8 以外的区域格式需要 Windows 11 及以上版本，否则只能注入 UTF-8 或 Legacy 代码页。详见 [`activeCodePage`](https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage){target="_blank"}。
 :::
 
 ## 几个例子
