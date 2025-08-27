@@ -92,16 +92,18 @@ function EmbedLocaleInManifest {
     }
 
     # <application>
-    $applicationNode = $Manifest.application
+    $applicationNode = $assemblyNode.application
     if (-not $applicationNode) {
-        $applicationNode = $Manifest.CreateElement("application")
+        $ns = $Manifest.DocumentElement.NamespaceURI
+        $applicationNode = $Manifest.CreateElement("application", $ns)
         $assemblyNode.AppendChild($applicationNode) | Out-Null
     }
 
     # <windowsSettings>
     $windowsSettingsNode = $applicationNode.windowsSettings
     if (-not $windowsSettingsNode) {
-        $windowsSettingsNode = $Manifest.CreateElement("windowsSettings")
+        $ns = $Manifest.DocumentElement.NamespaceURI
+        $windowsSettingsNode = $Manifest.CreateElement("windowsSettings", $ns)
         $applicationNode.AppendChild($windowsSettingsNode) | Out-Null
     }
 
