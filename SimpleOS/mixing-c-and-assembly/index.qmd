@@ -1,0 +1,114 @@
+---
+title: C 语言、汇编混合编程
+---
+
+在操作系统开发过程中，C 语言本身只能完成一些纯计算型的任务，对于硬件相关的操作，则必须借助汇编语言实现。一般而言，要在项目中引入汇编语言进行开发，主要有内联汇编和独立汇编两种方式。
+内联汇编可以直接将汇编代码块嵌入 C 语言代码，直接使用由 C 语言定义的符号，并且在一般情况下无需手动处理调用约定等 ABI 相关的问题。
+内联汇编的缺陷在于可移植性较差，不同的编译器对内联汇编的支持各不相同，且语法差异较大。
+独立汇编则是单独编写汇编代码，并通过汇编器将其编译为目标文件，再与 C 语言代码链接在一起。
+独立汇编的可移植性较好（尤其是使用像 NASM 这样的汇编器时），但需要手动处理调用约定等 ABI 相关的问题。
+
+## MSVC 扩展的内联汇编
+
+MSVC 提供的内联汇编采用 Intel 语法，形式上与单独编写的汇编代码十分相似，可读性较好。
+使用 Clang 时通过 `-fms-extensions` 开启 MSVC 扩展后，即可使用 MSVC 风格的内联汇编。
+根据微软官方文档的表述，除了 `sp`、`bp` 这两个与栈帧相关的寄存器外，使用其余的通用寄存器时无需手动保存和恢复寄存器的值，编译器会自动处理。
+
+::: {.callout-note}
+一般情况下，应尽量优先使用 `ax`、`cx`、`dx` 这三个寄存器进行数据传递，避免使用 `bx`、`si`、`di` 这三个寄存器，以免与编译器的优化策略冲突。
+:::
+
+下面的代码演示了如何使用 MSVC 风格的内联汇编实现一个原子交换操作：
+
+```c
+#include <stdlib.h>
+#include <stdio.h>
+#include <inttypes.h>
+#include <time.h>
+
+int main()
+{
+    // 生成 [0, 5) 范围内的随机数
+    auto t = time(nullptr);
+    srand(t);
+    uint32_t number = rand() % 3;
+    printf("number = %" PRIu32 "\n", number);
+    uint32_t desired = 0;
+    printf("desired = %" PRIu32 "\n", desired);
+    // 原子交换测试
+    bool success = false;
+    __asm
+    {
+        mov eax, desired
+        lock cmpxchg dword ptr [number], eax
+        jnz fail
+        mov success, 1
+    fail:
+    }
+    if (success)
+    {
+        puts("atomic exchange succeeded");
+        return EXIT_SUCCESS;
+    }
+    else
+    {
+        puts("atomic exchange failed");
+        return EXIT_FAILURE;
+    }
+}
+```
+
+```powershell
+clang atomic_exchange.c -fms-extensions -o atomic_exchange -std=c23
+```
+
+## 独立汇编
+
+使用独立汇编时，需要手动处理调用约定等 ABI 相关的问题，尤其是调用约定相关的规则。
+
+`popcnt` 指令用于计算一个整数的二进制表示中值为 1 的位的数量，属于 x86 指令集中的一条位操作指令。
+有了这条指令，可以高效地实现一些需要计算位数的算法，尤其是对位图管理操作。
+该指令属于 SSE4.2 指令集扩展的一部分，因此在使用该指令前，必须确保目标 CPU 支持 SSE4.2 指令集。
+不幸的是，SimpleOS 运行的环境是 QEMU 模拟的 i386 CPU，因此不支持这条指令。
+下面的代码演示了如何使用 MSVC 风格的内联汇编实现 `popcnt` 指令，其调用遵循 `cdecl` 调用约定，参数在栈上传递，返回值存放在 `eax` 寄存器中。
+
+```nasm
+; popcnt.asm
+global popcnt
+popcnt:
+        xor eax, eax
+        mov edx, [esp + 4] ; 获取参数
+    count:
+        test edx, 0xFFFFFFFF ; 若 edx != 0，一直右移到 edx 变成 0
+        jz end
+        shr edx, 1 ; 右移 1 位，CF 存放移出的位
+        jc increment ; 移出的位为 1
+        jmp count
+    increment:
+        inc eax
+        jmp count ; 继续统计
+    end: ; eax 中存放结果
+        ret
+```
+
+```c
+// popcnt_test.c
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdio.h>
+
+extern __cdecl uint32_t popcnt(uint32_t x);
+
+int main()
+{
+    uint32_t number = 0b10110101;
+    uint32_t count = popcnt(number);
+    printf("number = %" PRIu32 ", popcnt = %" PRIu32 "\n", number, count);
+    return 0;
+}
+```
+
+```powershell
+nasm -f elf32 -o popcnt.obj popcnt.asm
+clang popcnt_test.c popcnt.obj -std=c23 -m32 -o popcnt_test 
+```

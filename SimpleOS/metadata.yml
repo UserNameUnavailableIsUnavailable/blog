@@ -7,5 +7,7 @@ sidebar:
     children:
     - title: 应用程序二进制接口
       href: /SimpleOS/application-binary-interface/index.html
+    - title: C 语言、汇编联合编程
+      href: /SimpleOS/mixing-c-and-assembly/index.html
     - title: 编译器和链接器的使用
       href: /SimpleOS/usage-of-compiler-and-linker/index.html

@@ -23,7 +23,7 @@ sidebar: null
 ## 底层技术栈
 
 - [CSAPP 笔记](/CSAPP-Notes/)
-- [x86_64 汇编](/x86_64-Assembly/)
+- [x86_64 汇编](/x86_64-assembly/)
 - [SimpleOS 设计与实现](/SimpleOS/)
 
 ## 数学
