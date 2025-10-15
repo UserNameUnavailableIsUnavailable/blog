@@ -10,9 +10,9 @@ sidebar: null
 - [KZ 教程](/kz-guide/)
 - [CSOL 集成工具](/CSOL-Utilities/)
 
-## 思考
+## 前端
 
-- [思考](/thinking/)
+- [前端](/前端/)
 
 ## 开发
 

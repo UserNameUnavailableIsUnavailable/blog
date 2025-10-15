@@ -21,7 +21,7 @@ The set of elements that the function may produce and must be at least as big as
 ### Important Mappings
 
 - **Injective（单射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is injective (or **one-to-one**) if $\forall\; y \in \boldsymbol{Y}$ there is at most one $x \in \boldsymbol{X}$ such that $f(x) = y$.
-- **Surjective（满射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is onto (or **surjective**) if $\forall\; y \in \boldsymbol{Y}$ there $\exists\; x \in \boldsymbol{X}$ such that $f(x)=y$.
+- **Surjective（满射）**: A function $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$ is surjective (or **onto**) if $\forall\; y \in \boldsymbol{Y}$ there $\exists\; x \in \boldsymbol{X}$ such that $f(x)=y$.
 - **Bijective（双射）**: A function is bijective (or **invertible**) if it is *both injective and surjective*. For an invertible mapping $f:\boldsymbol{X}\mapsto\boldsymbol{Y}$, we say its inverse image is $f^{-1}:\boldsymbol{Y}\mapsto\boldsymbol{X}$.
 
 ::: {.callout-important}

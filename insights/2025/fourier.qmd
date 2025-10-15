@@ -1,0 +1,15 @@
+---
+title: "Some insights on Fourier transforms"
+---
+
+## Basics
+
+Informally, a function $f(x)$ can be represented as a series of sinusoids:
+
+$$
+f(t) = A_0 + \sum_{n=1}^{\infty} \left(\sin \left(n \omega t + \varphi_n \right) \right).
+$$
+
+The motivation of the Fourier transform is to decompose a representation superposed by many different basic features into its basic components.
+In Acoustics, we believe that a complex sound is composed of many different pure tones, that is, a complex wave can be seen as a superposition of many simple waves.
+The similar idea also applies to the field of deep learning, where a complex representation can be decomposed into many simple features. For example, we say an image contains high frequency features if in a small region of the image the pixel values change rapidly, therefore resulting in such a feature we call "edges".

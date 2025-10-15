@@ -17,34 +17,51 @@ D_i f_n(\mathbf{a})\\
 \end{bmatrix}.
 $$
 
+For instance, given $\mathbf{f}\begin{pmatrix}x_1 \\ x_2\end{pmatrix} = \begin{bmatrix}x_1^2 + x_2 \\ x_1 + x_2^2\end{bmatrix}$, we have:
+
+$$D_1 \mathbf{f}\begin{pmatrix}x_1 \\ x_2\end{pmatrix} = \begin{bmatrix} 2 x_1 \\ 1 \\ \end{bmatrix};$$
+
+$$D_2 \mathbf{f}\begin{pmatrix}x_1 \\ x_2\end{pmatrix} = \begin{bmatrix} 1 \\ 2 x_2 \\ \end{bmatrix}.$$
+
 That is, calculate the derivative for each $f_i$ on the spot.
 
 ## Jacobian Matrix and Derivatives
 
-Jacobian matrix put derivative for each component in the order from left to right.
+For function $f$ from $\mathbb{R} \mapsto \mathbb{R}$, we have the following definition of derivative:
+
+$$
+f^{\prime}(x) = \lim_{h \rightarrow 0}\frac{f(x + h) - f(x)}{h} = m.
+$$
+
+If the above limit exists, then we say that $f$ is derivable at point $x$, and the derivative of $f$ at point $x$ is $m$.
+We can have a better understanding of the derivative by rewriting the above equation as:
+
+$$
+f^{\prime}(x) = \lim_{h \rightarrow 0}\frac{1}{h}\left(f(x + h) - f(x) - mh\right) = 0.
+$$
+
+A useful interpretation for this equation is that the increment of $f$ at point $x$ can be approximated by a linear function $mh$, and the approximation error is small compared to $h$. This also leads us to the definition of derivative for higher dimensions:
+
+$$
+D \mathbf{f}(\mathbf{a}) = \lim_{\vec{h}\rightarrow \vec{0}}\frac{1}{\Vert{\vec{h}}\Vert}\left(\left(\mathbf{f}(\mathbf{a} + \vec{h}) - \mathbf{f}({\mathbf{a}})\right) - \mathbf{M}\vec{h}\right) = \vec{0}.
+$$
+
+If there exists such a linear transformation $\mathbf{M}$ that makes the above equation hold, then we say that $\mathbf{f}$ is derivable at point $\mathbf{a}$, and the derivative of $\mathbf{f}$ at point $\mathbf{a}$ is the linear transformation $\mathbf{M}$.
+
+Since each partial derivative $D_i \mathbf{f}(\mathbf{a})$ is a column vector, it is very natural to combine all partial derivatives into a matrix, which is called the Jacobian matrix.
+
+The Jacobian matrix of $\mathbf{f}(\mathbf{a})$ puts partial derivative for each component in the order from left to right.
 
 $$
 \left[\mathbf{J}\mathbf{f}(\mathbf{a})\right] = \begin{bmatrix} D_1\mathbf{f}(\mathbf{a})&\cdots&D_m\mathbf{f}(\mathbf{a}) \end{bmatrix}.
 $$
 
 Jacobian matrix is simply a matrix of partial derivatives, so the existence of Jacobian matrix only indicates that the function is partially derivable at point $\mathbf{a}$.
-For the Jacobian matrix to be the functions derivative, i.e., for the function to be derivable, we also need to show the following equation holds:
+For the Jacobian matrix to be the function's derivative, we have to show the following equation holds:
 
 $$
 \lim_{\vec{h}\rightarrow \vec{0}}\frac{1}{\Vert{\vec{h}}\Vert}\left(\left(\mathbf{f}(\mathbf{a} + \vec{h}) - \mathbf{f}({\mathbf{a}})\right) - \left[\mathbf{J}\mathbf{f}(\mathbf{a})\right]\right) = \vec{0}.
 $$
-
-If this equation holds, we say that the derivative $\left[D\mathbf{f}(\mathbf{a})\right]$ exists, and $\left[D\mathbf{f}(\mathbf{a})\right] = \left[\mathbf{J}\mathbf{f}(\mathbf{a})\right]$.
-
-Also, for a function to be differentiable, the following condition holds:
-
-$$
-\lim_{\vec{h}\rightarrow \vec{0}}\frac{1}{\Vert{\vec{h}}\Vert}\left(\left(\mathbf{f}(\mathbf{a} + \vec{h}) - \mathbf{f}({\mathbf{a}})\right) - L(\vec{h})\right) = \vec{0},
-$$
-
-where $L$ is a linear transformation, i.e., $L:\mathbb{R}^m\mapsto\mathbb{R}^n$.
-
-The derivability and differentiability are equivalent, the transformation $L$ essentially corresponds to the Jacobian matrix. Jacobian matrix is essentially the best approximation to the function at $\mathbf{a}$.
 
 ::: {.callout-important}
 Although $\vec\nabla f(\mathbf{a}) = \left[Df(\mathbf{a})\right]^\mathsf{T}$, do not confuse gradients with derivatives. Geometrically, gradients are only defined in spaces with an inner product. And, gradients can only be vectors, which means multi-valued functions do not have gradients (but they still can have Jacobian matrices and derivatives).
@@ -65,3 +82,10 @@ $$
 $$
 
 Note that $\vec{v}$ need not be a unit vector.
+
+## $C^p$ functions
+
+A function is $C^p$ function if all its partial derivatives up to order $p$ exist and are continuous on $U$, Specially:
+
+- A function on $U \subseteq \mathbb{R}^n$ is $C^0$ function if it is continuous on $U$ (the derivative of order $0$ refers to the function itself);
+- A function on $U \subseteq \mathbb{R}^n$ is $C^1$ function if all its partial derivatives exist and are continuous on $U$.

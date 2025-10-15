@@ -1,0 +1,64 @@
+---
+title: 线性回归
+---
+
+给定观测样本 $[x_1, x_2, \ldots, x_D]^\mathsf{T}$ 和标签。下面的式子描述了一个最简单的线性回归模型：
+
+$$
+y = w_0 + w_1 x_1 + \cdots + w_D x_D
+$$
+
+记 $\mathbf{x} = [x_0, x_1, x_2, \ldots, x_D]^\mathsf{T}$（其中 $x_0 \equiv 1$）并将权重记作 $\mathbf{w} = [w_0, w_1, \ldots, w_D]^\mathsf{T}$，我们就可以将上式写作下面这样更简洁的形式：
+
+$$
+\begin{equation}
+y = \mathbf{w}^\mathsf{T}\mathbf{x} \label{eq:BasicLinearRegression}
+\end{equation}
+$$
+
+模型 $\eqref{eq:BasicLinearRegression}$ 的输出结果仅仅是 $\mathbf{x}$ 的仿射组合，存在很大的局限性。
+通过引入 **基函数（basis functions）** $\boldsymbol{\phi}(\mathbf{x}) = [\phi_0, \phi_1, \ldots, \phi_{M-1}]$，预先对 $\mathbf{x}$ 施加一个变换（变换后的结果记作 $\boldsymbol{\phi}(\mathbf{x})$），可提升上述模型的表达能力 [^transform]：
+
+$$
+\begin{equation}
+y = \sum_{i=0}^{M-1} w_i \phi_i(\mathbf{x}) \label{eq:LinearRegressionWithBasisFunctions}
+\end{equation}
+$$
+
+[^transform]: 变换后的维度可能发生变化，不一定为 $D$。
+
+有了 $\eqref{eq:LinearRegressionWithBasisFunctions}$，$\eqref{eq:BasicLinearRegression}$ 可视作 $\phi_j(\mathbf{x}) = x_j$ 的特例。
+引入基函数后，线性回归模型的“线性”就表现为基函数的线性组合，而模型与输入特征之间则可以是非线性关系。
+
+给定 $N$ 个观测样本 $\mathbf{X} = [\mathbf{x}_1, \cdots, \mathbf{x}_N]$，我们可以根据基函数计算出 **设计矩阵（design matrix）** [^design-matrix]：
+
+$$
+\Phi = \begin{bmatrix}
+\phi_0(\mathbf{x}_1) & \phi_1(\mathbf{x}_1) & \cdots & \phi_{M-1}(\mathbf{x}_1) \\
+\phi_0(\mathbf{x}_2) & \phi_1(\mathbf{x}_2) & \cdots & \phi_{M-1}(\mathbf{x}_2) \\
+\vdots & \vdots & \ddots & \vdots \\
+\phi_0(\mathbf{x}_N) & \phi_1(\mathbf{x}_N) & \cdots & \phi_{M-1}(\mathbf{x}_N)
+\end{bmatrix}
+$$
+
+[^design-matrix]: 设计矩阵的每一行是一个观测样本 $\mathbf{x}_i^\mathsf{T}$ 在 **基函数空间** 中的表示 $\boldsymbol{\phi}^\mathsf{T}(\mathbf{x}_i)$，即基函数输出的转置。在后文可以看到，这样的摆放方式可保持形式上的简洁。
+
+对观测样本的预测结果可表示如下：
+
+$$
+\mathbf{Y} = \begin{bmatrix}  y_1 \\ y_2 \\ \vdots \\ y_N \end{bmatrix} = \Phi \mathbf{w}
+$$
+
+从概率论的视角看，对样本 $\mathbf{x}$ 进行观测，就会得到一个可能的观测结果 $t$。我们可以用一个联合概率分布 $p(\mathbf{x}, t)$ 来刻画这种关系。我们希望最小化模型在这种分布下的平方损失 $\mathcal{L}\left(y(\mathbf{x}), t\right) = \left(y(\mathbf{x}) - t\right)^2$，为此，我们计算损失函数在该分布下的期望：
+
+$$
+\mathbb{E}[\mathcal{L}] = \iint \left(y(\mathbf{x}) - t\right)^2 p(\mathbf{x}, t) \, \mathrm{d}t \, \mathrm{d}\mathbf{x}
+$$
+
+注意到 $p(\mathbf{x}, t) = p(t | \mathbf{x}) p(\mathbf{x})$，于是：
+
+$$
+\mathbb{E}[\mathcal{L}] = \int \left\{\int \left(y(\mathbf{x}) - t\right)^2 p(t | \mathbf{x}) \, \mathrm{d}t\right\} p(\mathbf{x}) \, \mathrm{d}\mathbf{x}
+$$
+
+记 $F[y](\mathbf{x}) = \int \left(y(\mathbf{x}) - t\right)^2 p(t | \mathbf{x}) \, \mathrm{d}t$
