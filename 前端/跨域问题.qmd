@@ -12,7 +12,7 @@ title: 跨域问题
 首先，用户通过浏览器访问 `https://safe.com/` ，并登录了该站点，产生了一些 cookies，有了 cookies，用户后续无需重复登录即可向 `https://safe.com/` 发送请求。
 
 ::: {.callout-tip}
-`https://cafe.com/` 产生的 cookies 对 `https://evil.com/` 是不可见的，反之亦然。
+`https://safe.com/` 产生的 cookies 对 `https://evil.com/` 是不可见的，反之亦然。
 :::
 
 随后，用户访问 `https://evil.com/`，该站点通过 JavaScript 代码发起了对 `https://safe.com/` 的请求，这时，浏览器会携带 `https://safe.com/` 的 cookies 向 `https://evil.com/` 发起请求，`https://safe.com/` 校验 cookies 确认无误后，认为这是合法请求并响应该请求，返回了用户的隐私数据。浏览器收到响应后，将请求结果交给 `https://evil.com/` 的 JavaScript 代码处理，`https://evil.com/` 的 JavaScript 代码就可以获取到用户的隐私数据了。
