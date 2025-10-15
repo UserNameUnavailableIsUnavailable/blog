@@ -5,5 +5,5 @@ sidebar:
   - title: 前端
     href: /前端/index.html
     children:
-    - title: 前端
-    - href: /前端/跨域问题.html
+    - title: 跨域问题
+      href: /前端/跨域问题.html
