@@ -6,24 +6,24 @@ title: 跨域问题
 
 给定如下两个站点：
 
-- https://safe.com/
-- https://evil.com/
+- `https://safe.com/`
+- `https://evil.com/`
 
-首先，用户通过浏览器访问 https://safe.com/，并登录了该站点，产生了一些 cookies，有了 cookies，用户后续无需重复登录即可向 https://safe.com/ 发送请求。
+首先，用户通过浏览器访问 `https://safe.com/` ，并登录了该站点，产生了一些 cookies，有了 cookies，用户后续无需重复登录即可向 `https://safe.com/` 发送请求。
 
 ::: {.callout-tip}
-https://cafe.com/ 产生的 cookies 对 https://evil.com/ 是不可见的，反之亦然。
+`https://cafe.com/` 产生的 cookies 对 `https://evil.com/` 是不可见的，反之亦然。
 :::
 
-随后，用户访问 https://evil.com/，该站点通过 JavaScript 代码发起了对 https://safe.com/ 的请求，这时，浏览器会携带 https://safe.com/ 的 cookies 向 https://evil.com/ 发起请求，https://safe.com/ 校验 cookies 确认无误后，认为这是合法请求并响应该请求，返回了用户的隐私数据。浏览器收到响应后，将请求结果交给 https://evil.com/ 的 JavaScript 代码处理，https://evil.com/ 的 JavaScript 代码就可以获取到用户的隐私数据了。
+随后，用户访问 `https://evil.com/`，该站点通过 JavaScript 代码发起了对 `https://safe.com/` 的请求，这时，浏览器会携带 `https://safe.com/` 的 cookies 向 `https://evil.com/` 发起请求，`https://safe.com/` 校验 cookies 确认无误后，认为这是合法请求并响应该请求，返回了用户的隐私数据。浏览器收到响应后，将请求结果交给 `https://evil.com/` 的 JavaScript 代码处理，`https://evil.com/` 的 JavaScript 代码就可以获取到用户的隐私数据了。
 
-以上场景中，https://evil.com/ 通过 JavaScript 代码向 https://safe.com/ 发起请求，并获取到了用户的隐私数据，这就是跨域攻击。
+以上场景中，`https://evil.com/` 通过 JavaScript 代码向 `https://safe.com/` 发起请求，并获取到了用户的隐私数据，这就是跨域攻击。
 
 ## 同源策略（Same-Origin Policy, SOP）
 
 要阻止上述情况发生，浏览器引入了同源策略（Same-Origin Policy, SOP），同源策略规定，只有同源的站点之间才能相互访问资源，否则就会被浏览器阻止。
-回到上面的例子，https://safe.com/ 的数据返回到浏览器后，浏览器发现请求是由 https://evil.com/ 发起的，二者不匹配，于是拒绝向 https://evil.com/ 展示响应的数据。
-因此，在同源策略的约束下，https://safe.com/ 仍然响应了由 https://evil.com/ 提供的恶意代码发起的请求，但请求的数据被浏览器的安全策略拦截，https://evil.com/ 的 JavaScript 代码无法获取到响应的数据。
+回到上面的例子，`https://safe.com/` 的数据返回到浏览器后，浏览器发现请求是由 `https://evil.com/` 发起的，二者不匹配，于是拒绝向 `https://evil.com/` 展示响应的数据。
+因此，在同源策略的约束下，`https://safe.com/` 仍然响应了由 `https://evil.com/` 提供的恶意代码发起的请求，但请求的数据被浏览器的安全策略拦截，`https://evil.com/` 的 JavaScript 代码无法获取到响应的数据。
 
 请求方和响应方的 URL 必须满足以下三个条件，才被认为是同源的：
 
@@ -41,13 +41,13 @@ https://cafe.com/ 产生的 cookies 对 https://evil.com/ 是不可见的，反�
 - CDN 加速：用户从服务器 A 获取前端页面，而服务器 A 并不包含页面渲染所需的所有资源，页面需要通过 CDN 服务器 B 获取到这些资源
 
 在上述场景中，受同源策略限制，浏览器会拒绝向请求方展示响应结果。要想让浏览器向请求方展示响应结果，就产生了跨域资源共享（Cross-Origin Resource Sharing）的需求。
-我们知道浏览器并不会阻断请求发起和响应返回的过程，而是在得到响应结果后决定是否要向请求方展示响应结果，因此，CORS 的关键在于如何让浏览器认为响应结果可以向跨域的请求方出示，即让浏览器知道 https://safe.com/ 的响应结果可以向哪些安全的站点展示，要做到这一点，根本上就是需要响应请求的服务器 https://safe.com/ 来指定哪些站点是安全的。
-所以，CORS 错误从根本上说，不存在前端解决方案，必须由后端服务器来解决。
+我们知道浏览器并不会阻断请求发起和响应返回的过程，而是在得到响应结果后决定是否要向请求方展示响应结果，因此，CORS 的关键在于如何让浏览器认为响应结果可以向跨域的请求方出示，即让浏览器知道 `https://safe.com/` 的响应结果可以向哪些安全的站点展示，要做到这一点，根本上就是需要响应请求的服务器 `https://safe.com/` 来指定哪些站点是安全的。
+所以， **CORS 错误从根本上说，不存在前端解决方案，必须由后端服务器来解决 **。
 
 ## 常见的跨域解决方案
 
 前面提到，CORS 错误必须由后端服务器来解决，其本质就是在 HTTP 响应头中添加一些字段，告诉浏览器哪些站点是安全的，浏览器就会允许这些站点访问响应结果。
-例如，https://safe.com/ 加载页面时需要从 https://api.safe.com/ 获取数据，那么 https://api.safe.com/ 就需要在响应头中添加如下字段：
+例如，`https://safe.com/` 加载页面时需要从 `https://api.safe.com/` 获取数据，那么 `https://api.safe.com/` 就需要在响应头中添加如下字段：
 
 ```http
 Access-Control-Allow-Origin: https://safe.com/
@@ -58,4 +58,4 @@ Access-Control-Allow-Headers: Content-Type, Authorization
 ## 真实案例
 
 实际开发中，常常需要从第三方接口获取数据。
-例如，https://safe.com 需要从 https://3rdparty.com/api/data 获取一些数据（假定该接口允许任何来源的请求），但在返回的响应头中并没有包含 `Access-Control-Allow-Origin` 字段，浏览器就会阻止 https://safe.com 访问响应结果，报出 CORS 错误。由于我们无法在调整服务器 https://3rdparty.com/ 的配置，因此针对这样的场景，唯一的解决方案就是通过后端服务器（例如 https://api.safe.com/）去请求 https://3rdparty.com/api/data （后端服务器可以直接获取到原始的 HTTP 响应报文），然后再将数据解析后返回给前端页面，并在响应头中添加 `Access-Control-Allow-Origin` 字段，允许 https://safe.com 访问响应结果。
+例如，`https://safe.com` 需要从 `https://3rdparty.com/api/data` 获取一些数据（假定该接口允许任何来源的请求），但在返回的响应头中并没有包含 `Access-Control-Allow-Origin` 字段，浏览器就会阻止 `https://safe.com` 访问响应结果，报出 CORS 错误。由于我们无法在调整服务器 `https://3rdparty.com/` 的配置，因此针对这样的场景，唯一的解决方案就是通过后端服务器（例如 `https://api.safe.com/`）去请求 `https://3rdparty.com/api/data` （后端服务器可以直接获取到原始的 HTTP 响应报文），然后再将数据解析后返回给前端页面，并在响应头中添加 `Access-Control-Allow-Origin` 字段，允许 `https://safe.com` 访问响应结果。
