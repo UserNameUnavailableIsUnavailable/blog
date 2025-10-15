@@ -17,7 +17,7 @@ title: 跨域问题
 
 随后，用户访问 `https://evil.com/`，该站点通过 JavaScript 代码发起了对 `https://safe.com/` 的请求，这时，浏览器会携带 `https://safe.com/` 的 cookies 向 `https://evil.com/` 发起请求，`https://safe.com/` 校验 cookies 确认无误后，认为这是合法请求并响应该请求，返回了用户的隐私数据。浏览器收到响应后，将请求结果交给 `https://evil.com/` 的 JavaScript 代码处理，`https://evil.com/` 的 JavaScript 代码就可以获取到用户的隐私数据了。
 
-以上场景中，`https://evil.com/` 通过 JavaScript 代码向 `https://safe.com/` 发起请求，并获取到了用户的隐私数据，这就是跨域攻击。
+以上场景中，`https://evil.com/` 通过 JavaScript 代码向 `https://safe.com/` 发起请求，并获取到了用户的隐私数据，这就是跨站请求伪造（Cross-Site Request Forgery, CSRF）攻击。
 
 ## 同源策略（Same-Origin Policy, SOP）
 
@@ -42,7 +42,7 @@ title: 跨域问题
 
 在上述场景中，受同源策略限制，浏览器会拒绝向请求方展示响应结果。要想让浏览器向请求方展示响应结果，就产生了跨域资源共享（Cross-Origin Resource Sharing）的需求。
 我们知道浏览器并不会阻断请求发起和响应返回的过程，而是在得到响应结果后决定是否要向请求方展示响应结果，因此，CORS 的关键在于如何让浏览器认为响应结果可以向跨域的请求方出示，即让浏览器知道 `https://safe.com/` 的响应结果可以向哪些安全的站点展示，要做到这一点，根本上就是需要响应请求的服务器 `https://safe.com/` 来指定哪些站点是安全的。
-所以， **CORS 错误从根本上说，不存在前端解决方案，必须由后端服务器来解决 **。
+所以， **CORS 错误从根本上说，不存在前端解决方案，必须由后端服务器来解决** 。
 
 ## 常见的跨域解决方案
 
