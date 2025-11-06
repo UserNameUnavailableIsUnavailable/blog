@@ -1,0 +1,17 @@
+sidebar:
+  children:
+  - title: 返回
+    href: ../index.html
+  - title: C++ 笔记
+    href: index.html
+    children:
+    - title: Value Categories
+      href: value-categories/index.html
+    - title: A `Translate` Example
+      href: a-translate-example/index.html
+    - title: "`emplace_back` 与 `push_back`"
+      href: emplace_back-vs-push_back.html
+    - title: "缓冲模式"
+      href: setvbuf.html
+    - title: "携程"
+      href: coroutine.html

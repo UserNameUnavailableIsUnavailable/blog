@@ -10,21 +10,9 @@ sidebar: null
 - [KZ 教程](/kz-guide/)
 - [CSOL 集成工具](/CSOL-Utilities/)
 
-## 前端
+## 计算机科学与技术
 
-- [前端](/前端/)
-
-## 开发
-
-- [C++ 笔记](/cpp/)
-- [Win32 应用开发](/win32-app-develop/)
-- [Java](/java/)
-
-## 底层技术栈
-
-- [CSAPP 笔记](/CSAPP-Notes/)
-- [x86_64 汇编](/x86_64-assembly/)
-- [SimpleOS 设计与实现](/SimpleOS/)
+[这里](/Computer/) 汇总了计算机学习笔记和项目实践。
 
 ## 数学
 

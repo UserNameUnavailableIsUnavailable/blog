@@ -8,8 +8,8 @@ title: x86_64 汇编
 
 一些关于**汇编怎样写**的资料：
 
-- [AMD64 Architecture Programmer's Manual](https://docs.amd.com/v/u/en-US/40332-PUB_4.08)
 - [Intel® 64 and IA-32 Architectures Software Developer Manuals](https://cdrdv2-public.intel.com/858440/325462-088-sdm-vol-1-2abcd-3abcd-4.pdf)
+- [AMD64 Architecture Programmer's Manual](https://docs.amd.com/v/u/en-US/40332-PUB_4.08)
 - [NASM 文档](https://www.nasm.us/docs.php)
 
 除了写汇编代码，我们还需要了解汇编与其他编程语言如何协同工作，这就涉及到 ABI （Application Binary Interface），Windows 和 Linux 有不同的 ABI 规范：

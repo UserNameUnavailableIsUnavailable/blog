@@ -1,0 +1,11 @@
+  sidebar:
+    children:
+    - title: 返回
+      href: ../index.html
+    - title: Win32 开发
+      href: index.html
+      children:
+      - title: 字符编码
+        href: character-encoding/index.html
+      - title: Windows 乱码问题研究
+        href: survey-on-Windows-garbling-issue/index.html

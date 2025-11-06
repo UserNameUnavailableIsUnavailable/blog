@@ -1,11 +1,11 @@
 sidebar:
   children:
   - title: 返回
-    href: /index.html
+    href: ../index.html
   - title: CSAPP 笔记
-    href: /CSAPP-Notes/index.html
+    href: index.html
     children:
     - title: 第二章笔记
-      href: /CSAPP-Notes/ch02.html
+      href: ch02.html
     - title: 第三章笔记
-      href: /CSAPP-Notes/ch03.html
+      href: ch03.html

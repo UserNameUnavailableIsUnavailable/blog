@@ -1,0 +1,29 @@
+---
+title: 计算机技术
+---
+
+我们必须承认，时至今日，学会一门编程语言便能糊口的时代一去不返了，但编程语言本身仍然是建构大厦所需的基本材料。学习某个具体的技术最终的目的是实践一些抽象的想法。
+
+## 一些“基础”
+
+- [C++](C++/)
+- [Rust](rust/)
+- [x86_64 汇编](x86_64-assembly/)
+- [Java](java/)
+- [前端](frontend/)
+
+## 理论
+
+- [操作系统](operating-system/)
+- [CSAPP](CSAPP/)
+
+## 干活
+
+- [Linux](linux/)
+- [Win32 开发](Win32-development/)
+
+## 项目实践
+
+- [SimpleOS 设计与实现](SimpleOS/)
+- [CSOL 集成工具](CSOL-Utilities/)
+- [基于 Markdown 的个人博客、演示构建工具（前端）](macrohard-markdown/)

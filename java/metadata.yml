@@ -1,8 +1,0 @@
-sidebar:
-  children:
-  - title: 返回
-    href: /index.html
-  - title: Java
-    href: /java/index.html
-  - title: Java Web
-    href: /java/web/index.html

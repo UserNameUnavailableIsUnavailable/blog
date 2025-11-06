@@ -1,11 +1,11 @@
 sidebar:
   children:
     - title: 返回
-      href: /macrohard-markdown/../index.html
+      href: ../index.html
     - title: 基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 的 R Markdown 扩展语法实现
-      href: /macrohard-markdown/index.html
+      href: index.html
       children:
       - title: "博客效果展示"
-        href: /macrohard-markdown/blog.html
+        href: blog.html
       - title: "幻灯片效果展示"
-        href: /macrohard-markdown/presentation.html
+        href: presentation.html

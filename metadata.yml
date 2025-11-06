@@ -1,6 +1,6 @@
 website:
   name: Macrohard Blog
-  homepage: https://blog.macrohard.fun
+  homepage: /
   description: "Macrohard Blog - A blog about technology, programming, and more."
   logo: /assets/favicon.ico
 format: html

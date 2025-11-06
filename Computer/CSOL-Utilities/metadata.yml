@@ -1,0 +1,41 @@
+sidebar:
+  children:
+  - title: 返回
+    href: ../index.html
+  - title: CSOL 集成工具开发者文档
+    href: index.html
+    children:
+    - title: 控制器
+      href: Controller/index.html
+      children:
+      - title: 交互
+        href: Controller/interaction.html
+    - title: 执行器
+      href: Executor/index.html
+      children:
+      - title: 模块化编程
+        href: Executor/module.html
+      - title: 运行时
+        href: Executor/runtime.html
+      - title: 中断
+        href: Executor/interrupt.html
+      - title: 错误处理
+        href: Executor/error.html
+      - title: 日期、时间
+        href: Executor/datetime.html
+      - title: 命令的解析与执行
+        href: Executor/command.html
+      - title: 键盘操作
+        href: Executor/keyboard.html
+      - title: 鼠标操作
+        href: Executor/mouse.html
+      - title: 实用工具
+        href: Executor/utility.html
+      - title: JSON 解析
+        href: Executor/JSON.html
+      - title: 定义武器或装备
+        href: Executor/weapon.html
+      - title: 玩家的游戏行为
+        href: Executor/player.html
+      - title: 自动化
+        href: Executor/automation.html
