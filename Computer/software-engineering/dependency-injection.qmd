@@ -1,0 +1,67 @@
+---
+title: 依赖注入
+---
+
+## 引子
+
+假设我们正在设计一个使用深度学习模型推理的 `Inferencer` 类：
+
+```cpp
+class Inferencer {
+public:
+    Inferencer(ModelA&& model_a, ModelB&& model_b) : model_a_(std::move(model_a)), model_b_(std::move(model_b)) {}
+    void run(const Image& image);
+private:
+    ModelA model_a_;
+    ModelB model_b_;
+    // ...
+};
+```
+
+实例化这个类后，通过 `run` 方法输入一幅图像 `image`，它会使用 `ModelA` 和 `ModelB` 来进行推理。
+
+为了实例化 `Inferencer`，我们需要提供 `ModelA` 和 `ModelB` 的实例，在模型数量较少的情况下这一点无可厚非，但是，随着模型数量的增加，`Inferencer` 类的构造函数会变得越来越臃肿，对应地，构造流程也会越来越麻烦。
+
+## 依赖注入
+
+为了解决上述问题，就要引入 **依赖注入**（Dependency Injection, DI）。
+
+首先，我们设计一个新的类 `ModelProvider` 用于管理模型实例：
+
+```cpp
+class ModelProvider {
+public:
+    ModelProvider();
+    ModelA getModelA();
+    ModelB getModelB();
+    // ...
+};
+```
+
+### 构造函数注入
+
+我们可以将 `Inferencer` 类修改为在创建时接收一个 `ModelProvider` 实例，在运行时从这个实例中获取所需的模型。
+
+```cpp
+class Inferencer {
+public:
+    Inferencer(ModelProvider& model_provider) : model_provider_(model_provider) {}
+    void run(const Image& image);
+};
+```
+
+### Setter 注入
+
+另一种方式是通过 setter 方法注入 `ModelProvider` 实例：
+
+```cpp
+class Inferencer {
+public:
+    Inferencer() = default;
+    setModelA(ModelA&& model_a);
+    setModelB(ModelB&& model_b);
+    void run(const Image& image);
+};
+```
+
+这样，`Inferencer` 实际的初始化过程就可以按需推迟，并且还可动态修改模型所需的依赖项。

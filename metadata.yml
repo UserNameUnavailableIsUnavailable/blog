@@ -5,6 +5,6 @@ website:
   logo: /assets/favicon.ico
 format: html
 title-numbering: true
-csl: /ieee.csl
-footer: /footer.md
+csl: /assets/ieee.csl
+footer: /footer.qmd
 favicon: /assets/favicon.ico

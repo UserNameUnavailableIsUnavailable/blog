@@ -1,0 +1,104 @@
+---
+title: 最小示例
+---
+
+本节展示一个最小的可运行 Spring 示例。
+
+## 创建项目
+
+在 VSCode 中按如下步骤基于 Maven 创建一个不使用任何预设框架的 Java 项目：
+
+![选择创建 Java 项目](assets/create-project-1.avif){.center}
+
+![选择基于 Maven 创建项目](assets/create-project-2.avif){.center}
+
+![选择不使用任何预设框架](assets/create-project-3.avif){.center}
+
+![填写 group id](assets/create-project-4.avif){.center}
+
+![填写 artifact id](assets/create-project-5.avif){.center}
+
+## 添加依赖
+
+截至本文编写时，Spring 框架最新稳定版本为 6.2.12。在 `pom.xml` 中添加如下依赖：
+
+```xml
+<properties>
+    <spring.version>6.2.12</spring.version>
+</properties>
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+</dependencies>
+```
+
+::: {.callout-important}
+需要注意，Spring 框架与 Spring Boot 是两个完全不同的东西。Spring Boot 是基于 Spring 框架之上的快速开发框架。虽然在实际开发中使用的都是 Spring Boot，但本系列文章的目的是学习 Spring 框架本身，因此这里直接使用 Spring 框架。
+:::
+
+## 理解并配置 Spring 容器
+
+IoC 是 Spring 框架的核心。与 Servlet 类似，Servlet 并非由用户代码直接实例化，而是容器统一创建和管理。我们只需要提供类的定义，并在 XML 配置文件中进行注册。注册时，需要指定实例的 ID 和所属类的全限定名（即像 `fun.macrohard.foo.Bar` 这样的类名）。框架代码运行后，会自动通过反射机制创建类的实例。 **需要指出，类的定义中必须包含无参构造函数，否则将无法实例化相应对象。** 这些类的实例在 Spring 容器中被称为 “Bean”，存放在 Map 结构中，以 Bean ID 为键，Bean 实例的引用为值。
+
+::: {.callout-note}
+Bean 的由来：
+在早期的 Java 语言中，JavaBeans 是一种特殊的类规范，要求类必须具有无参构造函数，并通过 getter 和 setter 方法访问属性。Spring 框架借用了这一概念，将其容器中的对象称为 Bean。
+:::
+
+首先，创建包 `fun.macrohard.foo`，并在该包中创建类 `Bar`：
+
+```java
+package fun.macrohard.foo;
+
+public class Bar {
+    public Bar() {
+        System.out.println("A Bar instance is created.");
+    }
+}
+```
+
+## 运行 Spring 容器
+
+Spring 并不知道要为哪些类创建实例。我们需要创建一个 XML 配置文件，列出需要由 Spring 容器管理的类。在运行时，告知 Spring 框架该配置文件的位置，Spring 框架会读取该文件并创建相应的 Bean 实例。然后，就可以从 Spring 容器中获取这些实例并使用它们了。
+
+Spring 默认在 CLASSPATH 指定的目录中查找并读取 XML 配置文件。在项目中有一个特殊的目录 `src/main/resources`，Maven 在打包时会将该目录下的文件复制到最终生成的 JAR 包的根目录下（CLASSPATH 默认包含该目录）。因此，我们可以在 `src/main/resources` 目录下创建一个 `foo.xml` 文件，并添加如下内容：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="bar114514" class="fun.macrohard.foo.Bar"/>
+</beans>
+```
+
+在 `Main.java` 中添加如下代码：
+
+```java
+package fun.macrohard;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Main {
+    public static void main(String[] args) {
+        // XML files are loaded from the classpath by default
+        // usually we put them in src/main/resources
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("foo.xml");
+        // Beans are created by Spring by calling their no-arg constructors (reflection)
+        // Class cls = Class.forName("fun.macrohard.foo.Bar");
+        // cls.newInstance();
+        // These beans are stored in a map, where keys are bean IDs, and values are references to the bean instances.
+        Object barBean = context.getBean("bar114514");
+        System.out.println("Bean loaded: " + barBean.getClass().getName());
+        context.close();
+    }
+}
+```
+
+上述代码很好理解，需要着重指出的是 Bean 的创建是在 `new ClassPathXmlApplicationContext("foo.xml")` 时完成的（可以尝试去掉相关代码，看程序运行时是否真的调用了 `Bar` 的构造方法）。
