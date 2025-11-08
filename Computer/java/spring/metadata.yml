@@ -7,3 +7,11 @@ sidebar:
     children:
     - title: 最小化 Spring 项目
       href: minimal/index.html
+    - title: IoC 容器
+      children:
+      - title: 初探 IoC
+        href: IoC/introduction-to-IoC.html
+      - title: 使用注解配置 IoC 容器
+        href: IoC/annotation-based-configuration.html
+      - title: Bean 的重要性质
+        href: IoC/bean-nature/index.html

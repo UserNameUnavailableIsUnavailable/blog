@@ -5,13 +5,11 @@ sidebar:
   - title: C++ 笔记
     href: index.html
     children:
-    - title: Value Categories
-      href: value-categories/index.html
-    - title: A `Translate` Example
-      href: a-translate-example/index.html
-    - title: "`emplace_back` 与 `push_back`"
-      href: emplace_back-vs-push_back.html
-    - title: "缓冲模式"
-      href: setvbuf.html
-    - title: 协程
-      href: coroutine.html
+    - title: C++ 基础
+      href: basics/index.html
+    - title: C++ STL
+      href: STL/index.html
+    - title: C++ 元编程
+      href: metaprogramming/index.html
+    - title: 琐碎问题记录
+      href: trivial/index.html

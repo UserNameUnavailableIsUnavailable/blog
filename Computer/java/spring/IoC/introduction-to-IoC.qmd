@@ -1,0 +1,167 @@
+---
+title: 初探 IoC
+---
+
+## 引子
+
+假设我们正在设计一个使用深度学习模型推理的包，这个包由 `Model` 和 `Inferencer` 两个类组成：
+
+```java
+package fun.macrohard.deep_learning;
+
+public class Model {
+    private final String name;
+    private final String inputSize;
+    private final String outputSize;
+
+    public Model(String name, String inputSize, String outputSize) {
+        this.name = name;
+        this.inputSize = inputSize;
+        this.outputSize = outputSize;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getInputSize() {
+        return inputSize;
+    }
+
+    public String getOutputSize() {
+        return outputSize;
+    }
+}
+
+```
+
+```java
+package fun.macrohard.deep_learning;
+
+class Inferencer {
+    private final Model modelA;
+    private final Model modelB;
+    public Inferencer(Model modelA, Model modelB);
+    public void run(final double[] tensor);
+};
+```
+
+实例化 `Inferencer` 类后，通过 `run` 方法输入一个张量 `tensor`，然后使用 `modelA` 和 `modelB` 来进行推理。为了实例化 `Inferencer`，我们需要预先创建好 `modelA` 和 `modelB` 的实例。在模型数量较少的情况下这一点无可厚非，但是，随着模型数量的增加，`Inferencer` 类的构造函数会变得越来越臃肿，对应地，构造流程也会越来越麻烦。并且，`Inferencer` 类也会被其他的类依赖，进而造成依赖爆炸的问题。
+
+造成上述问题的本质原因在于 `Inferencer` 需要直接管理其依赖项 `modelA` 和 `modelB` 的生命周期和实例化过程，这使得 `Inferencer` 类与其依赖项紧密耦合。为了解决这一问题，Spring 引入了 **控制反转**（Inversion of Control, IoC）和 **依赖注入**（Dependency Injection, DI）的概念。
+
+::: {.callout-important}
+控制反转是一种设计原则，而依赖注入是实现这一原则的一种模式。
+:::
+
+## 控制反转
+
+**控制反转（Inversion of Control, IoC）** 是 Spring 框架的核心思想。其目标是将对象的创建和依赖关系的管理交给框架，实现自动化的依赖管理。
+有了 IoC，我们只需要提供类的定义，并在配置文件中进行注册，Spring 容器创建时会自动通过反射机制创建类的实例，并注入所需的依赖项。
+**因此可以说，Spring 中的 IoC 是通过依赖注入的方式实现的。**
+
+## 依赖注入
+
+依赖注入解决上述问题的核心思想是将依赖项的创建和管理职责从分离出来，交给另一个专门的类来负责。这样，我们在设计一个类时就无需关心其依赖是如何创建和管理的。在 Spring 框架下，这个类就是 Spring 的 IoC 容器，由 IoC 容器所管理的依赖实例称为 **Bean** ，而 IoC 初始化 Bean 实例并注入依赖的过程被称作 **装配**（Wiring）。
+
+一般来说，依赖注入有两种常见的实现方式：构造函数注入和 Setter 注入。这两种注入方式各有其适用场景，下面分别进行介绍。在开始之前，先在 `src/main/resources` 目录下创建一个名为 `deep_learning.xml` 的 XML 配置文件，用于配置 Spring 容器。
+
+### 构造函数注入
+
+`Model` 类在创建时需要提供模型名称、输入张量尺寸、输出张量尺寸，并且这些字段在构造方法内初始化后不可更改（只提供 getter 方法），因此适合通过构造注入的方式注入依赖项。具体方法是在配置文件的 `beans` 中增加如下内容：
+
+```xml
+    <bean id="modelA" class="fun.macrohard.deep_learning.Model">
+        <constructor-arg index="0" value="ResNet-18" type="String" />
+        <constructor-arg index="1" value="224x224" type="String" />
+        <constructor-arg index="2" value="1000" type="String" />
+    </bean>
+    <bean id="modelB" class="fun.macrohard.deep_learning.Model">
+        <constructor-arg index="0" value="BERT-Base" type="String"/>
+        <constructor-arg index="1" value="512" type="String"/>
+        <constructor-arg index="2" value="30522" type="String"/>
+    </bean>
+```
+
+`constructor-arg` 元素用于指定构造函数参数，`index` 属性表示参数的位置（从 0 开始），`value` 属性表示参数的值。
+
+### Setter 注入
+
+对于 `Inferencer` 类来说，其依赖项 `modelA` 和 `modelB` 可以在实例化后通过 setter 方法进行设置，也就是将依赖项的注入延迟到实例化之后进行：
+
+```java
+package fun.macrohard.deep_learning;
+
+class Inferencer {
+    private Model modelA;
+    private Model modelB;
+
+    public Inferencer() {} // 无参构造函数，可省略
+
+    public void setModelA(Model modelA) {
+        this.modelA = modelA;
+    }
+
+    public void setModelB(Model modelB) {
+        this.modelB = modelB;
+    }
+
+    public void run(final double[] tensor);
+};
+```
+
+这样，若后续需要增加新的模型，只需新增相应的 setter 方法即可，不需要修改构造函数，代码的可维护性更好。
+
+修改后的 `Inferencer` 类适合采用 Setter 注入的方式注入依赖项。在配置文件的 `beans` 中增加如下内容：
+
+```xml
+    <bean id="inferencer" class="fun.macrohard.deep_learning.Inferencer">
+        <property name="modelA" ref="modelA" />
+        <property name="modelB" ref="modelB" />
+    </bean>
+```
+
+`property` 元素用于指定 setter 方法注入的属性，`name` 属性表示属性名称（对应 setter 方法名去掉 `set` 并将首字母小写），`ref` 属性表示要注入的依赖项的 Bean ID。Spring 容器在创建 `Inferencer` 实例后，会自动调用相应的 setter 方法将 `modelA` 和 `modelB` 注入到 `Inferencer` 实例中。
+
+### 测试用例
+
+```java
+package fun.macrohard;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import fun.macrohard.deep_learning.Inferencer;
+import fun.macrohard.deep_learning.Model;
+
+public class DeepLearningTest {
+    public static void main(String[] args) {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("deep_learning.xml");
+        Model modelA = (Model) context.getBean("modelA");
+        System.out.println("Model A name: " + modelA.getName());
+        Model modelB = (Model) context.getBean("modelB");
+        System.out.println("Model B name: " + modelB.getName());
+        Inferencer inferencer = (Inferencer) context.getBean("inferencer");
+        inferencer.run(new double[]{});
+        context.close();
+    }
+}
+```
+
+### 依赖注入方法
+
+除了上述示例中介绍的基本注入方式外，Spring 还支持更多复杂的注入类型，主要包括：
+
+- 简单值注入（如字符串、数字、布尔值等）
+- 合作者（Collaborators）注入、内部 Bean 注入
+- 集合注入（`Array`、`List`、`Map` 等）
+
+此外，还有自动装配（Autowiring）等高级注入方式，可以根据类型或名称自动匹配依赖项，减少配置工作量。
+
+到目前为止，我们注入依赖的方式均是通过 XML 配置文件进行的，但实际开发中普遍使用的方案是通过注解进行依赖注入（后续章节介绍）。因此，关于在 XML 中注入不同种类依赖的具体方法在本章不做过多展开，等到介绍注解配置时再补充具体方法。
+
+## 另请参阅
+
+- [Container Overview](https://docs.spring.io/spring-framework/reference/core/beans/basics.html){target="_blank"}
+- [Bean Overview](https://docs.spring.io/spring-framework/reference/core/beans/definition.html){target="_blank"}
+- [Dependency Injection](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html){target="_blank"}
+- [Dependencies and Configuration in Detail](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-properties-detailed.html){target="_blank"}

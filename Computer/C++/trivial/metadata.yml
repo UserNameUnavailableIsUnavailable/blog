@@ -1,0 +1,11 @@
+sidebar:
+  children:
+  - title: 返回
+    href: ../index.html
+  - title: C++ 琐碎问题记录
+    href: index.html
+    children:
+    - title: A `Translate` Example
+      href: a-translate-example/index.html
+    - title: 协程
+      href: coroutine.html

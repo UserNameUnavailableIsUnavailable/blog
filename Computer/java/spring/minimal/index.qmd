@@ -2,7 +2,11 @@
 title: 最小示例
 ---
 
-本节展示一个最小的可运行 Spring 示例。
+本节展示一个最小的可运行 Spring 示例，后续章节的项目创建方式均与本节所示方法相同。
+
+::: {.callout-important}
+如果没有一个能跑起来的项目，讲再多 Spring 的理论都是在扯淡。
+:::
 
 ## 创建项目
 
@@ -40,13 +44,13 @@ title: 最小示例
 需要注意，Spring 框架与 Spring Boot 是两个完全不同的东西。Spring Boot 是基于 Spring 框架之上的快速开发框架。虽然在实际开发中使用的都是 Spring Boot，但本系列文章的目的是学习 Spring 框架本身，因此这里直接使用 Spring 框架。
 :::
 
-## 理解并配置 Spring 容器
+## 初探 IoC 容器配置
 
-IoC 是 Spring 框架的核心。与 Servlet 类似，Servlet 并非由用户代码直接实例化，而是容器统一创建和管理。我们只需要提供类的定义，并在 XML 配置文件中进行注册。注册时，需要指定实例的 ID 和所属类的全限定名（即像 `fun.macrohard.foo.Bar` 这样的类名）。框架代码运行后，会自动通过反射机制创建类的实例。 **需要指出，类的定义中必须包含无参构造函数，否则将无法实例化相应对象。** 这些类的实例在 Spring 容器中被称为 “Bean”，存放在 Map 结构中，以 Bean ID 为键，Bean 实例的引用为值。
+IoC 容器是 Spring 框架的核心。类比 Servlet，Servlet 并非由用户代码直接实例化，而是由 Tomcat 容器统一创建和管理。我们只需要提供类的定义，并在 XML 配置文件中进行注册。注册时，需要指定实例的 ID 和所属类的全限定名（即像 `fun.macrohard.foo.Bar` 这样的类名）。框架代码运行后，会自动通过反射机制创建类的实例，在 Spring 框架中，以这样的方式创建的实例被称作 **Bean** 。 **需要指出，类的定义中必须包含无参构造函数，否则将无法实例化相应对象。**
 
 ::: {.callout-note}
 Bean 的由来：
-在早期的 Java 语言中，JavaBeans 是一种特殊的类规范，要求类必须具有无参构造函数，并通过 getter 和 setter 方法访问属性。Spring 框架借用了这一概念，将其容器中的对象称为 Bean。
+在早期的 Java 语言中，JavaBeans 是一种特殊的类规范，要求类必须具有无参构造函数，并通过 getter 和 setter 方法访问属性。Spring 框架借用了这一概念，将其容器中的对象称为 Bean，指代咖啡的“豆子”。
 :::
 
 首先，创建包 `fun.macrohard.foo`，并在该包中创建类 `Bar`：
@@ -57,6 +61,9 @@ package fun.macrohard.foo;
 public class Bar {
     public Bar() {
         System.out.println("A Bar instance is created.");
+    }
+    public void qux() {
+        System.out.println("Bar qux method called!");
     }
 }
 ```
@@ -94,11 +101,26 @@ public class Main {
         // Class cls = Class.forName("fun.macrohard.foo.Bar");
         // cls.newInstance();
         // These beans are stored in a map, where keys are bean IDs, and values are references to the bean instances.
-        Object barBean = context.getBean("bar114514");
+        Bar barBean = (Bar) context.getBean("bar114514");
         System.out.println("Bean loaded: " + barBean.getClass().getName());
+        barBean.qux();
         context.close();
     }
 }
 ```
 
+![运行结果](assets/result.avif){.center}
+
 上述代码很好理解，需要着重指出的是 Bean 的创建是在 `new ClassPathXmlApplicationContext("foo.xml")` 时完成的（可以尝试去掉相关代码，看程序运行时是否真的调用了 `Bar` 的构造方法）。
+
+::: {.callout-note}
+需要指出，`ClassPathXmlApplicationContext` 有多个重载，可以接收多个 XML 配置文件的路径，从而一次性加载多个配置文件，亦可以接收文件系统路径，从而加载任意位置的 XML 配置文件。具体用法可参考官方文档。
+:::
+
+## 返回类型
+
+到目前为止，Spring 容器已经能够正确创建 `Bar` 类的实例。但是，`getBean()` 方法返回的类型是 `Object`，这并不方便使用。在上面的例子中，采用了强制向下转型的方式将 `Object` 转换为 `Bar`。实际上，我们可以通过传入类的 `Class` 对象来指定返回类型：
+
+```java
+Bar barBean = context.getBean("bar114514", Bar.class);
+```

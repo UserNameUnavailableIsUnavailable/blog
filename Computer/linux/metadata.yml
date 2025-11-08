@@ -5,6 +5,8 @@ sidebar:
   - title: Linux 备忘录
     href: index.html
     children:
+    - title: "缓冲模式"
+      href: setvbuf.html
     - title: 设置 Ubuntu 默认终端
       href: set-ubuntu-default-terminal/index.html
     - title: nautilus 自定义
