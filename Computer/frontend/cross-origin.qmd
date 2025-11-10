@@ -9,7 +9,7 @@ title: 跨域问题
 - `https://safe.com/`
 - `https://evil.com/`
 
-首先，用户通过浏览器访问 `https://safe.com/` ，并登录了该站点，产生了一些 cookies，有了 cookies，用户后续无需重复登录即可向 `https://safe.com/` 发送请求。
+用户通过浏览器访问 `https://safe.com/`，并登录了该站点，产生了一些 cookies，有了 cookies，用户后续无需重复登录即可向 `https://safe.com/` 发送请求。
 
 ::: {.callout-tip}
 `https://safe.com/` 产生的 cookies 对 `https://evil.com/` 是不可见的，反之亦然。

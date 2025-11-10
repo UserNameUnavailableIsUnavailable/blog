@@ -11,5 +11,5 @@ sidebar:
       href: STL/index.html
     - title: C++ 元编程
       href: metaprogramming/index.html
-    - title: 琐碎问题记录
+    - title: C++ 琐碎问题记录
       href: trivial/index.html

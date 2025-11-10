@@ -1,0 +1,66 @@
+---
+title: 赋值
+---
+
+与复制构造函数和移动构造函数配对的是复制赋值运算符和移动赋值运算符，分别用于实现对象的复制赋值和移动赋值。
+
+## 复制赋值运算符
+
+复制赋值运算符应重载为如下形式，总是接受对同类型对象的 `const` 引用作为参数，并将对 `*this` 的引用作为返回值：
+
+```cpp
+ClassName& operator=(const ClassName& other);
+```
+
+## 移动赋值运算符
+
+移动赋值运算符应重载为如下形式，总是接受对同类型对象的右值引用作为参数，并将对 `*this` 的引用作为返回值：
+
+```cpp
+ClassName& operator=(ClassName&& other) noexcept;
+```
+
+## 重载赋值运算符时的若干注意事项
+
+自我赋值，即将一个对象赋值给它自己，是需要特别注意的情况，最基本的解决方案是检查赋值操作的左右两侧是否是同一个对象：
+
+```cpp
+operator=(const ClassName& other) {
+    if (this == &other) {
+        return *this; // 自我赋值，直接返回
+    }
+    // 进行实际的赋值操作
+    return *this;
+}
+
+operator=(ClassName&& other) noexcept {
+    if (this == &other) {
+        return *this; // 自我赋值，直接返回
+    }
+    // 进行实际的赋值操作
+    return *this;
+}
+```
+
+除了上面这种基本的解决方案，还有一种更为简洁的方案—— **复制交换（copy-and-swap）惯用法** ，其核心思想是通过复制构造函数创建一个临时对象，然后与当前对象交换资源，从而实现赋值操作。采用这种方式只需要实现一个赋值运算符重载函数即可，同时也天然地处理了自我赋值的问题：
+
+```cpp
+class Foo {
+public:
+    Foo& operator=(Foo other) { // 通过值传递调用复制或移动构造函数
+        swap(*this, other); // 交换资源
+        return *this;
+    }
+    friend void swap(Foo& first, Foo& second) noexcept {
+        using std::swap;
+        swap(first.x, second.x);
+        // 交换其他成员变量
+    }
+};
+```
+
+当赋值运算符右侧为左值时，会调用复制构造函数创建临时对象；当赋值运算符右侧为右值时，会调用移动构造函数创建临时对象。无论哪种情况，最终都会通过交换资源实现赋值操作，并且通过交换资源的方式天然地处理了自我赋值的问题。
+
+::: {.callout-important}
+copy-and-swap 惯用法也是存在缺陷的，当赋值运算符右侧为左值时，会额外调用一次复制构造函数，可能会带来性能开销。因此，在性能敏感的场景下，可能需要分别实现复制赋值运算符和移动赋值运算符，以避免不必要的复制操作。
+:::

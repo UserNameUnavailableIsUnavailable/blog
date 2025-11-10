@@ -39,6 +39,10 @@ title: Bean 的重要性质
 可以看到，在 `context` 实例化时立刻创建了 `bar114514` 的 Bean 实例，也就是默认情况下单例创建是饿汉式的，且创建后保持不变。而 `bar1919810` 的 Bean 实例是在每次调用 `getBean` 时返回一个新的实例。
 
 ::: {.callout-tip}
+单例创建在默认情况下是饿汉式的，也可以自行配置为懒汉式，参阅 [Lazy-initialized Beans](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-lazy-init.html)。
+:::
+
+::: {.callout-tip}
 除了 `singleton` 和 `prototype` 之外，Spring 框架还支持 `request`（为每个请求创建一个新的实例）、`session`（为每次会话创建一个新的实例）等作用域，甚至还支持自定义作用域。详情参阅 [Bean Scopes](https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html){target="_blank"}。
 :::
 

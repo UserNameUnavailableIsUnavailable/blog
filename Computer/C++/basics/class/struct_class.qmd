@@ -1,0 +1,5 @@
+---
+title: "`struct` 与 `class`"
+---
+
+从技术上讲，`struct` 与 `class` 在定义类时唯一的区别是默认的访问权限不同：`struct` 的默认访问权限是 `public`，而 `class` 的默认访问权限是 `private`。除此之外，`struct` 与 `class` 在功能上是完全等价的。只是在实际使用中，`struct` 一般用于定义旧数据（Pure Old Data, POD）类型，即与 C 中使用 `struct` 的方式保持一致。

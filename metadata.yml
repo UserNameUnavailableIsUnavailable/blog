@@ -8,3 +8,4 @@ title-numbering: true
 csl: /assets/ieee.csl
 footer: /footer.qmd
 favicon: /assets/favicon.ico
+lang: zh

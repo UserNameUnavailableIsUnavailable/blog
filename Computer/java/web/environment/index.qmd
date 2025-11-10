@@ -2,14 +2,6 @@
 title: 环境准备
 ---
 
-本文记录如何在 Visual Studio Code 上配置可调试 Java Web 开发环境，其摸索过程异常艰辛，故记录于此。
-
-## 前言
-
-鄙人不是很喜欢 IntelliJ IDEA 这样的集成开发环境，集成开发环境用得过多容易让人变得巨婴化。
-Java 的情况不是很清楚，至少对于 C++ 而言，在使用集成开发环境达到入门水平之后，就应该有意识地摆脱对集成开发环境的依赖，通过使用 GCC、Clang、Make 这样的开发工具链，了解一个项目是如何编译、链接然后加载运行的（当然，对于大型的项目而言，还是要用到一些现代的开发方式，比如使用 CMake，但这与搞清楚项目构建原理是完全两回事）。
-本人已有一定的 Java SE 基础，为了后续在学习 Java Web 开发过程中能够对一些细节了解得更加透彻，另外一点是个人认为 VSCode 开发起来更加自由，故决定采用 VSCode 作为主要开发环境。
-
 ## 折腾
 
 ### 基本环境准备
@@ -53,31 +45,25 @@ Maven 插件实际上是可有可无的，它本质上就是在调用安装的 M
     └───pom.xml
 ```
 
-![创建项目](assets/create-project.avif){ .center }
+![创建项目](assets/create-project.avif){.center}
 
-![选择 archetype](assets/select-archetype.avif){ .center }
+![选择 archetype](assets/select-archetype.avif){.center}
 
+![指定 archetype 版本](assets/archetype-version.avif){.center}
 
-![指定 archetype 版本](assets/archetype-version.avif){ .center }
-
-
-![指定 group id](assets/group-id.avif){ .center }
-
+![指定 group id](assets/group-id.avif){.center}
 
 Group id 代表了项目中所有源文件的包名前缀，我这里使用 `fun.macrohard`。
 
-![指定 artifact id](assets/artifact-id.avif){ .center }
-
+![指定 artifact id](assets/artifact-id.avif){.center}
 
 Artifact id 代表了项目的标识，与上面所示的项目结构中的 `<artifact-id>` 相同，我这里使用 `blog`。
 
-![snapshot 版本](assets/snapshot-version.avif){ .center }
-
+![snapshot 版本](assets/snapshot-version.avif){.center}
 
 项目快照版本，这一点暂时不涉及，保持默认即可。
 
-![确认](assets/confirm.avif){ .center }
-
+![确认](assets/confirm.avif){.center}
 
 ### 最简 Java Web 项目
 
@@ -172,45 +158,37 @@ public class Hello implements Servlet {
 对基于 Servlet 的 Web 项目而言，打包格式称作 WAR（Web Application Archive），其本质上就是一个压缩包，部署到服务器后 Tomcat 将其解压并运行其中的 Java class，以这种方式打包 Java Web 程序的好处是部署方便。然而，实际开发中，项目文件是频繁变动的，这会给开发带来很多不便，因此产生了一种称为“exploded”打包方案，顾名思义就是把 WAR 包炸开（解压），换句话说就是压根不打包，这样在开发过程中就可以实现所谓的“热更新”。
 :::
 
-![打包](assets/exploded.avif){ .center }
-
+![打包](assets/exploded.avif){.center}
 
 Maven 会自动处理并编译项目，然后“打包”。在 `target/blog/` 目录下，可以看到构建的所有文件，其中就有相应的 Java 字节码文件。
 
-![生成的目标文件](assets/target.avif){.center }
+![生成的目标文件](assets/target.avif){.center}
 
 ### 使用 Community Server Connectors 部署项目
 
 首先，创建一个服务器。
 
-![创建服务器](assets/create-new-server.avif){ .center }
-
+![创建服务器](assets/create-new-server.avif){.center}
 
 接下来会询问是否要下载服务器，由于我们已经自行下载了 Tomcat，故选择使用硬盘上已有的服务器，并根据弹窗指定 Tomcat 服务器所在的根目录即可。选择完毕后，会询问是否需要配置一些东西，保持默认，直接点击“Finish”即可（在这个面板里也配置不了什么东西，端口号都没法改，要配置还是应该去改 Tomcat 的配置文件）。
 
-![使用现有服务器](assets/use-server-on-disk.avif){.center }
-
+![使用现有服务器](assets/use-server-on-disk.avif){.center}
 
 然后，为服务器新增部署，部署类型选择为“Exploded”。
 
-![新增部署](assets/add-deployment.avif){ .center }
+![新增部署](assets/add-deployment.avif){.center}
 
-
-![部署类型为 exploded](assets/exploded-deployment.avif){ .center }
-
+![部署类型为 exploded](assets/exploded-deployment.avif){.center}
 
 接下来会询问是否需要传递参数，这里没有，选择 No。
 
-![不需要参数](assets/no-parameter.avif){ .center }
-
+![不需要参数](assets/no-parameter.avif){.center}
 
 最后，我们就看到在服务器选项卡下新增了项目，并且状态为“Publish Required”，意思是我们需要“发布”内容，右键并点击“Publish Server（Full）”即可。
 
-![需要发布](assets/publish-required.avif){.center }
+![需要发布](assets/publish-required.avif){.center}
 
-
-![完整发布](assets/publish-server.avif){ .center }
-
+![完整发布](assets/publish-server.avif){.center}
 
 每当我们对项目本身做出改动，比如重新编译，都需要再次发布。发布后，服务器状态变为“Synchronized”。
 
@@ -224,22 +202,18 @@ Web 项目运行于 Tomcat 服务器上，调试的流程是 Tomcat 服务器以
 
 右键服务器选项并点击“Debug Server”，此时会弹出一个框，询问我们要给调试的项目起什么名字（这个名字和项目本身没有关系）。
 
-![调试服务器](assets/debug-server.avif){.center }
+![调试服务器](assets/debug-server.avif){.center}
 
-
-![调试器项目名](assets/debugger-project-name.avif){ .center }
-
+![调试器项目名](assets/debugger-project-name.avif){.center}
 
 在源代码中打好断点，然后访问 `http://localhost:8080/blog/test`，断点成功命中，折腾成功。
 
-![命中断点](assets/breakpoint.avif){ .center }
-
+![命中断点](assets/breakpoint.avif){.center}
 
 ### 没有到此为止
 
 这部分内容至关重要，调试完成后，一定要断开连接，然后关闭服务器，否则直接关掉 VSCode 而 socket 没有正确关闭的话是会造成泄漏的。服务器若不正常关闭，那么服务器即使处在关闭状态，其端口也可能被一直占用（Windows 的情况会好些，Linux 比较严重）。
 
-![断开连接](assets/disconnect.avif){ .center }
+![断开连接](assets/disconnect.avif){.center}
 
-
-![关闭服务器](assets/stop-server.avif){ .center }
+![关闭服务器](assets/stop-server.avif){.center}

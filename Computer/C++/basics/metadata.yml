@@ -8,4 +8,15 @@ sidebar:
     - title: Value Categories
       href: value-categories.html
     - title: 初始化列表
-      href: initializer-lists.html
+      href: initializer-list.html
+    - title: 面向对象基础
+      href: class/index.html
+      children:
+      - title: "`struct` 与 `class`"
+        href: class/struct_class.html
+      - title: 构造函数
+        href: class/constructor.html
+      - title: 赋值
+        href: class/assignment.html
+      - title: 继承
+        href: class/inheritance.html

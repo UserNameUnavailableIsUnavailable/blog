@@ -6,4 +6,4 @@ sidebar:
     href: index.html
     children:
     - title: 跨域问题
-      href: 跨域问题.html
+      href: cross-origin.html
