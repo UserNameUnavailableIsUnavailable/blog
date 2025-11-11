@@ -1,5 +1,5 @@
 ---
-title: 基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 的 R Markdown 扩展语法实现
+title: Macrohard Markdown 博客/幻灯片生成工具
 additional:
     - "https://macrohard.fun/"
     - 114,514 citations
@@ -18,7 +18,7 @@ bibliography: references.bib
 
 ## 概述
 
-本文介绍 Macrohard 站点使用的 R Markdown 扩展语法，需要读者具备 HTML 和 Markdown 基础。该实现基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 解析器以及其强大的衍生插件，部分缺少对应插件或现有插件无法满足需求的的特性则由我自行实现，这些特性的实现将在完善后作为插件开源。
+本文介绍 Macrohard 站点使用的 Markdown 博客/幻灯片生成工具，需要读者具备 HTML 和 Markdown 基础。 该实现基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 解析器以及其强大的衍生插件，部分缺少对应插件或现有插件无法满足需求的的特性则由我自行实现，这些特性的实现将在完善后作为插件开源。
 
 本扩展采用纯前端实现，因此发布内容不需要本地编译，与同类产品 [Quarto](https://quarto.org) 不同（基于 [Pandoc](https://pandoc.org/)）。由于个人时间和精力有限，故仅实现了 R Markdown 扩展语法的一个子集。
 

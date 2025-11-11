@@ -2,7 +2,7 @@ sidebar:
   children:
     - title: 返回
       href: ../index.html
-    - title: 基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 的 R Markdown 扩展语法实现
+    - title: Macrohard Markdown 博客/幻灯片生成工具
       href: index.html
       children:
       - title: "博客效果展示"

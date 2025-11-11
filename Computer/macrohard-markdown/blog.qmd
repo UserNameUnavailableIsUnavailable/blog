@@ -1,5 +1,5 @@
 ---
-title: 基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 的 R Markdown 扩展语法实现
+title: Macrohard Markdown 博客/幻灯片生成工具
 work-source: "[Macrohard](https://macrohard.fun/)"
 citations: 114514 citations
 format: html
@@ -19,7 +19,7 @@ references-location: references
 
 ## 概述
 
-本文介绍 Macrohard 站点使用的 R Markdown 扩展语法，需要读者具备 HTML 和 Markdown 基础。该实现基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 解析器以及其强大的衍生插件，部分缺少对应插件或现有插件无法满足需求的的特性则由我自行实现，这些特性的实现将在完善后作为插件开源。
+本文介绍 Macrohard 站点使用的 Markdown 博客幻灯片生成工具，需要读者具备 HTML 和 Markdown 基础。该实现基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 解析器以及其强大的衍生插件，部分缺少对应插件或现有插件无法满足需求的的特性则由我自行实现，这些特性的实现将在完善后作为插件开源。
 
 本扩展采用纯前端实现，因此发布内容不需要本地编译，与同类产品 [Quarto](https://quarto.org) 不同（基于 [Pandoc](https://pandoc.org/)）。由于个人时间和精力有限，故仅实现了 R Markdown 扩展语法的一个子集。
 
@@ -61,7 +61,7 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 |下划线|`_Foo_`|_Foo_ [^about_underline]|
 |删除线|`~~Foo~~`|~~Foo~~|
 
-[^about_underline]: 该特性与 R Markdown 的行为不同，R Markdown 中仅支持使用 `[Foo]{.underline}` 来实现下划线。在标准（非扩展）的 Markdown 语法中 `_Foo_` 将会产生斜体的 *Foo*，而 `*Foo*` 已经具有一样的功能，故这里决定覆盖标准 Markdown 的行为，提供一种更加简便的产生下划线的扩展语法。
+[^about_underline]: 该特性与 R Markdown 的行为不同，R Markdown 中仅支持使用 `[Foo]{.underline}` 来实现下划线。在标准 Markdown 语法中 `_Foo_` 将会产生斜体的 *Foo*，而 `*Foo*` 已经具有一样的功能，故这里决定覆盖标准 Markdown 的行为，提供一种更加简便的产生下划线的扩展语法。
 
 ## 属性语法
 
@@ -322,6 +322,60 @@ y = \boldsymbol{w}^\mathsf{T}\boldsymbol{x} + b
 y = ax+b
 \end{equation}
 $$
+
+## 传送
+
+本扩展支持传送（Teleport）功能，即将一个元素的内容传送到另一个位置进行显示。使用传送功能时，需分别定义传送源（id 指定为 `teleport-source-ID`）和传送目标容器（id 指定为 `teleport-destination-ID`），文档加载后，传送源会作为整体被移动到传送目标内进行显示。
+
+例如，标准 Markdown 语法无法在表格内嵌入复杂元素（比如列表、代码块等），但通过传送功能可以实现这一点。下面的代码展示了如何使用传送功能将复杂元素放置在表格中：
+
+```plain
+:::{#teleport-source-strong-ordering}
+- `a == b` $\Rightarrow$ `f(a) == f(b)`。
+- 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
+:::
+
+:::{#teleport-source-weak-ordering}
+- `a == b` $\nRightarrow$ `f(a) == f(b)`。
+- 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
+:::
+
+:::{#teleport-source-partial-ordering}
+- `a == b` $\nRightarrow$ `f(a) == f(b)`。
+- 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
+:::
+
+|顺序|定义{.center}|<!-- 这里使用 .center，定义一栏仅居中标题，列表保持靠左 -->
+|:-:|---|
+|`std::strong_ordering`|{#teleport-destination-strong-ordering}|
+|`std::weak_ordering`|{#teleport-destination-weak-ordering}|
+|`std::partial_ordering`|{#teleport-destination-partial-ordering}|
+```
+
+这会产生如下效果：
+
+:::{#teleport-source-strong-ordering}
+- `a == b` $\Rightarrow$ `f(a) == f(b)`。
+- 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
+:::
+
+:::{#teleport-source-weak-ordering}
+- `a == b` $\nRightarrow$ `f(a) == f(b)`。
+- 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
+:::
+
+:::{#teleport-source-partial-ordering}
+- `a == b` $\nRightarrow$ `f(a) == f(b)`。
+- 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
+:::
+
+|顺序|定义{.center}|
+|:-:|---|
+|`std::strong_ordering`|{#teleport-destination-strong-ordering}|
+|`std::weak_ordering`|{#teleport-destination-weak-ordering}|
+|`std::partial_ordering`|{#teleport-destination-partial-ordering}|
+
+有了传送功能，可以方便地将复杂的元素放置在文档的其他位置，从而实现更灵活的布局，这在创建表格时非常有用。
 
 ## 流程图
 

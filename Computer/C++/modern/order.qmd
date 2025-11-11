@@ -1,0 +1,117 @@
+---
+title: 顺序（C++20）
+---
+
+C++ 20 引入了新的头文件 `<compare>` 以及一个新的三路比较运算符 `<=>`。
+
+## 相同与等价
+
+- $a \equiv b$ 表示 $a$ 与 $b$ 等价（equivalent），即在某种意义下它们是相同的，但可能在某些方面有所不同。
+- $a = b$ 表示 $a$ 与 $b$ 相同（equal），即它们在数值意义上是完全相同的，在这种情况下，$a$ 与 $b$ 从数学意义上完全不可区分。
+
+在下面的例子中，当两个 `Point` 实例的 `x` 与 `y` 成员数值相等时，我们通常认为这两个点是同一个点（相同且等价）：
+
+```cpp
+struct Point {
+    uint64_t x;
+    uint64_t y;
+};
+// p1 与 p2 相同，在数学意义上完全不可区分
+Point p1{ .x = 1, .y = 2 };
+Point p2{ .x = 1, .y = 2 };
+```
+
+对于下面的例子，若我们根据时间先后来比较两笔不同的交易，则时间戳相同的两笔交易在时间上是等价的，但这不意味着两笔交易相同：
+
+```cpp
+struct Transaction {
+    uint64_t id;
+    uint64_t timestamp;    
+};
+
+// tx1 与 tx2 在时间的意义上是等价的，但它们不是同一个交易
+Transaction tx1{ .id = 1, .timestamp = 114514 };
+Transaction tx2{ .id = 2, .timestamp = 114514 };
+```
+
+浮点运算有时会出现运算结果为 `NaN` 的情况。根据 IEEE 754 标准，`NaN` 与任何值都不等价，与任何数的比较结果全为 `false`：
+
+```cpp
+int main() {
+    double NaN = std::nan("");
+    std::cout << std::boolalpha << (NaN < NaN) << std::endl; // 输出: false
+    std::cout << std::boolalpha << (NaN == NaN) << std::endl; // 输出: false
+    std::cout << std::boolalpha << (NaN > NaN) << std::endl; // 输出: false
+    std::cout << std::boolalpha << (NaN != NaN) << std::endl; // 输出: true
+}
+```
+
+::: {.callout-important}
+显然，C++ 中的 `==` 实际上表示的是一种等价的概念。等价的语义，即基于什么判断两个对象等价特别重要。我们可以说两笔交易在发生时刻的意义上是等价的，但据此说两笔交易在指称的实体意义下是等价的（`id` 不同，是两笔不同的交易）。
+:::
+
+## 三种顺序
+
+`<compare>` 中定义了 `std::strong_ordering`、`std::weak_ordering` 和 `std::partial_ordering` 三种顺序类型，其定义如下：
+
+:::{#teleport-source-strong-ordering}
+- $a \equiv b \Rightarrow f(a) \equiv f(b)$。
+- 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
+:::
+
+:::{#teleport-source-weak-ordering}
+- $a \equiv b \nRightarrow f(a) \equiv f(b)$。
+- 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
+:::
+
+:::{#teleport-source-partial-ordering}
+- $a \equiv b \nRightarrow f(a) \equiv f(b)$。
+- 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
+:::
+
+|顺序|定义{.center}|作用|
+|:-:|---|:-:|
+|`std::strong_ordering`|{#teleport-destination-strong-ordering}|最严格的顺序，适用于所有可比较类型，与 STL 排序算法、容器无缝集成。|
+|`std::weak_ordering`|{#teleport-destination-weak-ordering}|弱化了等价的要求，可用于忽略大小写进行字符串比较的场景。|
+|`std::partial_ordering`|{#teleport-destination-partial-ordering}|只能保证部分顺序，适用于某些元素不可比较的情况，如浮点数中的 `NaN`。|
+
+::: {.callout-important}
+需要指出，这里的等价所蕴含的语义仅仅是以“顺序”，即排序时的先后次序为依据的。
+:::
+
+在“顺序”的语义下，`Point` 实际上对应于 ``std::strong_ordering``，而 `Transaction` 则对应于 ``std::weak_ordering``，浮点数则对应于 ``std::partial_ordering``。
+
+## `<=>` 运算符
+
+C++20 引入了新的三路比较运算符 `<=>`，也称为“太空船运算符”（spaceship operator）。它可以用于简化自定义类型的比较操作。重载了此运算符后，无需再单独重载 `<` `<=` `>` `>=`，编译器会自动生成这些运算符的实现。 **需要特别注意的是，重载 `<=>` 后，编译器并不会自动生成 `==` `!=` 运算符的实现，仍需手动重载。**
+
+::: {.callout-important}
+为什么重载 `<=>` 运算符后，编译器不会自动生成 `==` `!=` 运算符的实现？
+
+`<=>` 强调的是顺序上的关系，和语义上的等价关系并不等同。例如，在顺序的语义下，我们可以说两笔存款在存款时刻的意义上等价，但这并不意味着这两笔交易所指称的实体意义下是等价的。因此，编译器不会假设顺序关系可以直接推导出等价关系。
+:::
+
+```cpp
+struct Transaction {
+    uint64_t id;
+    uint64_t timestamp;
+
+    // 重载三路比较运算符
+    auto operator<=>(const Transaction& other) const {
+        return timestamp <=> other.timestamp;
+    }
+    // 重载等于运算符
+    bool operator==(const Transaction& other) const {
+        return id == other.id && timestamp == other.timestamp;
+    }
+};
+
+int main() {
+    Transaction tx1{ .id = 1, .timestamp = 114514 };
+    Transaction tx2{ .id = 2, .timestamp = 1919810 };
+
+    std::cout << std::boolalpha << (tx1 < tx2) << std::endl;  // 输出: true
+    std::cout << std::boolalpha << (tx1 == tx2) << std::endl; // 输出: false（必须重载 == 或 != 其中之一）
+    std::cout << std::boolalpha << (tx1 > tx2) << std::endl;  // 输出: false
+}
+```
