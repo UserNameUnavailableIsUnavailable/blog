@@ -233,60 +233,60 @@ $$
 
 ```markdown
 ::: {.callout-note}
-一些笔记。
+笔记。
 :::
 ```
 
 ::: {.callout-note}
-一些笔记。
+笔记。
 :::
 
 ### `callout-tip`
 
 ```markdown
 ::: {.callout-tip}
-一些贴士。
+提示。
 :::
 ```
 
 ::: {.callout-tip}
-一些贴士。
+提示。
 :::
 
 ### `callout-important`
 
 ```markdown
 ::: {.callout-important}
-谨记，毋忘！
+重点。
 :::
 ```
 
 ::: {.callout-important}
-谨记，毋忘！
+重点。
 :::
 
 ### `callout-warning`
 
 ```markdown
 ::: {.callout-warning}
-可能存在潜在问题。
+警告。
 :::
 ```
 
 ::: {.callout-warning}
-可能存在潜在问题。
+警告。
 :::
 
 ### `callout-caution`
 
 ```markdown
 ::: {.callout-caution}
-绝对不要这样做！
+注意。
 :::
 ```
 
 ::: {.callout-caution}
-绝对不要这样做！
+注意。
 :::
 
 ## 流程图

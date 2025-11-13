@@ -1,0 +1,237 @@
+---
+title: 让 fcitx5 更符合 Windows 使用习惯
+---
+
+## 基本设置
+
+在 Windows 系统中，我们通过 Win + Space 来切换输入法，当前输入法不是英文输入法时，按 Shift 键可临时切换到英文输入模式，再按一次 Shift 键可恢复到之前的输入法模式。
+fcitx5 提供的拼音输入法不存在相似的英文输入模式，因此只能通过临时切换到英文输入法实现切换来模拟上述特性（需将首个输入法设置为英文输入法）。
+在 fcitx5 的全局配置界面中，可以按下图所示进行设置：
+
+![fcitx5 全局设置](assets/configure-global-options.avif){.center}
+
+![按下 Shift 时切换首个输入法与当前输入法](assets/shift.avif){.center}
+
+## 大写锁定问题
+
+在 Windows 系统下，按下 CapsLock 键后，若当前输入法不是英文输入法，则会直接切换为英文输入模式，并且保持大写锁定状态。
+
+若仿照上面的方法将 CapsLock 键设置为切换到英文输入法，则在按下 CapsLock 键后，仅会切换到英文输入法，但不会启用大写锁定状态，并且不可避免地出现大写锁定状态混乱的问题。例如，在不存在输入焦点的情况下按下 CapsLock 键位，大写锁定将启用，但并不触发输入法切换，随后，在激活输入焦点后（默认输入法为英文），按下 CapsLock 键将会导致输入法切换到中文，同时大写锁定状态解除，再按一次 CapsLock 键重新切换到英文输入法，并且处于大写锁定状态，这时就出现了这样一种尴尬的情况——我们没法解除英文输入状态下的大写锁定状态了。
+
+要解决上述问题，比较明智的解决方案是编写一个脚本来监听 CapsLock 键事件，当 CapsLock 键弹起时：
+
+- 若大写锁定指示灯亮起，则保存当前输入法切换到英文输入法，并启用大写锁定状态。
+- 若大写锁定指示灯熄灭，则切换回之前的输入法（若有），并解除大写锁定状态。
+
+fcitx 提供了 Lua 接口 [^lua-api]，可通过编写 Lua 插件实现上述功能。插件源码：[fcitx-capslock](https://git.macrohard.fun/root/fcitx5-capslock)。
+
+通过如下命令克隆该插件并创建符号链接：
+
+```powershell
+$path = "/path/to/your/directory"
+git clone https://git.macrohard.fun/root/fcitx-capslock.git $path
+ln -s $path/CapsLockEventHandler.conf ~/.local/share/fcitx5/addon/CapsLockEventHandler.conf
+ln -s $path/CapsLockEventHandler ~/.local/share/fcitx5/lua
+```
+
+重启 fcitx5 后即可生效。
+
+
+## 实现原理
+
+### 插件创建流程
+
+要创建插件，首先定位到 `~/.local/share/fcitx5/addon/`,创建名为 `CapsLockEventHandler.conf` 的配置文件，内容如下：
+
+```ini
+[Addon]
+Name=CapsLockEventHandler
+Comment=CapsLockEventHandler
+Category=Module
+Type=Lua
+Version=1.0.0
+OnDemand=False
+Configurable=False
+Library=main.lua
+
+[Addon/Dependencies]
+0=luaaddonloader
+```
+
+其中，`Name` 为插件的名称，`Type` 指定插件的类型，`Library` 指定插件的入口。插件加载时，将根据指定的入口进行加载。
+
+然后，定位到 `~/.local/share/fcitx5/lua/`,创建名为 `CapsLockEventHandler` 的目录，其内部结构如下：
+
+```plain
+CapsLockEventListener
+|── main.lua
+├── fcitx_profile.lua
+└── LIP.lua
+```
+
+### fcitx-lua 接口
+
+创建 Lua 插件需要使用 fcitx5-lua 模块（已经随 fcitx5 一同安装）提供的 Lua 接口，接口文档参阅 [Fcitx Lua API](https://fcitx.github.io/fcitx5-lua/)。Lua API 一共有两套，一般使用 `fcitx` 模块：
+
+```lua
+local fcitx = require("fcitx")
+```
+
+::: {.callout-warning}
+这份接口文档一言难尽，有的地方还需要查看源代码：[fcitx5-lua](https://github.com/fcitx/fcitx5-lua).
+:::
+
+### 大小写状态的判定
+
+由于 fcitx5 仅在 Linux 平台下使用，因此无需考虑跨平台问题。
+在 Linux 系统中，`/sys/class/leds/` 目录下记录了各个指示灯的状态信息。文件 `input<N>::capslock/brightness` 记录了 CapsLock 指示灯的状态，`0` 表示关闭，`1` 表示开启。需要注意的是，`N` 的值可能因系统而异，可以通过查看该目录下的内容来确定正确的路径。并且，若系统中存在多个输入设备（如外接键盘），则可能存在多个 `input<N>::capslock` 目录，这些指示灯的状态是一致的，可以任选其一进行读取：
+
+![LED 信息](assets/leds.avif){.center}
+
+```lua
+---判断大写锁定状态。
+---@return boolean|nil 大写锁定开启返回 true，关闭返回 false，无法判断（找不到 capslock 指示灯设备）返回 nil。
+local function is_caplock_on()
+	local base = "/sys/class/leds"
+	local path = nil
+	local entries = io.popen(([[ls -1 "%s"]]):format(base))
+	if not entries then
+		return nil
+	end
+    -- 查找 capslock 指示灯对应的路径
+	for entry in entries:lines() do
+		if entry:match("capslock") then
+			path = ([[%s/%s/brightness]]):format(base, entry)
+			break
+		end
+	end
+	if path then
+		local f = io.open(path, "r")
+		if not f then
+			return false
+		end
+		local v = f:read("*l")
+		f:close()
+		if v == "1" then
+			return true
+		else
+			return false
+		end
+	end
+	return nil
+end
+```
+
+### 获取默认输入法
+
+fcitx5-lua 接口没有提供获取默认输入法的功能，可以采取读取配置文件的方式来实现。fcitx5 的用户配置文件位于 `~/.config/fcitx5/profile`，格式为 INI。可以使用 [LIP](https://github.com/Dynodzzo/Lua_INI_Parser) 库来解析该配置文件：
+
+```lua
+local LIP = require("LIP")
+
+local profile = {}
+
+---配置文件的时间戳。
+local profile_tp = 0
+---配置信息缓存。
+local profile_cache = nil
+
+---获取文件时间戳。
+local function stat(path)
+    local f = io.popen("stat -c %Y " .. path)
+    if not f then return 0 end
+    local tp = f:read("*n") --[[@as integer]]
+    f:close()
+    return tp
+end
+
+---加载 fcitx 用户配置。
+---@param ... string 配置文件的字段
+---@return any # 配置内容
+function profile.load(...)
+    local home = os.getenv("HOME")
+    -- open ~/.config/fcitx5/profile
+    local path = ("%s/.config/fcitx5/profile"):format(home)
+    local file_tp = stat(path)
+    if file_tp > profile_tp then -- 文件更新
+        profile_cache = LIP.load(path)
+        profile_tp = file_tp
+    end
+    if not profile_cache then return nil end
+    local args = { ... }
+    local t = profile_cache
+    for _, field in ipairs(args) do
+        t = t[field]
+        if type(t) == "nil" then return nil end
+    end
+    return t
+end
+
+return profile
+```
+
+### 监听键盘事件
+
+接下来，我们需要实现一个回调函数，监听 CapsLock 的弹起事件：
+
+```lua
+local XK_Caps_Lock = 0xffe5
+local program_im_map = {}
+
+---处理大写锁定键。
+---@param sym X11 / Wayland 下的按键符号值。
+---@param state number 修饰键状态位掩码。
+---@param release boolean 按键是否为弹起事件，true 表示弹起，false 表示按下。
+function CapsLockEventHandler(sym, state, release)
+    if not (sym == XK_Caps_Lock and release) then
+        return
+    end
+    local default_im = fcitx_profile.load("Groups/0/Items/0", "Name")
+    if not default_im then return end
+    local current_im = fcitx.currentInputMethod() -- 获取默认输入法
+    local current_window = fcitx.currentProgram()
+    -- log("current_window = " .. current_window .. " current_im = " .. current_im)
+    if is_capslock_on() then -- 大写锁定处于打开状态，需要切换为默认输入法并保持大写状态
+        program_im_map[current_window] = current_im -- 保存当前正在使用的输入法
+        fcitx.setCurrentInputMethod(default_im) -- 切换为默认输入法
+    else -- 大写锁定处于关闭状态，恢复为上次使用的输入法
+        if program_im_map[current_window] then
+            fcitx.setCurrentInputMethod(program_im_map[current_window])
+            program_im_map[current_window] = nil
+        end
+    end
+end
+```
+
+::: {.callout-tip}
+CapsLock 对应的按键符号值为 `XK_Caps_Lock`，其值为 `0xffe5` [^XK]。
+
+[^XK]: 参阅 [X11 Keysym Definitions](https://www.cl.cam.ac.uk/~mgk25/ucs/keysyms.txt)。
+:::
+
+然后，通过 `fcitx.watchEvent` 注册上述回调函数：
+
+```lua
+fcitx.watchEvent(fcitx.EventType.KeyEvent, "CapsLockEventHandler")
+```
+
+### 模块搜索路径问题
+
+在插件的入口文件 `main.lua` 中，需要将插件目录添加到模块搜索路径 `package.path` 中，否则无法正确加载同一目录下的 `LIP` 和 `fcitx_profile` 模块：
+
+```lua
+local HOME = os.getenv("HOME")
+package.path = package.path .. ((";%s/.local/share/fcitx5/lua/CapsLockEventHandler/?.lua"):format(HOME))
+```
+
+::: {.callout-tip}
+`luaaddonloader` 在加载插件时，会为每个插件创建一个独立的 Lua 环境，因此每个插件的 `package.path` 变量都是独立的，需要在每个插件中单独设置。
+:::
+
+### 错误日志查询
+
+通过下述方式查看错误：
+
+```bash
+journalctl | grep fcitx
+```
