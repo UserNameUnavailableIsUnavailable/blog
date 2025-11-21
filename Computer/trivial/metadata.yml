@@ -1,0 +1,9 @@
+sidebar:
+  children:
+  - title: 返回
+    href: ../index.html
+  - title: 琐碎知识
+    href: index.html
+    children:
+    - title: 常见的 Shell 操作符
+      href: shell-operators.html

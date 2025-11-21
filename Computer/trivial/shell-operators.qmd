@@ -1,0 +1,120 @@
+---
+title: 常见的 Shell 操作符
+---
+
+## 基本概念
+
+### 标准输入、标准输出、标准错误
+
+在 von Neumann 计算机体系结构中，程序通过输入设备获取输入数据，通过输出设备输出结果数据。对应地，在 Unix 中，也产生了输入流和输出流的概念。
+
+在类 Unix 操作系统中，程序有三种预设的数据流：
+
+- 标准输入（C 标准库中的 `stdin`）：程序从中读取输入数据的流，通常与键盘关联。
+- 标准输出（C 标准库中的 `stdout`）：程序将正常输出数据写入的流，通常与终端关联。
+- 标准错误（C 标准库中的 `stderr`）：程序将错误消息写入的流，通常也与终端关联。
+
+其中，标准错误也属于输出流的一种，但它与标准输出是分开的，目的是为了让用户能够区分正常的输出和错误消息。
+
+在 `stdio.h` 头文件中，可以看到如下定义：
+
+```c
+/* Standard streams.  */
+extern FILE *stdin;		/* Standard input stream.  */
+extern FILE *stdout;		/* Standard output stream.  */
+extern FILE *stderr;		/* Standard error output stream.  */
+/* C89/C99 say they're macros.  Make them happy.  */
+#define stdin stdin
+#define stdout stdout
+#define stderr stderr
+```
+
+对于 Windows 命令行程序，上述概念同样适用。
+
+现代的 Shell 一般都赋予上述数据流一个默认的文件描述符：
+
+- 标准输入：文件描述符 `0`。
+- 标准输出：文件描述符 `1`。
+- 标准错误：文件描述符 `2`。
+
+在所有的类 Unix 操作系统中，当新进程创建时，这三个文件描述符都会被默认打开并关联到相应的设备文件上， **其文件描述符的编号都固定为上面列出的值** 。
+
+### 命令和程序
+
+命令、程序是人们总是混淆的概念（与此类似的还有程序和进程）。当我们打开终端时，终端实际上帮我们启动了一个 Shell 程序，Shell 程序接受用用户的输入，并对其进行解析。用户输入的可能是 Shell 的一个内置命令（如 `exit`）,也可能是一个可执行程序（如 `ls`）。一般来说，Shell 会先尝试将输入的内容视作内置命令进行解析，若其不是内置的命令，则在环境变量 `PATH` 列出的目录下查找对应的可执行程序并运行它。
+
+::: {.callout-note}
+在现代操作系统中，“终端”是通过一个图形化的终端模拟器程序来实现的。
+:::
+
+## 输出重定向
+
+`>` 是重定向操作符，用于将前面提到的三种数据流重定向到其他数据流中。其使用方法为 `N>` 其中 `N` 是文件描述符，可取 `1` 和 `2`，分别代表标准输出和标准错误。在缺省的情况下，`>` 等价于 `1>`。`>` 在重定向输出时会覆盖目标文件的内容，若想要追加输出，可以使用 `>>` 操作符，其使用方式与 `>` 完全一致。
+
+### `>`（或 `1>`）
+
+主流的 Shell 都支持使用 `>` 将命令的标准输出重定向到文件中，例如：
+
+```
+echo "Hello, world!" > hello.txt
+```
+
+### `2>`
+
+在 Unix 的设计中，标准错误的流和标准输出的流是分开的，主流的 Shell 均支持使用 `2>` 将标准错误重定向到文件中。其中，`2` 代表标准错误的文件描述符。
+
+### `>&`
+
+`>&` 的语义是将一个文件描述符重定向到另一个文件描述符。`2>&1` 表示将标准错误重定向到标准输出中。
+
+### 示例
+
+```c
+// test.c
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    fprintf(stdout, "Trivial message.\n");
+    fprintf(stderr, "Error message.\n");
+}
+```
+
+```bash
+clang test.c -o test
+./test 1> out.txt # 将标准输出重定向到 out.txt 文件中，标准错误仍然输出到终端
+./test 2> err.txt # 将标准错误重定向到 err.txt 文件中，标准输出仍然输出到终端
+./test > all.txt 2>&1 # 将标准输出和标准错误都重定向到 all.txt 文件中
+```
+
+## 输入重定向
+
+### `<`
+
+`<` 是输入重定向操作符。由于设计上的差异，目前 PowerShell 还不支持这种重定向方式。`<` 用于将文件的内容作为命令的标准输入流。例如：
+
+```bash
+echo 3 2 1 > numbers.txt
+sort < numbers.txt
+```
+
+::: {.callout-note}
+PowerShell 采取了面向对象的设计理念，其输入输出流传递的是对象而非文本流，对象通过管道在 Shell 的各个命令之间传递。当遇到可执行程序时，PowerShell 会将对象转换为文本流传递给可执行程序。上面的例子在 PowerShell 中可以这样写：
+
+```powershell
+"3`n2`n1" | Out-File -FilePath numbers.txt
+Get-Content -Path numbers.txt | Sort-Object
+```
+:::
+
+## 流的创建
+
+为类 Unix 系统设计的 shells 支持通过下面的方式创建新的数据流：
+
+```bash
+exec 3> newout.txt
+ls -l >&3 # 输出写入到 newout.txt 文件中
+echo 3 2 1 > newin.txt
+exec 4< newin.txt
+sort <&4 # 从 newin.txt 文件中读取输入
+```

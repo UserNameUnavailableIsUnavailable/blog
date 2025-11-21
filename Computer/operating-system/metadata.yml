@@ -7,3 +7,5 @@ sidebar:
     children:
     - title: 线程
       href: thread.html
+    - title: Shell 重定向实现原理详解
+      href: redirection-expatiation.html
