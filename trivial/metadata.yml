@@ -21,3 +21,5 @@
           href: /trivial/2025/change-login-shell-to-pwsh.html
         - title: 让 fcitx5 更符合 Windows 使用习惯
           href: /trivial/2025/fcitx-customization/index.html
+        - title: 由 Windows 休眠导致 Linux 无法挂载 NTFS 分区的问题
+          href: /trivial/2025/windows-hibernation-ntfs-mount-issue.html

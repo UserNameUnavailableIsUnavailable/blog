@@ -1,0 +1,46 @@
+---
+title: 僵尸进程
+---
+
+在 Unix 中，子进程在退出后，会将其退出状态暂存在内核中，父进程需调用 `wait` 系列函数获取子进程的退出状态并销毁子进程。这时就存在如下几种情况：
+
+- 父进程先于子进程退出：子进程成为 **孤儿进程（orphan process）** ，被 `init` 进程收养，子进程退出后，由 `init` 负责调用 `wait` 销毁子进程。
+- 子进程先于父进程退出：子进程退出后，内核将其退出状态保存在内核中，等待父进程调用 `wait` 获取退出状态并销毁子进程。此时，子进程处于已经退出但未被销毁的状态，称为 **僵尸进程（defunct process, aka. zombie process）** 。若父进程长时间不调用 `wait`，则僵尸进程会一直存在与内核中，占用系统资源。
+
+需要指出，子进程先于父进程退出的情况非常常见，僵尸进程的存在并不是一种错误。在 Unix 的父子进程模型与 C 语言中的裸指针内存管理十分类似：父进程创建子进程后，需要负责子进程的销毁。
+
+僵尸进程是类 Unix 操作系统中独有的概念，Windows 操作系统中并不存在僵尸进程。
+
+::: {.callout-note}
+Windows 中没有僵尸进程的概念，这一点与 Windows 的设计哲学有关。Windows 虽然也有进程标识符的概念，但真正实现对进程控制的是进程的句柄（handle）。在 Windows 中，父进程调用 `CreateProcess` 创建子进程后，父进程获取到的是子进程的句柄。句柄在内核中指向了子进程的内核对象，对象中维护了子进程的引用计数。当其他进程通过 `OpenProcess` 打开子进程时，子进程的引用计数增加 1，调用 `CloseHandle` 时，引用计数减少 1。当子进程退出时，其内核对象并不会立即销毁，而是等待所有引用该对象的句柄都被关闭后，才会销毁该对象并释放资源。因此，Windows 中不存在僵尸进程的问题。句柄从概念上与 C++ 中的智能指针非常类似。
+
+在 Windows 中，打开某个进程并持有其句柄后，在其句柄关闭前可以保证其该进程的内核对象一直有效。在 Unix 中，只能通过进程标识符来操作进程，并且由于进程标识符可会被重用，因此无法保证进程标识符对应的进程一直有效，这一点与 C / C++ 中的悬空指针问题类似。
+
+所以，单从设计上看，Windows 的句柄比 Unix 中的描述符更加先进。
+:::
+
+下面的代码演示了一个简单的僵尸进程的产生过程：
+
+```c
+int main() {
+    pid_t pid = fork();
+    if (pid < 0) {
+        fprintf(stderr, "Failed to fork child process.\n");
+        return 1;
+    }
+    if (pid == 0) { // child process
+        fprintf(stdout, "Child process exiting.\n");
+        return 0;
+    } else { // parent process
+        sleep(10); // Simulate long-running parent process
+        fprintf(stdout, "Parent process exiting.\n");
+        return 0;
+    }
+}
+```
+
+通过下面的命令可以查看系统中的僵尸进程：
+
+```bash
+ps -ef | grep -i defunct
+```

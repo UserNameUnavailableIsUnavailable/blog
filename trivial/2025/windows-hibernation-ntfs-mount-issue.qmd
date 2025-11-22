@@ -1,0 +1,28 @@
+---
+title: 由 Windows 休眠导致 Linux 无法挂载 NTFS 分区的问题
+---
+
+Windows 休眠与快速启动功能会在关机时将内存数据写入 NTFS 分区中的 `hiberfil.sys` 文件中，以便在下次启动时快速恢复系统状态。由于该文件占用大量磁盘空间，且普通用户无法访问该文件，因此 Windows 在休眠或启用快速启动后会将 NTFS 分区标记为“未干净卸载”状态。
+
+当 Linux 系统尝试挂载该 NTFS 分区时，`ntfs-3g` 驱动程序会检测到该分区处于未干净卸载状态，并拒绝挂载以防止数据损坏：
+
+```bash
+sudo ntfsfix /dev/nvme1n1p3 
+```
+
+```plain
+Mounting volume... Windows is hibernated, refused to mount.
+FAILED
+Attempting to correct errors... 
+Processing $MFT and $MFTMirr...
+Reading $MFT... OK
+Reading $MFTMirr... OK
+Comparing $MFTMirr to $MFT... OK
+Processing of $MFT and $MFTMirr completed successfully.
+Setting required flags on partition... OK
+Going to empty the journal ($LogFile)... OK
+Windows is hibernated, refused to mount.
+Remount failed: Operation not permitted
+```
+
+要解决上述问题，关闭 Windows 的休眠和快速启动功能即可。在使用固态硬盘的情况下，关闭快速启动对系统启动速度影响不大。

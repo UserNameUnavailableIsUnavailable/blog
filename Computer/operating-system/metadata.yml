@@ -7,5 +7,7 @@ sidebar:
     children:
     - title: 线程
       href: thread.html
+    - title: Unix 中的僵尸进程
+      href: defunct-process.html
     - title: Shell 重定向实现原理详解
       href: redirection-expatiation.html
