@@ -9,3 +9,5 @@
         href: character-encoding/index.html
       - title: Windows 乱码问题研究
         href: survey-on-Windows-garbling-issue/index.html
+      - title: "`CreateProcess` 的陷阱"
+        href: CreateProcess-pitfall/index.html

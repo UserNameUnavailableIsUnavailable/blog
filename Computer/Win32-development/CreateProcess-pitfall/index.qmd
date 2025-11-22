@@ -1,0 +1,72 @@
+---
+title: "`CreateProcess` 的陷阱"
+---
+
+使用 `CreateProcess` 创建子进程时，需要特别注意的一点是 `lpCommandLine` 必须是可写的字符串缓冲区，不能传入字符串常量，否则程序会因尝试写入只读内存而在运行时直接崩溃。在使用主流的 C 语言编译器时，编译器不会对此进行检查，而 C++ 编译器在编译时会发出警告。
+
+`CreateProcessA` 和 `CreateProcessW` 的函数原型如下所示：
+
+```c { code-line-numbers="3,16" }
+BOOL CreateProcessA(
+  [in, optional]      LPCSTR                lpApplicationName,
+  [in, out, optional] LPSTR                 lpCommandLine,
+  [in, optional]      LPSECURITY_ATTRIBUTES lpProcessAttributes,
+  [in, optional]      LPSECURITY_ATTRIBUTES lpThreadAttributes,
+  [in]                BOOL                  bInheritHandles,
+  [in]                DWORD                 dwCreationFlags,
+  [in, optional]      LPVOID                lpEnvironment,
+  [in, optional]      LPCSTR                lpCurrentDirectory,
+  [in]                LPSTARTUPINFOA        lpStartupInfo,
+  [out]               LPPROCESS_INFORMATION lpProcessInformation
+);
+
+BOOL CreateProcessW(
+  [in, optional]      LPCWSTR               lpApplicationName,
+  [in, out, optional] LPWSTR                lpCommandLine,
+  [in, optional]      LPSECURITY_ATTRIBUTES lpProcessAttributes,
+  [in, optional]      LPSECURITY_ATTRIBUTES lpThreadAttributes,
+  [in]                BOOL                  bInheritHandles,
+  [in]                DWORD                 dwCreationFlags,
+  [in, optional]      LPVOID                lpEnvironment,
+  [in, optional]      LPCWSTR               lpCurrentDirectory,
+  [in]                LPSTARTUPINFOW        lpStartupInfo,
+  [out]               LPPROCESS_INFORMATION lpProcessInformation
+);
+```
+
+```c
+#include <Windows.h>
+
+int main()
+{
+    // 错误：传入字符串常量，运行时会崩溃
+    BOOL bSuccess = CreateProcessW(
+        NULL,
+        L"C:/Windows/System32/notepad.exe",
+        NULL,
+        NULL,
+        FALSE,
+        0,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+    );
+    // 正确：使用可写的字符串缓冲区
+    wchar_t cmd[] = L"C:/Windows/System32/notepad.exe";
+    bSuccess = CreateProcessW(
+        NULL,
+        cmd,
+        NULL,
+        NULL,
+        FALSE,
+        0,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+    );
+}
+```
+
+![`clang` 和 `clang++` 编译对比](assets/createprocess-pitfall.avif){.center}

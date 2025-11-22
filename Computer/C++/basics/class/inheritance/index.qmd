@@ -1,0 +1,101 @@
+---
+title: 继承
+---
+
+## 虚函数与多态
+
+### `virtual`{.language-cpp} 关键字
+
+```cpp
+class Base {
+public:
+    virtual void use() const { std::cout << "Base::use()" << std::endl; }
+    virtual ~Base() noexcept { std::cout << "Base destructed." << std::endl; }
+};
+
+class Derived : public Base {
+public:
+    virtual void use() const override { std::cout << "Derived::use()" << std::endl; }    
+    virtual ~Derived() noexcept override { std::cout << "Derived destructed" << std::endl; }
+};
+
+int main() {
+    Base* pb = new Derived;
+    pb->use();
+    delete pb;
+}
+```
+
+基类中 `use()`{.language-cpp} 方法标记为 `virtual`{.language-cpp} 后，就成为了虚函数。 **在派生的子类中即便不使用 `virtual`{.language-cpp} 关键字标记 `use()`{.language-cpp}，`use()`{.language-cpp} 仍保持为虚函数。**
+
+::: {.callout-important}
+需要特别注意的是，当一个类出现虚函数后，该类 **必须** 同时包含虚析构函数。 **子类的虚构函数尽管名称与基类虚构函数不同，但子类虚构函数仍然是对父类虚构函数的重载。**
+析构时，会先调用子类的析构函数，再调用基类的析构函数。
+:::
+
+基类派生出子类后，子类实际上是在基类中又新建了一个更具体的作用域。考虑这样的例子：
+
+```cpp
+class Base {
+public:
+    void use() { std::cout << "Base gets used." << std::endl; }
+};
+
+class Derived : public Base {
+public:
+    void use() { std::cout << "Derived gets used." << std::endl; }
+};
+
+int main() {
+    Derived obj;
+    Derived& derived = obj;
+    Base& base = derived;
+    obj.use(); // 输出：Derived gets used.
+    derived.use(); // 输出：Derived gets used.
+    base.use(); // 输出：Base gets used.
+}
+```
+
+通过引用或指针对非虚函数调用的解析是在编译期就完成的，对虚函数的调用则在运行时解析。对于非虚的成员函数，对其调用的解析是在编译期就完成的，其中 `derived.use()`{.language-cpp} 被解析为 `derived.Derived::use()`{.language-cpp}，`base.use()`{.language-cpp} 被解析为 `base.Base::use()`{.language-cpp}。
+
+当通过基类的引用或指针访问虚函数时，调用的解析是在运行时完成的。运行时，通过查找虚函数表确定需要访问的虚函数地址，进而正确调用子类中重载的 `use()`，实现 **动态绑定（dynamic binding）** ，或称 **运行时绑定（run-time binding）** ，这种特性常被称作 **多态（Polymorphism）**。因此可以说，多态是运行期的行为，而非编译期的行为。
+
+::: {.callout-important}
+需要注意的是，上面提到的作用域覆盖现象在定义虚函数时仍然存在，`Derived::use()`{.language-cpp} 仍然覆盖了 `Base::use()`{.language-cpp}。
+:::
+
+### `override`{.language-cpp} 标识符
+
+在实际开发中，应使用 `override`{.language-cpp} 标识符在子类中显式地标记对基类函数的重载，这样在编译期就能够检查类似于下面这样的问题：
+
+::: {.callout}
+`override`{.language-cpp} 是标识符而非关键字。
+:::
+
+```cpp
+class FooException : public std::exception {
+    virtual const char* what() { return "Foo Exception"; }
+};
+
+int main() {
+    try {
+        throw FooException();
+    } catch (std::exception& e) {
+        std::cout << e.what() << std::endl; // 输出 std::exception，不会正确调用重载的版本
+    }
+}
+```
+
+在基类 `std::exception`{.language-cpp} 中，`what()` 的真正原型实际上是 `const char* what() const;`{.language-cpp}，因此 `FooException::what()`{.language-cpp} 并没有重载基类的 `what()`{.language-cpp}，而是 **隐藏** 了基类的 `what()`{.language-cpp}，随之而来的问题是没有办法在运行时实现多态。现代的编译器针对上述情况会发出警告：
+
+![基类的 `what()`{.language-cpp} 被覆盖](assets/warning-hidden.avif){.center}
+
+注意，编译器告诉我们的是基类中原有的 `what()`{.language-cpp} 函数被子类作用域下的 `what()`{.language-cpp} 覆盖。
+
+如果显式地指定 `override`{.language-cpp} 标识符，则意味着该函数重载了基类的某个虚函数，而基类中并不存在原型为 `const char* what()`{.language-cpp} 的虚函数，编译器会直接报错：
+
+![使用 `override`{.language-cpp} 后报错](assets/error-override.avif){.center}
+
+## 虚表{#vtable}
+
+每个包含虚函数的类在编译时都会生成一个 **虚函数表（virtual table, vtable）** ，该表中存储了类的虚函数地址。在运行时，通过类的指针或引用调用虚函数时，程序会先查找该类的虚函数表，然后根据表中的地址调用相应的虚函数实现动态绑定。

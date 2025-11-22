@@ -59,32 +59,66 @@ int main(void) {
 在 Windows 中,上述过程也是类似的，父进程通过 `CreateFile` 创建文件句柄后，可以使用 `SetStdHandle` 函数将标准输入、标准输出或标准错误重定向到该文件句柄上。
 与 Unix 所不同的是默认的继承策略，Windows 的句柄继承策略更为严格，需要同时满足两个条件：
 
-- 在打开文件时，`SECURITY_ATTRIBUTES` 结构体中的 `bInheritHandles` 参数设置为 `TRUE`。
+- 在打开/创建文件时，`SECURITY_ATTRIBUTES` 结构体中的 `bInheritHandles` 参数设置为 `TRUE`。
 - 在创建子进程时，`CreateProcess` 函数的 `bInheritHandles` 参数设置为 `TRUE`。
 
 只有满足上述两个条件，子进程才能继承父进程的文件句柄。
 
-而要实现标准句柄的重定向，还需要在 `STARTUPINFO` 结构体中的 `dwFlags` 字段中包含 `STARTF_USESTDHANDLES` 标志，明确要使用自定义的标准句柄，即用当前父进程的标准句柄覆盖子进程的标准句柄。否则，子进程仍将使用默认的标准句柄。
+而要实现标准句柄的重定向，还需要在 `STARTUPINFO` 结构体中的 `dwFlags` 字段中包含 `STARTF_USESTDHANDLES` 标志，并设置 `hStdInput`、`hStdOutput`、`hStdError` 三个字段，明确要使用的标准句柄。否则，子进程仍将使用默认的标准句柄。
 
-```c
+在下面的示例中，我们同样创建一个包含若干无序数字的 `numbers.txt` 文件：
+
+```powershell
+echo 5 4 3 2 1 > numbers.txt
+```
+
+```c { code-line-numbers="23,26" }
 #include <Windows.h>
+#include <stdio.h>
 
 int main() {
-    SECURITY_ATTRIBUTES sa;
-    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-    sa.bInheritHandle = TRUE; // 允许句柄继承
-    sa.lpSecurityDescriptor = NULL;
-    HANDLE hFile = CreateFile("numbers.txt", GENERIC_READ, 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    HANDLE hOrigStdin = GetStdHandle(STD_INPUT_HANDLE); // 保存原始标准输入句柄
-    SetStdHandle(STD_INPUT_HANDLE, hFile); // 重定向标准输入到 hFile
-    STARTUPINFOW si;
-    ZeroMemory(&si, sizeof(STARTUPINFOW));
-    si.cb = sizeof(STARTUPINFOW);
-    si.dwFlags |= STARTF_USESTDHANDLES;
-    si.hStdInput = hFile;
+    SECURITY_ATTRIBUTES sa = {
+        .nLength = sizeof(SECURITY_ATTRIBUTES),
+        .bInheritHandle = TRUE,
+        .lpSecurityDescriptor = NULL
+    }; // 文件句柄允许继承
+    HANDLE hFile = CreateFileW(L"numbers.txt", GENERIC_READ, FILE_SHARE_READ, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        fprintf(stdout, "CreateFileW failed with %lu.\n", GetLastError());
+        return 0;
+    }
+    STARTUPINFOW si = {
+        .cb = sizeof(STARTUPINFOW),
+        .dwFlags = STARTF_USESTDHANDLES,
+        .hStdInput = hFile,
+        .hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE),
+        .hStdError = GetStdHandle(STD_ERROR_HANDLE)
+    }; // 指定标准句柄
     PROCESS_INFORMATION pi;
-    CreateProcessW(NULL, L"C:/Windows/System32/sort", NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi); // 创建子进程，允许句柄继承
-    SetStdHandle(STD_INPUT_HANDLE, hOrigStdin); // 恢复原始标准输入句柄
+    wchar_t cmd[] = L"C:/Windows/System32/sort.exe";
+    BOOL bSuccess = CreateProcessW(
+        NULL,
+        cmd,
+        NULL,
+        NULL,
+        TRUE, // 允许子进程继承句柄
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi
+    );
+    if (!bSuccess) {
+        fprintf(stdout, "CreateProcessW failed with %lu.\n", GetLastError());
+    } else {
+        fprintf(stdout, "Child process created successfully.\n");
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    }
     CloseHandle(hFile); // 关闭文件句柄
 }
+```
+
+::: {.callout-important}
+需要特别注意的是，`CreateProcessW` 接收的 `lpCommandLine` 参数必须是可写的字符串缓冲区，不能传入字符串常量，否则程序会因尝试写入只读内存而在运行时直接崩溃。C 语言编译器不会对此进行检查，而 C++ 编译器在编译时会发出警告。
 ```

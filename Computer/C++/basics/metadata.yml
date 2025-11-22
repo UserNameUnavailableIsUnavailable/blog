@@ -12,11 +12,11 @@ sidebar:
     - title: 面向对象基础
       href: class/index.html
       children:
-      - title: "`struct` 与 `class`"
+      - title: "`struct`{.language-cpp} 与 `class`{.language-cpp} 的区别"
         href: class/struct_class.html
-      - title: 构造函数
-        href: class/constructor.html
+      - title: 构造函数与析构函数
+        href: class/constructor_and_destructor.html
       - title: 赋值
         href: class/assignment.html
       - title: 继承
-        href: class/inheritance.html
+        href: class/inheritance/index.html
