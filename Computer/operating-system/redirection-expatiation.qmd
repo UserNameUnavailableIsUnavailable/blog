@@ -10,7 +10,7 @@ title: Shell 重定向实现原理
 在下面的示例中，我们首先创建一个包含若干无序数字的 `numbers.txt`：
 
 ```bash
-bash echo 3 5 2 4 1 > numbers.txt
+echo 3 5 2 4 1 > numbers.txt
 ```
 
 然后，编写如下 C 代码，将标准输入重定向到 `numbers.txt` 并调用 `sort` 程序对数字进行排序：
