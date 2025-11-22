@@ -1,0 +1,71 @@
+---
+title: 对虚拟化技术的小结——为何 Linux 下用不了 Virtual Box 了？
+---
+
+## 问题引入
+
+在 Linux 上安装 Virtual Box 并创建虚拟机后，发现虚拟机无法启动，报错信息如下：
+
+```plain
+VM Name: windows-11
+
+VT-x is being used by another hypervisor (VERR_VMX_IN_VMX_ROOT_MODE).
+VirtualBox can't operate in VMX root mode. Please disable the KVM kernel extension, recompile your kernel and reboot (VERR_VMX_IN_VMX_ROOT_MODE).
+Result Code:
+NS_ERROR_FAILURE (0x80004005)
+Component:
+ConsoleWrap
+Interface:
+IConsole {6ac83d89-6ee7-4e33-8ae6-b257b2e81be8}
+```
+
+## 基本概念
+
+虚拟化技术（virtualization technology）是在一台物理计算机上运行多个操作系统实例的技术。在虚拟化技术中，虚拟机（virtual machine, VM）即操作系统的实例，虚拟机监控器（hypervisor）负责管理虚拟机的创建、运行和资源分配。VMs 由 hypervisor 创建并管理。目前，根据 hypervisor 架构的不同，虚拟化技术可以分为两大类：
+
+- **第一类虚拟化（Type 1 Virtualization）** ：也称为裸机虚拟化、裸金属虚拟化（bare-metal virtualization），hypervisor 直接运行在物理硬件上，管理虚拟机的创建和资源分配。
+- **第二类虚拟化（Type 2 Virtualization）** ：也称为托管虚拟化（hosted virtualization），hypervisor 运行在宿主操作系统上，利用宿主操作系统的资源管理功能来管理虚拟机。
+
+第一类虚拟化需要 CPU 提供的硬件支持，如 Intel 的 VT-x 和 AMD 的 AMD-V 技术。在这种虚拟化架构下，hypervisors 代替传统的操作系统，成为真正控制硬件的宿主操作系统（host OS）。以 Microsoft Hyper-V 和 KVM 为代表的 hypervisors 都采用了第一类虚拟化技术。举例来说，当安装提供 KVM 支持的 Linux 发行版时，内核中的 KVM 模块使得 Linux 内核充当 hypervisor 的角色，直接管理虚拟机的创建和资源分配，而 Linux 内核自身同时作为 hypervisor 所管理的客户操作系统（guest OS）存在。也就是说，此时的 Linux 兼具两重身份：既是 hypervisor，又是客户操作系统。
+
+第二类虚拟化则可以在没有硬件支持的情况下实现纯软件的虚拟化，但性能相对较低，目前主流的、采用第二类虚拟化技术的 hypervisors 基本都在一定程度上依赖硬件虚拟化支持。在这种虚拟化架构下，hypervisor 作为 **宿主操作系统** 的一个应用程序运行，利用宿主操作系统提供的硬件抽象层（HAL）来管理虚拟机的创建和资源分配。以 Oracle VirtualBox 和 VMware Workstation 为代表的 hypervisors 都采用了第二类虚拟化技术。举例来说，当在 Windows 操作系统上安装 VirtualBox 时，VirtualBox 作为一个应用程序运行在 Windows 上，利用 Windows 提供的硬件抽象层来创建和管理虚拟机。
+
+在 Linux 下，可通过 `lsmod | grep kvm` 命令检查 KVM 模块是否已加载，从而判断系统是否启用了第一类虚拟化支持：
+
+```plain
+kvm_intel             487424  0
+kvm                  1425408  1 kvm_intel
+irqbypass              12288  1 kvm
+```
+
+对于 Intel CPU，`kvm_intel` 模块负责提供 KVM 支持；对于 AMD CPU，`kvm_amd` 模块负责提供 KVM 支持。
+
+## 问题分析
+
+按道理来说，第二类虚拟化不应与第一类虚拟化冲突，因为第二类虚拟化运行在宿主操作系统上，利用宿主操作系统的资源管理功能来管理虚拟机，而第一类虚拟化直接运行在物理硬件上，管理虚拟机的创建和资源分配，两者并不直接竞争硬件资源。但实际上，为了提高虚拟化性能，第二类虚拟化通常会利用 CPU 提供的硬件虚拟化支持，如 Intel 的 VT-x 和 AMD 的 AMD-V 技术。因此，当宿主操作系统已经启用了第一类虚拟化（如启用了 Hyper-V 或 KVM）时，第二类虚拟化（如 VirtualBox）将无法使用硬件虚拟化支持，从而导致虚拟机无法启动并报错。Windows 操作系统针对这个问题引入了 Hypervisor Platform（WHPX），其作为 Hyper-V 与第二类 hypervisors 之间的兼容存在，像 Virtual Box 这样的 hypervisor 通过 Hyper-V API 访问虚拟化硬件。
+
+## 解决方案
+
+基于上述分析，目前要想在 Linux 下使用 Virtual Box，必须关闭第一类虚拟化支持：
+
+```bash
+# Intel CPU
+sudo rmmod kvm_intel
+# AMD CPU
+sudo rmmod kvm_amd
+sudo rmmod kvm
+```
+
+然后，在 `/etc/modprobe.d/` 目录下创建一个名为 `disable-kvm.conf` 的文件，内容如下：
+
+```plain
+blacklist kvm
+blacklist kvm_intel
+blacklist kvm_amd
+```
+
+不过，更明智的选择是直接使用基于 KVM 的虚拟化方案：
+
+- Virtual Machine Manager（virt-manager）
+- GNOME Boxes
+- QEMU（Quick Emulator）
