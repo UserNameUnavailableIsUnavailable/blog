@@ -11,3 +11,5 @@ sidebar:
       href: defunct-process.html
     - title: Shell 重定向实现原理详解
       href: redirection-expatiation.html
+    - title: 对虚拟化技术的小结——为何 Linux 下用不了 Virtual Box 了？
+      href: why-vbox-fails-in-linux.html
