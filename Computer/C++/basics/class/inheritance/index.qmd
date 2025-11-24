@@ -98,4 +98,169 @@ int main() {
 
 ## 虚表{#vtable}
 
-每个包含虚函数的类在编译时都会生成一个 **虚函数表（virtual table, vtable）** ，该表中存储了类的虚函数地址。在运行时，通过类的指针或引用调用虚函数时，程序会先查找该类的虚函数表，然后根据表中的地址调用相应的虚函数实现动态绑定。
+需要指出的是，类的成员函数并占用类实例的存储空间。
+在前面的章节已经提及，任何非静态的成员函数、构造函数、析构函数都包含一个隐含的 `this`{.language-cpp} 指针参数，用于指向当前实例的基址。
+因此，任一个类的成员函数在整个程序中都只有一份，并由所有类的实例共享。
+对于包含虚函数的类，编译器会为其生成一个 **虚函数表（virtual table, vtable）** ，该表中存储了类的虚函数地址。
+在运行时，通过类的指针或引用调用虚函数时，程序会先查找该类的虚函数表，然后根据表中的地址调用相应的虚函数实现动态绑定。
+同时，编译器还会在类的定义中新增一个隐藏的指针成员，指向该类的虚函数表。
+在调用构造函数时，该指针会被初始化为指向该类的虚函数表地址。下面的代码可以验证这一点：
+
+```cpp
+#include <iostream>
+
+class Foo {
+    std::int64_t number;
+public:
+    std::int64_t get() const noexcept { return number; }
+    void set(std::int64_t num) { this->number = num; }
+};
+
+class Bar {
+    std::int64_t number;
+public:
+    virtual void run() { std::cout << number << std::endl; }
+    virtual std::int64_t get() const noexcept { return number; }
+    virtual void set(std::int64_t num) { this->number = num; }
+};
+
+class Baz : public Bar {
+
+};
+
+int main () {
+    std::cout << "size of Foo: " << sizeof(Foo) << std::endl; // 8
+    std::cout << "size of Bar: " << sizeof(Bar) << std::endl; // 16
+    std::cout << "size of Baz: " << sizeof(Baz) << std::endl; // 16
+    return 0;
+}
+```
+
+可以看到，在 64 位平台下由于虚表指针的引入，类的大小扩大了 8 个字节。
+
+为了进一步说明问题，再编写一个更加简洁的样例，由 MSVC 提供的 clang++ 生成的 IR 来观察虚函数表的实现：
+
+::: {.callout-important}
+在 x86_64 平台下，C++ 有两种主要的 ABI 实现，分别为 Itanium ABI（这里的 Itanium 最初源于 Itanium 处理器架构，但现在已经广泛应用于其他 x86_64 平台）和 MSVC ABI。这里使用 MSVC 提供的 clang++ 编译器生成的 IR 来观察虚函数表的实现细节，其他编译器（如 GCC、Clang）生成的 IR 不尽相同，但实现思路基本是一致的。
+:::
+
+```cpp
+// foo.cpp
+class Foo {
+public:
+    virtual void run() const noexcept {};
+    virtual ~Foo() = default;
+private:
+    int foo;
+};
+
+class Bar : public Foo {
+public:
+    virtual void run() const noexcept override {};
+    virtual ~Bar() = default;
+private:
+    float bar;
+};
+
+int main () {
+    Bar bar;
+    Foo& foo = bar;
+    foo.run();
+    return 0;
+}
+```
+
+使用下面的命令生成 IR 代码：
+
+```powershell
+clang++ -S -emit-llvm foo.cpp -o foo.ll
+```
+
+在生成的 IR 中，`Foo` 和 `Bar` 这两个类的定义如下：
+
+```llvm
+%class.Bar = type { %class.Foo, float }
+%class.Foo = type { ptr, i32 }
+```
+
+除了类型为 `i32` 的 `foo` 成员，`Foo` 还包含一个类型为 `ptr` 的隐藏成员，该成员即为指向虚函数表的指针。`Bar` 继承自 `Foo`，因此 `Bar` 的定义中包含了一个 `Foo` 类型的成员（即 `Foo` 的所有成员），以及一个类型为 `float` 的 `bar` 成员。从这个意义上说，我们只需要截取 `Bar` 的前面部分，就可以得到 `Foo` 的定义。
+
+```llvm {code-line-numbers="7,10-13"}
+; Function Attrs: mustprogress noinline norecurse nounwind optnone uwtable
+define dso_local noundef i32 @main() #0 {
+  %1 = alloca i32, align 4
+  %2 = alloca %class.Bar, align 8
+  %3 = alloca ptr, align 8
+  store i32 0, ptr %1, align 4
+  %4 = call noundef ptr @"??0Bar@@QEAA@XZ"(ptr noundef nonnull align 8 dereferenceable(24) %2) #3
+  store ptr %2, ptr %3, align 8
+  %5 = load ptr, ptr %3, align 8
+  %6 = load ptr, ptr %5, align 8
+  %7 = getelementptr inbounds ptr, ptr %6, i64 0
+  %8 = load ptr, ptr %7, align 8
+  call void %8(ptr noundef nonnull align 8 dereferenceable(16) %5) #3
+  store i32 0, ptr %1, align 4
+  call void @"??1Bar@@UEAA@XZ"(ptr noundef nonnull align 8 dereferenceable(24) %2) #3
+  %9 = load i32, ptr %1, align 4
+  ret i32 %9
+}
+```
+
+使用 `alloc`{.language-llvm} 在栈上分配了 `Bar` 实例的内存空间后，将实例的基址存储到 `%2`{.language-llvm} 中，并调用构造函数 `@"??0Bar@@QEAA@XZ"`{.language-llvm} 进行初始化。
+
+```llvm {code-line-numbers="7"}
+; Function Attrs: mustprogress noinline nounwind optnone uwtable
+define linkonce_odr dso_local noundef ptr @"??0Bar@@QEAA@XZ"(ptr noundef nonnull returned align 8 dereferenceable(24) %0) unnamed_addr #1 comdat align 2 {
+  %2 = alloca ptr, align 8
+  store ptr %0, ptr %2, align 8
+  %3 = load ptr, ptr %2, align 8
+  %4 = call noundef ptr @"??0Foo@@QEAA@XZ"(ptr noundef nonnull align 8 dereferenceable(16) %3) #3
+  store ptr @"??_7Bar@@6B@", ptr %3, align 8
+  ret ptr %3
+}
+```
+
+在构造函数 `@"??0Bar@@QEAA@XZ"`{.language-llvm} 中，`store ptr @"??_7Bar@@6B@", ptr %3, align 8`{.language-llvm}，该行代码将虚函数表的地址存储到了隐藏的虚表指针成员中。我们可以据此找到虚表的定义：
+
+```llvm {code-line-numbers="1,13,16-17"}
+@0 = private unnamed_addr constant { [3 x ptr] } { [3 x ptr] [ptr @"??_R4Bar@@6B@", ptr @"?run@Bar@@UEBAXXZ", ptr @"??_GBar@@UEAAPEAXI@Z"] }, comdat($"??_7Bar@@6B@")
+@"??_R4Bar@@6B@" = linkonce_odr constant %rtti.CompleteObjectLocator { i32 1, i32 0, i32 0, i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R0?AVBar@@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R3Bar@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R4Bar@@6B@" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32) }, comdat
+@"??_7type_info@@6B@" = external constant ptr
+@"??_R0?AVBar@@@8" = linkonce_odr global %rtti.TypeDescriptor9 { ptr @"??_7type_info@@6B@", ptr null, [10 x i8] c".?AVBar@@\00" }, comdat
+@__ImageBase = external dso_local constant i8
+@"??_R3Bar@@8" = linkonce_odr constant %rtti.ClassHierarchyDescriptor { i32 0, i32 0, i32 2, i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R2Bar@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32) }, comdat
+@"??_R2Bar@@8" = linkonce_odr constant [3 x i32] [i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R1A@?0A@EA@Bar@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R1A@?0A@EA@Foo@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 0], comdat
+@"??_R1A@?0A@EA@Bar@@8" = linkonce_odr constant %rtti.BaseClassDescriptor { i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R0?AVBar@@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 1, i32 0, i32 -1, i32 0, i32 64, i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R3Bar@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32) }, comdat
+@"??_R1A@?0A@EA@Foo@@8" = linkonce_odr constant %rtti.BaseClassDescriptor { i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R0?AVFoo@@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 0, i32 0, i32 -1, i32 0, i32 64, i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R3Foo@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32) }, comdat
+@"??_R0?AVFoo@@@8" = linkonce_odr global %rtti.TypeDescriptor9 { ptr @"??_7type_info@@6B@", ptr null, [10 x i8] c".?AVFoo@@\00" }, comdat
+@"??_R3Foo@@8" = linkonce_odr constant %rtti.ClassHierarchyDescriptor { i32 0, i32 0, i32 1, i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R2Foo@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32) }, comdat
+@"??_R2Foo@@8" = linkonce_odr constant [2 x i32] [i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R1A@?0A@EA@Foo@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 0], comdat
+@1 = private unnamed_addr constant { [3 x ptr] } { [3 x ptr] [ptr @"??_R4Foo@@6B@", ptr @"?run@Foo@@UEBAXXZ", ptr @"??_GFoo@@UEAAPEAXI@Z"] }, comdat($"??_7Foo@@6B@")
+@"??_R4Foo@@6B@" = linkonce_odr constant %rtti.CompleteObjectLocator { i32 1, i32 0, i32 0, i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R0?AVFoo@@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R3Foo@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R4Foo@@6B@" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32) }, comdat
+
+@"??_7Bar@@6B@" = unnamed_addr alias ptr, getelementptr inbounds ({ [3 x ptr] }, ptr @0, i32 0, i32 0, i32 1)
+@"??_7Foo@@6B@" = unnamed_addr alias ptr, getelementptr inbounds ({ [3 x ptr] }, ptr @1, i32 0, i32 0, i32 1)
+```
+
+从上面的定义可以看到，`@"??_7Bar@@6B@"`{.language-llvm} 和 `@"??_7Foo@@6B@"`{.language-llvm} 分别是 `Bar` 和 `Foo` 类的虚函数表地址 `@0`{.language-llvm} 和 `@1`{.language-llvm} 别名，而虚函数表本身则定义为常量数组，数组中的每个元素即为虚函数的地址。
+
+::: {.callout-note}
+在源代码中，我们定义了两个虚函数，分别为 `run` 和析构函数。但在上述两个虚表的定义中，我们看到实际上表中有三个表项。以 `@0` 为例，其中以一个表项 `@"??_R4Bar@@6B@"`{.language-llvm} 的定义为：
+
+```llvm
+@"??_R4Bar@@6B@" = linkonce_odr constant %rtti.CompleteObjectLocator { i32 1, i32 0, i32 0, i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R0?AVBar@@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R3Bar@@8" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32), i32 trunc (i64 sub nuw nsw (i64 ptrtoint (ptr @"??_R4Bar@@6B@" to i64), i64 ptrtoint (ptr @__ImageBase to i64)) to i32) }, comdat
+```
+
+其中有一个关键的 `%rtti.CompleteObjectLocator`，它用于支持运行时类型识别（RTTI, Run-Time Type Information），是 C++ RTTI 机制的一部分。
+:::
+
+构造完成后，虚表指针成员已经指向了 `Bar` 类的虚函数表地址。因此，不论是通过 `Bar` 类的指针还是通过基类 `Foo` 类的指针调用虚函数时，程序都可通过虚表指针找到该类对应的虚表，进而调用正确的虚函数实现多态：
+
+```llvm
+  store ptr %2, ptr %3, align 8
+  %5 = load ptr, ptr %3, align 8
+  %6 = load ptr, ptr %5, align 8
+  %7 = getelementptr inbounds ptr, ptr %6, i64 0
+  %8 = load ptr, ptr %7, align 8
+  call void %8(ptr noundef nonnull align 8 dereferenceable(16) %5) #3
+```
