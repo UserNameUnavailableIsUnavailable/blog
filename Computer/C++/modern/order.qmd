@@ -54,26 +54,26 @@ int main() {
 
 `<compare>` 中定义了 `std::strong_ordering`、`std::weak_ordering` 和 `std::partial_ordering` 三种顺序类型，其定义如下：
 
-:::{#teleport-source-strong-ordering}
+:::{data-teleport-to="strong-ordering"}
 - $a \equiv b \Rightarrow f(a) \equiv f(b)$。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{#teleport-source-weak-ordering}
+:::{data-teleport-to="weak-ordering"}
 - $a \equiv b \nRightarrow f(a) \equiv f(b)$。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{#teleport-source-partial-ordering}
+:::{data-teleport-to="partial-ordering"}
 - $a \equiv b \nRightarrow f(a) \equiv f(b)$。
 - 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
 :::
 
 |顺序|定义{.center}|作用|
 |:-:|---|:-:|
-|`std::strong_ordering`|{#teleport-destination-strong-ordering}|最严格的顺序，适用于所有可比较类型，与 STL 排序算法、容器无缝集成。|
-|`std::weak_ordering`|{#teleport-destination-weak-ordering}|弱化了等价的要求，可用于忽略大小写进行字符串比较的场景。|
-|`std::partial_ordering`|{#teleport-destination-partial-ordering}|只能保证部分顺序，适用于某些元素不可比较的情况，如浮点数中的 `NaN`。|
+|`std::strong_ordering`|{#strong-ordering}|最严格的顺序，适用于所有可比较类型，与 STL 排序算法、容器无缝集成。|
+|`std::weak_ordering`|{#weak-ordering}|弱化了等价的要求，可用于忽略大小写进行字符串比较的场景。|
+|`std::partial_ordering`|{#partial-ordering}|只能保证部分顺序，适用于某些元素不可比较的情况，如浮点数中的 `NaN`。|
 
 ::: {.callout-important}
 需要指出，这里的等价所蕴含的语义仅仅是以“顺序”，即排序时的先后次序为依据的。

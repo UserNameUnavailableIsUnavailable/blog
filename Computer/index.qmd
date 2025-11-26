@@ -16,6 +16,7 @@ title: 计算机技术
 
 - [操作系统](operating-system/)
 - [CSAPP](CSAPP/)
+- [具体数学](concrete-mathematics/)
 
 ## 干活
 

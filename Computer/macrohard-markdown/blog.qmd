@@ -1,5 +1,5 @@
 ---
-title: Macrohard Markdown 博客/幻灯片生成工具
+title: Macrohard Markdown 博客/幻灯片生成工具{.center}
 work-source: "[Macrohard](https://macrohard.fun/)"
 citations: 114514 citations
 format: html
@@ -14,7 +14,7 @@ institute:
     - Sit^3^
 bibliography: references.bib
 footnotes-location: footnotes
-references-location: references
+bibliography-location: references
 ---
 
 ## 概述
@@ -325,65 +325,67 @@ $$
 
 ## 传送
 
-本扩展支持传送（Teleport）功能，即将一个元素的内容传送到另一个位置进行显示。使用传送功能时，需分别定义传送源（id 指定为 `teleport-source-ID`）和传送目标容器（id 指定为 `teleport-destination-ID`），文档加载后，传送源会作为整体被移动到传送目标内进行显示。
+本扩展支持传送（Teleport）功能，即将一个元素的内容传送到另一个位置进行显示。使用传送功能时，需要通过指定 `data-teleport-to` 属性指定传送的目标容器，文档加载后，传送源会作为整体被移动到传送目标容器内进行显示。
 
 例如，标准 Markdown 语法无法在表格内嵌入复杂元素（比如列表、代码块等），但通过传送功能可以实现这一点。下面的代码展示了如何使用传送功能将复杂元素放置在表格中：
 
 ```plain
-:::{#teleport-source-strong-ordering}
+:::{data-teleport-to="strong-ordering"}
 - `a == b` $\Rightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{#teleport-source-weak-ordering}
+:::{data-teleport-to="weak-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{#teleport-source-partial-ordering}
+:::{data-teleport-to="partial-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
 :::
 
 |顺序|定义{.center}|<!-- 这里使用 .center，定义一栏仅居中标题，列表保持靠左 -->
 |:-:|---|
-|`std::strong_ordering`|{#teleport-destination-strong-ordering}|
-|`std::weak_ordering`|{#teleport-destination-weak-ordering}|
-|`std::partial_ordering`|{#teleport-destination-partial-ordering}|
+|`std::strong_ordering`|{#strong-ordering}|
+|`std::weak_ordering`|{#weak-ordering}|
+|`std::partial_ordering`|{#partial-ordering}|
 ```
 
 这会产生如下效果：
 
-:::{#teleport-source-strong-ordering}
+```plain
+:::{data-teleport-to="strong-ordering"}
 - `a == b` $\Rightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{#teleport-source-weak-ordering}
+:::{data-teleport-to="weak-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{#teleport-source-partial-ordering}
+:::{data-teleport-to="partial-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
 :::
 
-|顺序|定义{.center}|
+|顺序|定义{.center}|<!-- 这里使用 .center，定义一栏仅居中标题，列表保持靠左 -->
 |:-:|---|
-|`std::strong_ordering`|{#teleport-destination-strong-ordering}|
-|`std::weak_ordering`|{#teleport-destination-weak-ordering}|
-|`std::partial_ordering`|{#teleport-destination-partial-ordering}|
+|`std::strong_ordering`|{#strong-ordering}|
+|`std::weak_ordering`|{#weak-ordering}|
+|`std::partial_ordering`|{#partial-ordering}|
+```
 
 有了传送功能，可以方便地将复杂的元素放置在文档的其他位置，从而实现更灵活的布局，这在创建表格时非常有用。
 
 ## 流程图
 
 ::::{.columns}
-:::{.column}
+:::{.column width="50%"}
 ````markdown
 <!-- 注意大括号，这里需要用到属性语法 -->
-```{mermaid width="300px"}
+```{mermaid .center height="300px"}
 graph TD
     A[开始] --> B{是否满足条件？}
     B -- 是 --> C[执行操作]
@@ -392,8 +394,8 @@ graph TD
 ```
 ````
 :::
-:::{.column}
-```{mermaid width="300px"}
+:::{.column width="50%"}
+```{mermaid .center height="40vh"}
 graph TD
     A[开始] --> B{是否满足条件？}
     B -- 是 --> C[执行操作]
@@ -402,6 +404,40 @@ graph TD
 ```
 :::
 ::::
+
+以这样的方式创建的流程图是无法显示标题的，要想为流程图指定标题，需要借助于一个图片 URL 置空的插图元素，并在定义流程图时指定 `data-override-image` 属性为插图元素的 `id`（通过属性语法定义）。这样，流程图创建后，会覆盖插图元素：
+
+::::{.columns}
+:::{.column width="50%"}
+````markdown
+```{mermaid .center data-override-image="flowchart"}
+graph TD
+    A[开始] --> B{是否满足条件？}
+    B -- 是 --> C[执行操作]
+    B -- 否 --> D[结束]
+    C --> D
+```
+
+![$ABCD$ `flowchart`](){#flowchart}
+````
+:::
+
+:::{.column width="50%"}
+```{mermaid data-override-image="flowchart"}
+graph TD
+    A[开始] --> B{是否满足条件？}
+    B -- 是 --> C[执行操作]
+    B -- 否 --> D[结束]
+    C --> D
+```
+
+![$ABCD$ `flowchart`](){#flowchart .center height="40vh"}
+:::
+::::
+
+::: {.callout-important}
+需要注意的是，在流程图元素中指定的 `width`、`height` 属性对应于渲染得到的原图（SVG 格式）大小，而在插图元素中指定的 `width`、`height` 是缩放大小。
+:::
 
 ## 图片增强
 
@@ -459,10 +495,10 @@ footnotes-location: footnotes
 
 [@shao2024explore]  探索了 xxx
 
-当鼠标悬停在引用链接上时，将会显示引用的详细信息。默认情况下，不会为引用生成单独的章节，若要列出引用的内容，可以在文档元信息中填写 `references-location: references` 并创建一个容器，将其 id 设置为 `references` 即可自动生成参考文献列表（`references` 根据需要进行修改）：
+当鼠标悬停在引用链接上时，将会显示引用的详细信息。默认情况下，不会为引用生成单独的章节，若要列出引用的内容，可以在文档元信息中填写 `bibliography-location: references` 并创建一个容器，将其 id 设置为 `references` 即可自动生成参考文献列表（`references` 根据需要进行修改）：
 
 ```yaml
-references-location: references
+bibliography-location: references
 ```
 
 ```markdown

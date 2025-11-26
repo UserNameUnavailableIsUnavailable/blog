@@ -1,0 +1,20 @@
+---
+title: MESI 缓存一致性协议
+---
+
+MESI 缓存一致性协议（MESI Cache Coherence Protocol）是一种用于多处理器系统中缓存一致性维护的协议。MESI 是 Modified、Exclusive、Shared 和 Invalid 四种缓存行状态的首字母缩写。MESI 协议由 MSI 协议发展而来，在原有的基础上引入了新的 Exclusive 状态，以提高缓存命中率和系统性能。
+
+MSI 协议就是一般的计算机体系结构中介绍的缓存一致性协议，通过下述三种状态来维护缓存一致性：
+
+- Invalid：缓存行无效，这是缓存行的初始状态。
+- Shared：缓存行被多个处理器共享，且与主存中的数据一致。在 Shared 状态下，从主存中加载数据可通过直接读取缓存行来完成，实现加速效果。
+- Modified / Dirty / Exclusive：缓存中的缓存行被修改，且与主存中的数据不一致。这时，其他处理器的缓存行必须被标记为 Invalid，以确保数据一致性。
+
+针对读写过程中可能发生的不同情况，MSI 协议定义了如下的状态转换规则：
+
+- On read miss：如果缓存行处于 Invalid 状态，处理器会向总线发送读请求，从主存中读取数据并将其加载到缓存中，同时将缓存行的状态设置为 Shared。
+- On write miss：如果缓存行处于 Invalid 或 Shared 状态，处理器会向总线发送写请求，其他处理器会将其缓存行状态设置为 Invalid，然后处理器从主存中读取数据，并将缓存行状态设置为 Modified。
+- On read hit：如果缓存行处于 Shared 或 Modified 状态，处理器可以直接读取数据。
+- On write hit：
+    - 如果缓存行处于 Modified 状态，处理器可以直接写入数据。
+    - 如果缓存行处于 Shared 状态，处理器会向总线发送写请求，其他处理器会将其缓存行状态设置为 Invalid，然后处理器将缓存行状态设置为 Modified。

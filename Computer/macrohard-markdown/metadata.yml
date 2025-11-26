@@ -5,7 +5,9 @@ sidebar:
     - title: Macrohard Markdown 博客/幻灯片生成工具
       href: index.html
       children:
-      - title: "博客效果展示"
+      - title: 博客效果展示
         href: blog.html
-      - title: "幻灯片效果展示"
+      - title: 双栏排版示例
+        href: double-column.html
+      - title: 幻灯片效果展示
         href: presentation.html

@@ -1,0 +1,9 @@
+sidebar:
+  children:
+  - title: 返回
+    href: ../index.html
+  - title: 具体数学笔记
+    href: index.html
+    children:
+    - title: 递归问题
+      href: 1-recurrent-problems.html

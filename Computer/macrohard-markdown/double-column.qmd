@@ -1,0 +1,43 @@
+---
+title: 双栏排版示例{.center}
+---
+
+::::{.columns .center}
+:::{.column}
+田所浩二^1^
+:::
+:::{.column}
+远野^1^
+:::
+:::{.column}
+淳平^2^
+:::
+:::{.column}
+我修院^2^
+:::
+:::{.column}
+德川^2^
+:::
+::::
+
+::::{.columns .center}
+:::{.column}
+<ruby>下北沢<rt>しもきたざわ</rt></ruby>バイオガス<ruby>研究所<rt>けんきゅうじょ</rt></ruby>^1^
+:::
+:::{.column}
+会員制レストラン株式会社^2^
+:::
+::::
+
+::::{.columns}
+:::{.column}
+## 114514
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis congue eget eros non finibus. In nulla ante, vulputate vel lacus quis, sodales consequat eros. Vivamus in eros orci. Nunc tincidunt turpis eros. Integer mattis augue nisi, in mattis metus tempor id. Maecenas vestibulum laoreet mi, id cursus nulla varius vitae.
+:::
+:::{.column}
+## 1919810
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis congue eget eros non finibus. In nulla ante, vulputate vel lacus quis, sodales consequat eros. Vivamus in eros orci. Nunc tincidunt turpis eros. Integer mattis augue nisi, in mattis metus tempor id. Maecenas vestibulum laoreet mi, id cursus nulla varius vitae.
+:::
+::::
