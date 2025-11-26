@@ -312,3 +312,69 @@ int main (int argc, char *argv[]) {
 ### 异常
 
 析构函数 **严禁** 抛出异常，任何析构函数必须标记为 `noexcept`{.language-cpp}。
+
+## 底层实现分析
+
+除了类中的静态函数，其他所有的成员函数以及构造函数、析构函数实际上都包含了一个隐藏的 `this`{.language-cpp} 指针参数，指向调用该成员函数的对象。
+
+```cpp
+class Foo {
+public:
+    Foo(int number) : number(number) {};
+private:
+    int number;
+};
+
+int main() {
+    Foo foo;
+}
+```
+
+使用 `clang++ -S -emit-llvm foo.cpp -o foo.ir` 生成中间表示 `foo.ir`，可以看到 `Foo` 的构造函数实际上被转换为如下形式：
+
+```llvm {code-line-numbers="13,17-28"}
+; ModuleID = 'foo.cpp'
+source_filename = "foo.cpp"
+target datalayout = "e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-windows-msvc19.44.35220"
+
+%class.Foo = type { i32 }
+
+$"??0Foo@@QEAA@H@Z" = comdat any
+
+; Function Attrs: mustprogress noinline norecurse optnone uwtable
+define dso_local noundef i32 @main() #0 {
+  %1 = alloca %class.Foo, align 4
+  %2 = call noundef ptr @"??0Foo@@QEAA@H@Z"(ptr noundef nonnull align 4 dereferenceable(4) %1, i32 noundef 114514)
+  ret i32 0
+}
+
+; Function Attrs: mustprogress noinline nounwind optnone uwtable
+define linkonce_odr dso_local noundef ptr @"??0Foo@@QEAA@H@Z"(ptr noundef nonnull returned align 4 dereferenceable(4) %0, i32 noundef %1) unnamed_addr #1 comdat align 2 {
+  %3 = alloca i32, align 4
+  %4 = alloca ptr, align 8
+  store i32 %1, ptr %3, align 4
+  store ptr %0, ptr %4, align 8
+  %5 = load ptr, ptr %4, align 8
+  %6 = getelementptr inbounds %class.Foo, ptr %5, i32 0, i32 0
+  %7 = load i32, ptr %3, align 4
+  store i32 %7, ptr %6, align 4
+  ret ptr %5
+}
+
+attributes #0 = { mustprogress noinline norecurse optnone uwtable "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
+attributes #1 = { mustprogress noinline nounwind optnone uwtable "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
+
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4}
+
+!0 = !{i32 1, !"wchar_size", i32 2}
+!1 = !{i32 8, !"PIC Level", i32 2}
+!2 = !{i32 7, !"uwtable", i32 2}
+!3 = !{i32 1, !"MaxTLSAlign", i32 65536}
+!4 = !{!"clang version 19.1.5"}
+```
+
+`alloca`{.language-llvm} 指令用于在栈上分配内存，`call`{.language-llvm} 指令用于调用函数。
+可以看到，调用构造函数的过程实际上是现在栈上分配一块内存，然后将该内存地址作为隐藏的第一个参数传递给构造函数。
+`@"??0Foo@@QEAA@H@Z"`{.language-llvm} 即为 `Foo` 的构造函数，其中 `%0`{.language-llvm} 即为隐藏的 `this`{.language-cpp} 指针，指向正在被构造的 `Foo` 对象。构造函数内部，`%0`{.language-llvm}、`%4`{.language-llvm}、`%5`{.language-llvm} 均为对象的起始地址，通过偏移访问成员变量。`getelementptr`{.language-llvm} 指令用于计算成员变量的地址偏移，随后由对象的基址加上偏移访问成员变量 `number` 并初始化。
