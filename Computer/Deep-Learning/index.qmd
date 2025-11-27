@@ -1,0 +1,7 @@
+---
+title: 炼丹
+---
+
+## 参考资料
+
+- [Dive into Deep Learning](https://d2l.ai/)

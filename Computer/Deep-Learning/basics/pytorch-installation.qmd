@@ -1,0 +1,31 @@
+---
+title: PyTorch 基础
+---
+
+## 环境准备
+
+首先，前往 <https://pytorch.org> 下载环境。
+环境隔离是良好的习惯，应该善用 `conda` 提供的虚拟环境功能实现开发环境的隔离。
+
+```powershell
+conda create -p ./.venv python=3.10
+conda activate ./.venv
+# 需要使用 PyTorch 官网提供的下载命令
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+```
+
+一般常用如下的命令导入 PyTorch 的包：
+
+```python
+import torch
+import torchvision
+import torchvision.transforms as transforms
+```
+
+激活环境后进入 Python 环境，通过如下命令验证安装：
+
+```python
+import torch
+print(torch.cuda.is_available())
+```
+若输出 `True`{.language-python}，则说明环境成功安装。
