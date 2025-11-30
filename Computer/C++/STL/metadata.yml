@@ -1,5 +1,5 @@
 sidebar:
-  back: ../index.html
+  back: ../index.htm
   children:
   - title: C++ STL
     href: index.html
