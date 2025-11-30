@@ -16,7 +16,7 @@ sub rsp, 16 * N
 enter 16 * N, 0
 ```
 
-[^1]: [<code>enter</code> 指令与标准 prolog 的性能差异](https://stackoverflow.com/a/5964507)
+[^1]: [`enter` 指令与标准 prolog 的性能差异](https://stackoverflow.com/a/5964507){target="_blank"}
 
 
 **Epilog** 则指从当前函数返回时清理栈帧的区域。

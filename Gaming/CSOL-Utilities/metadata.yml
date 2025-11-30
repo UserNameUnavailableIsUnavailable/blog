@@ -1,7 +1,6 @@
 sidebar:
+  back: ../index.html
   children:
-  - title: 返回
-    href: ../index.html
   - title: CSOL 集成工具开发者文档
     href: index.html
     children:

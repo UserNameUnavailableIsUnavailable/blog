@@ -1,7 +1,6 @@
 sidebar:
+  back: ../index.html
   children:
-  - title: 返回
-    href: ../index.html
   - title: x86_64 汇编
     href: index.html
     children:

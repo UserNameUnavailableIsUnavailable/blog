@@ -1,7 +1,6 @@
 sidebar:
+  back: ../index.html
   children:
-  - title: 返回
-    href: ../index.html
   - title: C++ 琐碎问题记录
     href: index.html
     children:

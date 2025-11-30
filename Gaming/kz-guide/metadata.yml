@@ -1,7 +1,6 @@
 sidebar:
+  back: ../index.html
   children:
-  - title: 返回
-    href: ../index.html
   - title: KZ 教程
     href: index.html
   - title: 准备工作

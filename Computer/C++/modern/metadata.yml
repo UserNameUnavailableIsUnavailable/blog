@@ -1,7 +1,6 @@
 sidebar:
+  back: ../index.html
   children:
-    - title: 返回
-      href: ../index.html
     - title: 现代 C++
       href: index.html
       children:

@@ -1,8 +1,7 @@
 sidebar:
+  back: ../index.html
   children:
-  - title: 返回
-    href: /
   - title: 思考
-    href: /thinking/index.html
+    href: index.html
   - title: "2025"
-    href: /thinking/2025/index.html
+    href: 2025/index.html

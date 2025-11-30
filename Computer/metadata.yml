@@ -1,6 +1,5 @@
 sidebar:
+  back: ../index.html
   children:
-  - title: 返回
-    href: ../index.html
   - title: 计算机技术
     href: index.html

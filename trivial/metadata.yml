@@ -1,25 +1,25 @@
-  sidebar:
+
+sidebar:
+  back: ../index.html
+  children:
+  - title: 琐碎问题记录
+    href: /trivial/index.html
     children:
-    - title: 返回
-      href: /index.html
-    - title: 琐碎问题记录
-      href: /trivial/index.html
+    - title: "2025"
       children:
-      - title: "2025"
-        children:
-        - title: Chocolatey 安装
-          href: /trivial/2025/chocolatey/index.html
-        - title: Microsoft PC Manager 引起的性能问题
-          href: /trivial/2025/Bullshit-Microsoft-PC-Manager/index.html
-        - title: 解决 “blink.cmp  No fuzzy matching library found!”
-          href: /trivial/2025/blink_cmp-prebuilt-binaries-issue/index.html
-        - title: 使用 Vim 进行二进制文件编辑时的问题
-          href: /trivial/2025/vim-binary-file-editing-issue/index.html
-        - title: "调查：PowerShell 对外部程序输出数据的处理方式"
-          href: /trivial/2025/external-commands-in-pwsh/index.html
-        - title: Linux 修改登录 shell 为 PowerShell
-          href: /trivial/2025/change-login-shell-to-pwsh.html
-        - title: 让 fcitx5 更符合 Windows 使用习惯
-          href: /trivial/2025/fcitx-customization/index.html
-        - title: 由 Windows 休眠导致 Linux 无法挂载 NTFS 分区的问题
-          href: /trivial/2025/windows-hibernation-ntfs-mount-issue.html
+      - title: Chocolatey 安装
+        href: /trivial/2025/chocolatey/index.html
+      - title: Microsoft PC Manager 引起的性能问题
+        href: /trivial/2025/Bullshit-Microsoft-PC-Manager/index.html
+      - title: 解决 “blink.cmp  No fuzzy matching library found!”
+        href: /trivial/2025/blink_cmp-prebuilt-binaries-issue/index.html
+      - title: 使用 Vim 进行二进制文件编辑时的问题
+        href: /trivial/2025/vim-binary-file-editing-issue/index.html
+      - title: "调查：PowerShell 对外部程序输出数据的处理方式"
+        href: /trivial/2025/external-commands-in-pwsh/index.html
+      - title: Linux 修改登录 shell 为 PowerShell
+        href: /trivial/2025/change-login-shell-to-pwsh.html
+      - title: 让 fcitx5 更符合 Windows 使用习惯
+        href: /trivial/2025/fcitx-customization/index.html
+      - title: 由 Windows 休眠导致 Linux 无法挂载 NTFS 分区的问题
+        href: /trivial/2025/windows-hibernation-ntfs-mount-issue.html

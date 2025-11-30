@@ -1,14 +1,13 @@
   sidebar:
+    back: ../index.html
     children:
-      - title: 返回
-        href: /index.html
       - title: 最优化理论
-        href: /optimization/index.html
+        href: index.html
         children:
         - title: 基本概念
-          href: /optimization/basic-concepts/index.html
+          href: basic-concepts/index.html
         - title: 常用定理、结论
-          href: /optimization/useful-tools/index.html
+          href: useful-tools/index.html
         - title: Lagrange 法
-          href: /optimization/lagrangian-methods/index.html
+          href: lagrangian-methods/index.html
 

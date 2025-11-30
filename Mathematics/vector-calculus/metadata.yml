@@ -1,7 +1,6 @@
   sidebar:
+    back: ../index.html
     children:
-    - title: Back
-      href: /index.html
     - title: Vector Calculus
       href: index.html
       children:

@@ -1,7 +1,6 @@
 sidebar:
+  back: ../index.html
   children:
-    - title: 返回
-      href: ../index.html
     - title: Macrohard Markdown 博客/幻灯片生成工具
       href: index.html
       children:
