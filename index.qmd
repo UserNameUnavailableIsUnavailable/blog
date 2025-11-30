@@ -5,7 +5,7 @@ format: html
 sidebar: null
 ---
 
-- [计算机科学与技术](Computer/)
+- [计算机](Computer/)
 - [数学](Mathematics/)
 - [游戏](Gaming/)
 - [琐碎记录](/trivial/)
