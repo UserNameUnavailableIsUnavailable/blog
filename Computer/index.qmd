@@ -4,26 +4,21 @@ title: 计算机技术
 
 我们必须承认，时至今日，学会一门编程语言便能糊口的时代一去不返了，但编程语言本身仍然是建构大厦所需的基本材料。学习某个具体的技术最终的目的是实践一些抽象的想法。
 
-## 一些“基础”
+## 笔记
 
 - [C++](C++/)
 - [Rust](rust/)
 - [x86_64 汇编](x86_64-assembly/)
 - [Java](java/)
 - [前端](frontend/)
-
-## 理论
-
 - [操作系统](operating-system/)
 - [CSAPP](CSAPP/)
 - [具体数学](concrete-mathematics/)
-
-## 干活
-
-- [Linux](linux/)
+- [深度学习](deep-learning/)
+- [Linux 开发](Linux-development//)
 - [Win32 开发](Win32-development/)
 
-## 项目实践
+## 实践
 
 我个人主张只做“实用”的项目，而非像“xx 外卖”那样毫无意义的练手项目，做完就扔，且没有任何实用价值。
 

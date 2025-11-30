@@ -7,3 +7,5 @@ sidebar:
     children:
     - title: "`emplace_back` 与 `push_back`"
       href: emplace_back-vs-push_back.html
+    - title: "理解 `shared_ptr` 与 `weak_ptr`"
+      href: shared_ptr-and-weak_ptr/index.html

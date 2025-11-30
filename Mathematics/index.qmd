@@ -1,0 +1,7 @@
+---
+title: 数学
+---
+
+- [最优化](optimization/)
+- [向量微积分](vector-calculus/)
+- [概率论](probability/)

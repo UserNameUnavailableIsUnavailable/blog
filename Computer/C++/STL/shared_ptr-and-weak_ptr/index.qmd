@@ -1,0 +1,106 @@
+---
+title: 理解 `shared_ptr` 与 `weak_ptr`
+---
+
+## 引用计数机制
+
+在 MSVC 的实现中，除 `unique_ptr` 外的智能指针都继承自 `_Ptr_base` 这个类：
+
+```cpp
+template <class _Ty>
+class _Ptr_base { // base class for shared_ptr and weak_ptr
+// ...
+private:
+    element_type* _Ptr{nullptr};
+    _Ref_count_base* _Rep{nullptr};
+};
+```
+
+其中，`_Ptr` 即托管的原始指针，`_Rep` 则是引用计数控制块，其定义如下：
+
+```cpp
+class __declspec(novtable) _Ref_count_base { // common code for reference counting
+    // ...
+    _Atomic_counter_t _Uses  = 1;
+    _Atomic_counter_t _Weaks = 1;
+};
+```
+
+![引用计数控制块示意图](assets/_Ptr_base.drawio.svg){.center data-style-background-color="white" data-style-color="black"}
+
+其中，`_Uses` 称为“强引用计数”，表示有多少个 `shared_ptr` 实例共享对同一对象的所有权；`_Weaks` 称为“弱引用计数”，表示有多少个 `weak_ptr` 实例观察同一对象。
+
+构造 `shared_ptr` 实例时，会创建上面的引用计数块。当 `shared_ptr` 实例发生复制时，则调用下面的方法，增加引用计数并与 `_Other` 共享指针和引用计数块：
+
+```cpp
+template <class _Ty2>
+void _Copy_construct_from(const shared_ptr<_Ty2>& _Other) noexcept {
+    // implement shared_ptr's (converting) copy ctor
+    _Other._Incref();
+
+    _Ptr = _Other._Ptr;
+    _Rep = _Other._Rep;
+}
+```
+
+## 循环引用问题
+
+由于 `shared_ptr` 通过引用计数来管理资源的释放，因此当两个或多个对象相互持有 `shared_ptr` 时，就会导致循环引用问题，进而引发内存泄漏。例如：
+
+```cpp
+#include <atomic>
+#include <iostream>
+#include <memory>
+
+struct Foo
+{
+    static std::atomic_int counter;
+    int id;
+    std::shared_ptr<Foo> ref;
+    Foo() : id(counter++)
+    {
+        std::cout << "Object " << id << " created" << std::endl;
+    };
+    ~Foo()
+    {
+        std::cout << "Object " << id << " destroyed" << std::endl;
+    }
+};
+
+std::atomic_int Foo::counter = 0;
+
+int main (int argc, char *argv[]) {
+    auto A = std::make_shared<Foo>();
+    auto B = std::make_shared<Foo>();
+    B->ref = A;
+    A->ref = B;
+    return 0;
+}
+```
+
+运行上述代码，我们会发现两个实例的析构函数并没有被调用：
+
+```plain
+Object 0 created
+Object 1 created
+```
+
+在创建 `A` 和 `B` 并相互引用后，此时对象之间的引用关系如下（注意区分智能指针对象本身以及智能指针所引用的匿名对象）：
+
+![循环引用示意图](assets/problem.drawio.svg){.center data-style-background-color="white" data-style-color="black"}
+
+`A` 和 `B` 在作用域结束销毁时，分别将引用控制块中的 `_Uses` 计数减一，但并未归零，因此析构函数不会被调用。
+`A` 与 `B` 析构时正确的释放了其持有的引用计数，而相互引用彼此的 `ObjectA` 和 `ObjectB` 则出现了一个自我指涉（self-reference）的圈：要释放 `ObjectA`，必须先释放 `ObjectB`，而要释放 `ObjectB`，又必须先释放 `ObjectA`。对于这个圈中的任何一方而言，其必须释放其自身。从表面上看，要想解决这个问题，只需要将其中一方的 `_Uses` 减 1 即可打破这个圈。
+
+我们考虑地更深入一些，`shared_ptr` 从本质上讲，是将自己的生命周期管理托付给其他实体，也就是所有权的出让。隐含在所有权出让中的还有一种“主从关系”，请考虑这样几个现实的例子：
+
+- 公司的老板 B 与员工 A 关系，B 可以解雇 A，但 A 不能解雇 B。
+- 恐怖分子 B 与人质 A 关系，B 可以处决 A，但 A 不能处决 B。
+
+由于上述主从关系的存在，`B->ref = A;`{.language-cpp} 后，`ObjectA` 的生命周期控制权出让给了 `ObjectB`，即 `ObjectB` 是“主”，`ObjectA` 是“从”，后续的 ``A->ref = B;`{.language-cpp} 则违反了上述主从关系。所以，更直白地讲，主从关系从本质上就是一种权限等级的划分，在同一关系（如例子中生命周期控制关系）下，低权限的实体不允许反过来控制高权限实体。
+
+## 主从关系的弱化
+
+我们要判断一个对象的“死活”状态，并不非得要拥有对其生命周期的控制权。在这种理念下，出现了 `weak_ptr`，这种指针实际上是对上述主从关系（权限）的一种弱化，其目的不在于控制对象的生命周期，而只是 **观察** 对象是否还有效。因此，`weak_ptr` 并不拥有对象的所有权，也不负责对象的销毁。在必要时，`weak_ptr` 可以通过 `lock` 实现权限的提升，拥有对象的所有权。
+
+那么，`_Weaks` 计数存在的意义何在呢？从编程角度看，`__Ptr_base` 中，`_Rep` 本质上也是一个裸指针，其目的在于让各个智能指针统一使用一份引用控制块。引用控制块本身自然也需要自动析构。从实体权限的角度看，`_Uses` 标记了有多少实体拥有对象的所有权，而 `_Weaks` 则标记了有多少实体在观察该对象（`shared_ptr` 当然也有观察的权限）。只有当 `_Uses` 和 `_Weaks` 都归零时，引用控制块才会被销毁。

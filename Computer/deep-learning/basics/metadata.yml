@@ -1,0 +1,13 @@
+sidebar:
+  children:
+  - title: 返回
+    href: ../index.html
+  - title: 基础
+    href: basics/index.html
+    children:
+    - title: PyTorch 环境搭建
+      href: basics/pytorch-setup.html
+    - title: 张量
+      href: basics/tensor.html
+    - title: 变换
+      href: basics/transform.html

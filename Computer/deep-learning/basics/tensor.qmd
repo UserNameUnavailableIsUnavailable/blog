@@ -7,7 +7,7 @@ title: 张量
 张量（Tensor）是深度学习中的基本数据结构，可以看做是多维数组的推广。标量（scalar）、行向量（row vector）、矩阵（matrix）都是张量的特例：
 
 - 标量：0 维的张量，例如 $[5]$，所属空间为 $\mathbb{R}$；
-- 向量：1 维的张量，例如 $[1, 2, 3]$，所属空间为 $\mathbb{R}^3$；
+- 向量：1 维的张量，例如 $[1, 2, 3]^\mathsf{T}$，所属空间为 $\mathbb{R}^3$；
 - 矩阵：2 维的张量，例如 $\begin{bmatrix}1 & 2 & 3 \\ 4 & 5 & 6\end{bmatrix}$，所属空间为 $\mathbb{R}^{2 \times 3}$；
 
 从数学视角来看，一个 $\mathbb{R}^{2 \times 3}$ 张量空间中的张量是由两个张量空间 $$\mathbb{R}^3$ 按序排列形成的。在 PyTorch 中，用数组 $[2, 3]$ 来标记张量的尺寸。
@@ -31,3 +31,11 @@ x = torch.Tensor([[1,2,3],[4,5,6]])
 x.size()
 x.stride()
 ```
+
+## 微分
+
+考虑多元函数 $\mathbf{f}: \mathbb{R}^m \mapsto \mathbb{R}^n$，它一共有 $m$ 个偏导数，每个偏导数都有 $n$ 个分量。若将这些偏导数从左到右依次排列成一个矩阵，我们就得到了雅可比矩阵（Jacobian Matrix）。在这个多元函数可导条件满足的情况下，Jacobian 矩阵就是这个函数的导数。可阅读 [Derivatives](/Mathematics/vector-calculus/derivatives.html) 进一步了解相关理论。
+
+::: {.callout-important}
+在多元函数的情形下，无论是偏导数还是导数，实际上已经不再是“数”，而是张量。
+:::

@@ -5,27 +5,7 @@ format: html
 sidebar: null
 ---
 
-## 计算机科学与技术
-
-[这里](/Computer/) 汇总了计算机学习笔记和项目实践。
-
-## 游戏
-
-- [KZ 教程](/Gaming/kz-guide/)
-- [CSOL 集成工具](/Gaming/CSOL-Utilities/)
-
-## 数学
-
-- [概率论](/probability/)
-- [向量微积分](/vector-calculus/)
-- [最优化方法](/optimization/)
-
-## 炼丹
-
-- [炼丹速成](/Deep-Learning-Crash-Course/)
-- [数字图像处理（英）](/Digital-Image-Processing/)
-- [模式识别与机器学习](/machine-learning/)
-
-## 琐碎记录
-
+- [计算机科学与技术](Computer/)
+- [数学](Mathematics/)
+- [游戏](Gaming/)
 - [琐碎记录](/trivial/)
