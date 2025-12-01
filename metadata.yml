@@ -2,10 +2,11 @@ website:
   name: Macrohard Blog
   homepage: /
   description: "Macrohard Blog - A blog about technology, programming, and more."
-  logo: /assets/favicon.ico
+  logo: /assets/logo.drawio.svg
 format: html
 title-numbering: true
 csl: /assets/ieee.csl
-footer: /footer.qmd
-favicon: /assets/favicon.ico
+footer: /footer.rmd
+favicon: /assets/favicon.drawio.svg
 lang: zh
+cdn: https://cdn.macrohard.fun/assets/node_modules/

@@ -1,11 +1,10 @@
 sidebar:
+  back: ../index.html
   children:
-  - title: 返回
-    href: /
   - title: 模式识别与机器学习
-    href: /machine-learning/index.html
+    href: index.html
     children:
       - title: 概率分布
-        href: /machine-learning/probability-distributions/
+        href: probability-distributions/
       - title: 线性分类模型
-        href: /machine-learning/linear-models-for-classification/
+        href: linear-models-for-classification/

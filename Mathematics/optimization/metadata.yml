@@ -1,7 +1,7 @@
   sidebar:
     back: ../index.html
     children:
-      - title: 最优化理论
+      - title: 最优化
         href: index.html
         children:
         - title: 基本概念
