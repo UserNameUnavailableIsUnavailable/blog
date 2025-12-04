@@ -1,20 +1,10 @@
 ---
-title: Macrohard Markdown 博客/幻灯片生成工具{.center}
-work-source: "[Macrohard](https://macrohard.fun/)"
+title: Macrohard Markdown 博客/幻灯片生成工具介绍{.center}
 citations: 114514 citations
 format: html
-author:
-    - Foo^1^
-    - Bar^2^
-    - Baz^2^
-    - Qux^3^
-institute:
-    - Ipsum^1^
-    - Dolor^2^
-    - Sit^3^
 bibliography: references.bib
-footnotes-location: footnotes
-bibliography-location: references
+footnote-container: footnotes
+reference-container: references
 ---
 
 ## 概述
@@ -463,10 +453,10 @@ graph TD
 
 [^FootnoteExample]: 这是脚注的内容。
 
-当鼠标悬停在脚注链接上时，将会显示脚注的内容。默认情况下，脚注内容将放置在页面底端。若要自定义脚注内容显示的位置，可以在文档元信息中填写 `footnotes-location: footnotes` 并创建一个容器，将其 id 设置为 `footnotes` 即可自动生成脚注列表（`footnotes` 根据需要进行修改）。
+当鼠标悬停在脚注链接上时，将会显示脚注的内容。默认情况下，脚注内容将放置在页面底端。若要自定义脚注内容显示的位置，可以在文档元信息中填写 `footnote-container: footnotes` 并创建一个容器，将其 id 设置为 `footnotes` 即可自动生成脚注列表（`footnotes` 根据需要进行修改）。
 
 ```yaml
-footnotes-location: footnotes
+footnote-container: footnotes
 ```
 
 ```markdown
@@ -495,10 +485,10 @@ footnotes-location: footnotes
 
 [@shao2024explore]  探索了 xxx
 
-当鼠标悬停在引用链接上时，将会显示引用的详细信息。默认情况下，不会为引用生成单独的章节，若要列出引用的内容，可以在文档元信息中填写 `bibliography-location: references` 并创建一个容器，将其 id 设置为 `references` 即可自动生成参考文献列表（`references` 根据需要进行修改）：
+当鼠标悬停在引用链接上时，将会显示引用的详细信息。默认情况下，不会为引用生成单独的章节，若要列出引用的内容，可以在文档元信息中填写 `reference-container: references` 并创建一个容器，将其 id 设置为 `references` 即可自动生成参考文献列表（`references` 根据需要进行修改）：
 
 ```yaml
-bibliography-location: references
+reference-container: references
 ```
 
 ```markdown

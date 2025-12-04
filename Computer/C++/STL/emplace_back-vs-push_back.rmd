@@ -69,13 +69,14 @@ reference emplace_back( Args&&... args ); // Since C++ 17
 
 ## 源码分析
 
-在 MSVC 的 STL 实现中， `void push_back(T&& val)`{.language-cpp} 与 `void emplace_back(Args&&... args)`{.language-cpp} 在形式上并没有本质区别。
-关键性的差异在于 `val` 是一个已经构造好的对象，而 `args` 是构造函数接收的参数（这个参数当然也可以是一个已经构造好的对象，这时 `push_back` 和 `emplace_back` 就没有区别了）。
+在 MSVC 的 STL 实现中。`void push_back(T&& val)`{.language-cpp} 本质上是 `void emplace_back(T&& val)`{.language-cpp} 的一层封装。
 
-::: {.callout-important}
-从这里可以直观看出，这两个方法的性能差异并不在于方法的实现本身，而在于方法调用前是否产生了冗余的构造。
-随后，`push_back` 需要把这个冗余的对象再复制到指定位置，而 `emplace_back` 则直接在指定位置进行构造。
-:::
+```cpp
+_CONSTEXPR20 void push_back(_Ty&& _Val) {
+    // insert by moving into element at end, provide strong guarantee
+    _Emplace_one_at_back(_STD move(_Val));
+}
+```
 
 ```cpp
 template <class... _Valty>
@@ -88,13 +89,14 @@ _CONSTEXPR20 _CONTAINER_EMPLACE_RETURN emplace_back(_Valty&&... _Val) {
     (void) _Result;
 #endif // ^^^ !_HAS_CXX17 ^^^
 }
-
-
-_CONSTEXPR20 void push_back(_Ty&& _Val) {
-    // insert by moving into element at end, provide strong guarantee
-    _Emplace_one_at_back(_STD move(_Val));
-}
 ```
+
+关键性的差异在于 `push_back` 接收的是一个已经构造好的对象，然后把调用复制构造函数或移动构造函数将其放到容器末尾，而 `emplace_back` 接收的是构造函数的参数（这个参数当然也可以是一个已经构造好的对象，这时 `push_back` 和 `emplace_back` 就没有区别了）。
+
+::: {.callout-important}
+从这里可以直观看出，这两个方法的性能差异并不在于方法的实现本身，而在于方法调用前是否产生了冗余的构造。
+随后，`push_back` 需要把这个冗余的对象再复制到指定位置，而 `emplace_back` 则直接在指定位置进行构造。
+:::
 
 调用 `_Emplace_one_at_back` 后，并在容量充足的情况下（`_Mylast` 指向下个插入位置，`_My_data._Myend` 指向容器末尾，因此二者相等时说明容器已满）调用 `_Emplace_back_with_unused_capacity` 插入新元素。
 

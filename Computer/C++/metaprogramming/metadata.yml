@@ -3,3 +3,5 @@ sidebar:
   children:
   - title: C++ 元编程
     href: index.html
+  - title: "`type_identity`"
+    href: type_identity.html

@@ -1,0 +1,106 @@
+---
+title: "`type_identity`"
+---
+
+C++ 20 引入的 `std::type_identity` 是一个简单的类型萃取工具，用于阻止模板参数的类型推导。
+
+## 例子
+
+考虑如下的模板函数 `invoke_callback`：
+
+```cpp
+#include <functional>
+
+template <typename T>
+void invoke_callback(std::function<void (T) callback, T value)
+{
+    callback(value);
+}
+
+int main() {
+    invoke_callback([](int x) {}, 100);
+}
+```
+
+编译上述代码会报错：
+
+```plain
+foo.cpp:13:5: error: no matching function for call to 'invoke_callback'
+   13 |     invoke_callback([] (int) {}, 100);
+      |     ^~~~~~~~~~~~~~~~
+foo.cpp:6:6: note: candidate template ignored: could not match 'std::function<void (T)>' against '(lambda at foo.cpp:13:22)'
+    6 | void invoke_callback(std::function<void (T)> callback, T v)
+      |      ^
+1 error generated.
+```
+
+错误信息显示无法将 lambda 表达式匹配到 `std::function<void (T)>`{.language-cpp}。对于 `100` 这个参数，`T` 被推导为 `int`。于是，`callback` 的类型 `std::function<void (T)>`{.language-cpp} 实际上变成了 `std::function<void (int)>`{.language-cpp}。而编译器实际上拿到的 `callback` 类型是 lambda，与 `std::function<void (int)>`{.language-cpp} 并不匹配。
+
+乍一看有些反直觉，因为下面的代码是完全合法的：
+
+```cpp
+std::function<void (int)> func = [](int x) {};
+```
+
+这就涉及到模板编译过程中两条重要的规则：
+
+- 规则 1：对于同样的模板参数 `T`，如果其被用作多个参数的类型，**每个参数的类型推导是独立进行的**。
+- 规则 2：**模板参数类型推导和隐式类型转换不能同时发生。**
+
+由于模板参数的推导总是最先进行的，因此编译器会尝试由 lambda 表达式的类型去推导 `std::function<void (T)>`{.language-cpp} 中 `T`，此时由 lambda 到 `std::function` 的转换并没有发生，造成推导失败。因此，不论 `T` 实际是什么类型，lambda 表达式都无法匹配 `std::function<void (T)>`{.language-cpp}。报错中的 `std::function<void (int)>`{.language-cpp} 看起来是编译器已经从 lambda 推导出来 `T` 的实际类型，但实际上这从参数 `100` 推导得出的。编译无法通过的原因在于违背了规则 2。
+
+## 解决方法
+
+显然，编译器是能够从传入的参数正确推导出 `T` 的实际类型的，那么我们只需要告知编译器直接使用已经推导出的类型，即阻止独立类型推导。
+
+```cpp
+template <typename T>
+void invoke_callback(std::function<void (std::type_identity_t<T>)> callback, T value)
+{
+    callback(value);
+}
+
+int main()
+{
+    invoke_callback([](int x) {}, 100);
+}
+```
+
+这样，`std::type_identity_t<T>`{.language-cpp} 会直接使用已经推导出的 `T` 类型，这样，从 lambda 到 `std::function<void (int)>`{.language-cpp} 的隐式类型转换就可以顺利进行。
+
+我们可以将上述示例推广到更通用的情形：
+
+```cpp
+#include <iostream>
+#include <functional>
+
+template <typename... VA>
+// void invoke_callback(std::function<void (VA&&... va)> callback, VA&&... va) // 错误
+void invoke_callback(std::function<void (std::type_identity_t<VA>...)> callback, VA&&... va) // 正确
+{
+    callback(std::forward<VA>(va)...);
+}
+
+int main()
+{
+    invoke_callback([](int x, double y) {
+        std::cout << "x: " << x << ", y: " << y << std::endl;
+    }, 42, 3.14);
+}
+```
+
+## `type_identity` 实现
+
+STL 中 `std::type_identity`{.language-cpp} 的实现非常简单，如下所示：
+
+```cpp
+template <class T>
+struct type_identity {
+    using type = T;
+};
+template <class T>
+using type_identity_t = typename type_identity<T>::type;
+```
+
+其原理也很简单：`type_identity` 是一个模板结构体，其成员类型 `type` 就是模板参数 `T` 本身。通过 `type_identity_t` 别名模板，获取 `type_identity` 中的成员类型 `type`。
+这样，`std::type_identity_t<T>`{.language-cpp} 实际上就是 `T` 本身，但由于其被包裹在 `type_identity` 结构体中，编译器不会对其进行独立的类型推导，从而阻止了规则 1 的发生。
