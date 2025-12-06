@@ -7,11 +7,11 @@ title: vscode-neovim 插件的 `<C-q>` 问题
 
 按下 `<C-p>`，输入 `> keyboard`，分别找到默认的快捷键配置和用户的快捷键配置。
 
-![按键绑定配置文件](assets/keybindings.png)
+![按键绑定配置文件](assets/keybindings.avif){.center}
 
 打开默认的快捷键和用户快捷键配置，在默认快捷键配置中搜索 `ctrl+q`，然后在用户快捷键配置中把绑定的功能屏蔽。举例来说：
 
-![热键屏蔽方法](assets/block.png)
+![热键屏蔽方法](assets/block.avif){.center}
 
 对于上图来说，屏蔽方式就是在用户的 `keybinding.json` 文件中添加：
 
@@ -27,7 +27,7 @@ title: vscode-neovim 插件的 `<C-q>` 问题
 
 按照这种方式，在整个默认快捷键配置中搜索 `ctrl+q`，并在用户快捷键配置中进行屏蔽。需要注意，并不是所有包含 `ctrl+q` 的快捷键映射都需要屏蔽。举例来说，像 `ctrl+k ctrl+q` 表示先按 `<C-k>`，再按 `<C-q>`，这是没有必要屏蔽的；另外，`when` 字段表示快捷键映射发生的条件，若在进行编辑时此条件不满足也是不需要屏蔽的。
 
-![按键映射条件](assets/when.png)
+![按键映射条件](assets/when.avif){.center}
 
 ## Windows 解决方案
 

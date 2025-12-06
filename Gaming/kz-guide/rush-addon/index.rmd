@@ -4,17 +4,17 @@ title: 译：KZ-RUSH 长跳插件数据
 
 这篇文章介绍了在 KZ-Rush 官方服务器及局域网服务器所使用的插件（即 KZ-Rush 插件）长跳数据机制。文中提及的<b>地速（prestrafe）</b>假定您使用 USP、海豹短刀这类基础地速为 250 <em>u/s</em> 的武器。
 
-><b>译注</b>
-><br />
+>**译注**
+>
 ><b>地速（prestrafe，简称 pre）</b>：起跳后进行空中加速（strafe）前的地面速度，后文如无特别说明，均将其简称为地速。
 ><br />
-><b>u/s</b>：<b>units/s</b>，CS 中使用的长度单位为 <b>unit</b>，该单位实际上是<b>英寸</b>。CS 为美国开发的游戏，美国惯用英制长度单位。
+>*u/s*：<b>units/s</b>，CS 中使用的长度单位为 <b>unit</b>，该单位实际上是<b>英寸</b>。CS 为美国开发的游戏，美国惯用英制长度单位。
 
 ## 插件中的主要数据及加速数据
 
 让我们以一次成功的 CJ（Count Jump） 上 250 板子为例：
 
-![](./cj-250-block.png)
+![](./cj-250-block.avif){.center}
 
 主要数据（main stats）中的第一行是跳跃技巧的名称（图中的 `CountJump`）。在 HJ（High Jump）中，还会显示摩擦帧数 FF（Friction Frames），即所谓的边缘摩擦造成减速的帧数。顺带一提，你可以通过打开 <b>ShowPre</b> 功能（见后文）以在起跳瞬间查看 HJ 的 FF。
 
@@ -31,7 +31,7 @@ title: 译：KZ-RUSH 长跳插件数据
 ><br />
 >小跳和大跳均属于跳跃的范畴，有关小跳的原理参见文章<a href='https://blog.macrohard.fun/kz-guide/duck'>译：关于“下蹲”你不知道的事</a>
 
-![](strafe-stats.png)
+![](strafe-stats.avif){.center}
 
 加速数据（strafe stats）的每一列显示对应次数加速的信息。第一列是加速时按下的按键，第二列是加速和失速的差值（即实际获得的加速），第三列是失速的值。第四列是加速按键处于按下状态的帧数，最后一列是加速的效率（efficiency），以百分数表示。
 
@@ -49,11 +49,11 @@ $$\mathrm{efficiency}=\frac{加速值为正数的帧数}{本次加速占用的�
 
 在一次成功的跳跃中，加速数据的底端显示以下参数： <b>jof（jumpoff，即起跳点到当前板边的距离）</b>、<b>land（landing，着陆点到超过目标板边的距离）</b>、<b>block（板子的距离）</b>。
 
-![](lj-success.png)
+![](lj-success.avif){.center}
 
 在失败的跳跃中，<b>land</b> 参数被 <b>last</b>（着陆点到目标板边还差多少距离）所取代。
 
-![](lj-failure.png)
+![](lj-failure.avif){.center}
 
 除了 HUD 中的长跳数据，还有一些更详细的信息会输出到控制台中。比如，主要数据中有 <b>maxspeed</b>，即空中滑翔过程中达到的最大水平速度，而加速数据中同时输出加速的次数序号和加速按键，以及 efficiency、overlapps、desync 这三个参数。
 
@@ -106,7 +106,7 @@ DD 的颜色显示相较于 bhop 要更简洁明了：FOG 为 2 时是绿色，F
 
 成功的 Jump Bug 在玩家起身（stand-up）的同时起跳时发生，与此同时人物模型的中心距离地面高度为 36 ~ 38 <em>u</em>（即人物模型双脚离地距离小于 2 <em>u</em>）。此种情况下如果 KZ-Rush 长跳数据中打开 JB 数据显示（参阅<b>长跳设置菜单</b>中的打开菜单），您会看到以下的信息：
 
-![](jumpbug-success.png)
+![](jumpbug-success.avif){.center}
 
 我们可以看到 <b>distance</b>，指示坠落点与着陆点之间的高低差，以及 JB 时人物模型双脚与地面之间的剩余距离 <b>left</b>。如果您打开控制台，会看到这个：
 
@@ -122,7 +122,7 @@ Required Z: -668.000000 (+ 2.0)
 
 我们在起身的同时起跳，但是起跳的时机过早或者过晚会发生什么呢？这时就要引出 Jump Bug 练习器。在开关菜单（参阅<b>长跳设置菜单</b>）中打开或设定 `ljs_enable_jumpbug 2` 可以启用该功能。有了练习器，我们可以查看失败的 JB 数据：
 
-![](jumpbug-failure.png)
+![](jumpbug-failure.avif){.center}
 
 数据表明，我们提前了 4 帧，即比成功的 JB 提前了 37.19 <em>u</em> 起跳。控制台中有一个 Z 坐标，所需的范围以及我们能够进行成功 JB 的坐标（`Possible Z`）。
 
@@ -138,7 +138,7 @@ Possible Z: -666.968750 (4 frames later)
 
 由于我们是通过小跳坠落起始平台的，因而上述例子中的 JB 是可能的。但是如果我们通过常规大跳坠落平台，则不可能在这个高度进行 JB：
 
-![](jumpbug-impossible.png)
+![](jumpbug-impossible.avif){.center}
 
 如前所述，控制台中有更详细的信息：
 
@@ -188,7 +188,7 @@ Nearest Z2: -672.269897 (1 frame earlier)
 
 第一页设置：
 
-![](ljs-1.png)
+![](ljs-1.avif){.center}
 
 ### 1. Stats Mode（默认：Simple）
 
@@ -239,13 +239,13 @@ JumpOff 应该在哪种情况下显示在 HUD 中？
 
 第二页设置：
 
-![](ljs-2.png)
+![](ljs-2.avif){.center}
 
 ### 1. pre Menu
 
 <b>ShowPre</b> 打开时显示哪些地速：
 
-![](PreMenu.png)
+![](PreMenu.avif){.center}
 
 注意，如果您在小跳之前在地面上滞留了超过 10 帧，插件会将其视作小跳地速，若小于这个时长则视作 DD 地速。另外，菜单中的 <b>cj pre</b> 表示大跳而非小跳的地速。
 
@@ -253,7 +253,7 @@ JumpOff 应该在哪种情况下显示在 HUD 中？
 
 选择为哪些技巧显示数据：
 
-![](EnableMenu.png)
+![](EnableMenu.avif){.center}
 
 ### 3. LJ Sound（默认：关闭）
 
@@ -288,11 +288,11 @@ JumpOff 应该在哪种情况下显示在 HUD 中？
 
 默认情况下，局域网服务器的长跳榜单处于关闭状态（`ljs_top_enable 0`），武器速度榜单亦处于关闭状态（`ljs_top_weapon_enable 0`）。如果您开启他们，就可以打开 `/ljtop` 菜单：
 
-![](ljtop-menu.png)
+![](ljtop-menu.avif){.center}
 
 如果武器榜单也打开，菜单中的选项 <b>7. Choose Speed</b> （或聊天命令 `/weapontop`）将会显示选择武器速度的菜单。
 
-![](weapon-speed-menu.png)
+![](weapon-speed-menu.avif){.center}
 
 ## 长跳配置
 

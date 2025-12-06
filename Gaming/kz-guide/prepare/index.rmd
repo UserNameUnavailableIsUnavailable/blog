@@ -31,9 +31,9 @@ title: 准备工作
 
 CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认版本，需要将其切换到 legacy 版本。
 
-![](use_legacy_00.png)
+![](use_legacy_00.avif){.center}
 
-![](use_legacy_01.png)
+![](use_legacy_01.avif){.center}
 
 ## 开始之前
 
@@ -53,7 +53,7 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 正版 CS 中也可以通过 `Wait for vertical sync` 选项关闭。
 
-![](disable_vsync.png)
+![](disable_vsync.avif){.center}
 
 ### 原始鼠标输入
 
@@ -61,7 +61,7 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 正版 CS 中也可通过 `Raw mouse input` 选项开启。
 
-![](enable_rawinput.png)
+![](enable_rawinput.avif){.center}
 
 ### FPS 最大值
 
@@ -174,7 +174,7 @@ KZ average 水平地图包：<a href='https://macrohard.fun/downloads/2024/06/24
 
 然后，在游戏内点选 `allow custom addons` 即可使用地图包，不需要使用地图包时，将选项去掉即可。注意，该过程会造成游戏闪退，重启游戏即可。
 
-![](allow_addon_contents.png)
+![](allow_addon_contents.avif){.center}
 
 ## 优化
 

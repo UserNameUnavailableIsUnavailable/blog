@@ -11,7 +11,7 @@ title: 让 Nautilus 更像 Windows 11 Explorer
 
 在 GitHub 下载 [Actions for Nautilus](https://github.com/bassmanitram/actions-for-nautilus) 的 deb 包并安装后，点击图标打开配置页面（配置是通过一个网页完成的）。
 
-![](actions_for_nautilus.png)
+![](actions_for_nautilus.avif){.center}
 
 参见下图，仿照 Windows 11，我配置了如下选项：
 
@@ -19,18 +19,18 @@ title: 让 Nautilus 更像 Windows 11 Explorer
 - Open in VS Code：在 VS Code 中打开任意文件或文件夹
 - Copy as Path：复制任意文件/文件夹的路径
 
-![](open_in_terminal.png)
+![](open_in_terminal.avif){.center}
 
-![](restrict_file_types_to_dir.png)
+![](restrict_file_types_to_dir.avif){.center}
 
-![](open_in_vscode.png)
+![](open_in_vscode.avif){.center}
 
-![](copy_as_path.png)
+![](copy_as_path.avif){.center}
 
 ## 效果展示
 
-![](effect_01.png)
+![](effect_01.avif){.center}
 
-![](effect_02.png)
+![](effect_02.avif){.center}
 
-![](effect_03.png)
+![](effect_03.avif){.center}
