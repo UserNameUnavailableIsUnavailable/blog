@@ -1,0 +1,5 @@
+---
+title: IoC 容器
+---
+
+控制反转（Inversion of Control, IoC）是 Spring 框架的核心思想。其目标是将对象的创建和依赖关系的管理交给框架，实现自动化的依赖管理。

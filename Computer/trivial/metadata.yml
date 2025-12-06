@@ -1,8 +1,18 @@
 sidebar:
-  back: index.html
+  back: ../index.html
   children:
-  - title: 琐碎知识
+  - title: 琐碎记录
     href: index.html
     children:
-    - title: 常见的 Shell 操作符
-      href: shell-operators.html
+    - title: "2025"
+      children:
+      - title: 常见的 Shell 操作符
+        href: 2025/shell-operators.html
+      - title: 设置 Ubuntu 默认终端
+        href: 2025/set-ubuntu-default-terminal/index.html
+      - title: nautilus 自定义
+        href: 2025/customize-nautilus-extensions/index.html
+      - title: Linux 桌面截屏优化
+        href: 2025/linux-desktop-screenshot-optimization/index.html
+      - title: 在 Linux 服务器上部署 Clash 服务
+        href: 2025/clash-service/index.html

@@ -5,9 +5,9 @@ title: 计算机
 ## 笔记
 
 - [C++](C++/)
-- [Rust](rust/)
+- [Rust](Rust/)
 - [x86_64 汇编](x86_64-assembly/)
-- [Java](java/)
+- [Java](Java/)
 - [前端](frontend/)
 - [操作系统](operating-system/)
 - [CSAPP](CSAPP/)

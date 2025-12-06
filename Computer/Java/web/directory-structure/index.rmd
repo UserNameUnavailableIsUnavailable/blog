@@ -1,0 +1,43 @@
+---
+title: Web 应用的目录结构
+---
+
+本节讨论一个简单但重要的问题：Web 应用的目录结构。
+在之前的章节中，我们建立了一个最简单的 Servlet，在 Tomcat 中正确加载运行，并且对 Servlet 的生命周期有了一些基本的认识。
+但是，我们仍不清楚 Tomcat 究竟是如何工作的：
+
+- 不论是采用 war 包部署还是 exploded 方式部署，Tomcat 作为 Web 服务器，都需要通过某种方式找到需要加载的 Servlet 对应的字节码文件并加载，那么，Tomcat 是如何找到这些文件的？
+- 在前面的例子中，我们必须要通过 `<domain-name>/<artifact-id>/<url-pattern>` 来访问到正确的 Servlet，其中 `<domain-name>` 为站点的域名，`<artifact-id>` 是我们创建项目时指定的项目名，`<url-pattern>` 是为 Servlet 指定的访问资源的路径。然而，在我们见到的不少网页中，有很多有很多直接使用 `<domain-name>/` 即可访问到想要的资源，这是如何实现的？
+
+## `webapps` 目录
+
+打开 Tomcat 安装目录，定位到 `webapps` 文件夹，会发现存在如下的目录：
+
+![存放 Web 应用的 `webapps` 目录](assets/webapps.avif){.center}
+
+在我们点击 “Add Deployment” 后，部署的 Web 应用就会被存放到该位置。若以 war 包方式部署，则在此目录下可找到相应的 war 包；若以 exploded 方式部署，则在此目录下可找到相应的目录。
+这两种方式从本质上是完全一样的，是 war 包的本质就类似于常见的 tar 包，解压后仍是一个存放 Web 应用的目录。
+这里就产生了第一个问题：不论是 war 包部署还是 exploded 部署，Tomcat 是怎么知道目录中的哪个字节码文件是需要加载的 Servlet 字节码文件的？
+
+在 Tomcat 还没有现在这样先进的时候，Tomcat 是通过 Web 应用目录下的 `WEB-INF/web.xml` 文件来确定 Servlet 字节码文件所在位置的。从 Tomcat 7.x 开始，通过在源代码中增加 `@WebServlet` 注解，Tomcat 在启动时通过扫描字节码文件中的注解信息，就能够直接确定是否需要将此字节码文件作为 Servlet 加载。
+
+## 上下文路径
+
+我们在访问 Web 应用时用到的像 `/foo/bar` 这样路径，被称作上下文路径（context path）。
+一个 Web 应用可由若干 Servlets 构成，每个 Servlet 都具有一个与之对应的上下文路径。
+这样，Web 应用本身由 `pom.xml` 中定义的 `artifactId` 标识，而 Web 应用中的 Servlet 又由其上下文路径标识，拼接 `artifactId` 和 Servlet 的所在 Web 应用的上下文路径，就形成了最终的上下文路径。
+例如，Web 应用的标识为 `foo`，其中一个 Servlet 的路径为 `/bar`，则访问到这个 Servlet 的上下文路径就是 `/foo/bar`。
+在很早的时候，上下文路径时通过 `context.xml` 配置的。
+现在，这种已经过时了，大家更乐于使用更加“高内聚、低耦合”的注解方式进行配置。
+
+当存在多个上下文路径前缀相同的 Servlets 时，遵循最长路径匹配原则。
+例如，`/foo` 和 `/foo/bar` 同时存在时，对 `/foo/bar/index.html` 的请求会被交由 `/foo/bar` 对应的 Servlet 处理。
+
+`webapps` 目录下存在一个十分特殊的目录——`ROOT`，该目录存放站点根路径的 Web 应用。
+`ROOT` 这个 Web 应用很特殊，它并没有像一般 Web 应用那样的 artifact 标识，该应用一般被用作站点的默认 Web 应用。
+当访问 `/foo/index.html` 这样的 URL 时，若不存在 `/foo` 相应的 Servlet，则请求会被转交给 `/` 对应的 Servlet 处理，也就是 `ROOT` 下存放的 Web 应用。
+在 `pom.xml` 中，将 `artifactId` 设置为 `ROOT` 即可为站点根目录生成 Web 应用。
+
+::: {.callout-tip}
+需要指出，Web 应用并不一定非得要包含 Servlet 字节码文件，Tomcat 从本质上讲仍是一个 HTTP 服务器，因此在默认提供的 `ROOT` 目录下，我们只看到 `index.jsp` 以及一些相关的资源文件和配置文件。
+:::

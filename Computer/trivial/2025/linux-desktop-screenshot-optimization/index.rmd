@@ -81,4 +81,4 @@ subprocess.run(cmd)
 
 然后，需要将截图绑定到全局热键。对于 Arch，只要在快捷键里增加两个选项卡就可以实现全桌面截图和交互式截图了。
 
-![Arch 绑定热键](assets/arch-bind.png)
+![Arch 绑定热键](assets/arch-bind.avif){.center}

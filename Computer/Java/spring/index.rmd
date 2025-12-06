@@ -1,0 +1,14 @@
+---
+title: Spring 框架
+---
+
+## 引言
+
+Spring 框架是目前业界 Java Web 开发的事实标准。
+Spring Boot 是基于 Spring 框架之上的快速开发框架，其目的在于简化了 Spring 应用的配置和部署流程。
+因此，要学习 Spring Boot，首先需要学习了解 Spring 框架。
+这套笔记基于官方文档和网络上的教程资源整理，选取其中重要的部分进行记录，主要目的是快速上手 Spring 框架的核心功能和使用方法。
+
+## 资料
+
+- [Spring Framework 官方文档](https://spring.io/projects/spring-framework){target="_blank"}

@@ -1,0 +1,67 @@
+---
+title: Bean 的重要性质
+---
+
+## Bean 作用域
+
+在之前的最小示例中已经提到过，Bean 的实例是在实例化 `ClassPathXmlApplicationContext` 时创建的。
+
+在 Spring 框架中，Bean 的默认作用域是 **单例（Singleton）** 。这里的单例与通常意义上的单例有所不同，传统意义上的单例是指某个类在整个进程中只有一个实例，而这里的单例是指一个 Bean ID 在同一个 Spring 容器中只对应一个一个共享的实例。每次调用 `getBean` 方法获取该 Bean 时，返回的都是同一个实例的引用。
+
+与单例对应的是 **原型（Prototype）** 作用域。将 Bean 的作用域设置为原型后，每次调用 `getBean` 方法获取该 Bean 时，Spring 容器都会创建一个新的实例并返回其引用。
+
+我们可以通过在配置文件中为 Bean 添加 `scope` 属性来设置 Bean 的作用域：
+
+```xml
+    <bean id="bar114514" class="fun.macrohard.foo.Bar" scope="singleton" />
+    <bean id="bar1919810" class="fun.macrohard.foo.Bar" scope="prototype" />
+```
+
+运行如下测试程序：
+
+```java
+    public static void main(String[] args) {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("foo.xml");
+        Bar bar1 = context.getBean("bar1919810", Bar.class);
+        System.out.println(bar1);
+        Bar bar2 = context.getBean("bar1919810", Bar.class);
+        System.out.println(bar2);
+        Bar bar3 = context.getBean("bar114514", Bar.class);
+        System.out.println(bar3);
+        Bar bar4 = context.getBean("bar114514", Bar.class);
+        System.out.println(bar4);
+        context.close();
+    }   
+```
+
+![运行结果](assets/bean-scope-example.avif){.center}
+
+可以看到，在 `context` 实例化时立刻创建了 `bar114514` 的 Bean 实例，也就是默认情况下单例创建是饿汉式的，且创建后保持不变。而 `bar1919810` 的 Bean 实例是在每次调用 `getBean` 时返回一个新的实例。
+
+::: {.callout-tip}
+单例创建在默认情况下是饿汉式的，也可以自行配置为懒汉式，参阅 [Lazy-initialized Beans](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-lazy-init.html)。
+:::
+
+::: {.callout-tip}
+除了 `singleton` 和 `prototype` 之外，Spring 框架还支持 `request`（为每个请求创建一个新的实例）、`session`（为每次会话创建一个新的实例）等作用域，甚至还支持自定义作用域。详情参阅 [Bean Scopes](https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html){target="_blank"}。
+:::
+
+## Bean 的生命周期
+
+对于一个 Bean 单例，其生命周期分为以下几个阶段：
+
+- 实例化：Spring 容器根据指定的方式（如构造函数）创建 Bean 的实例。
+- 属性赋值：Spring 容器为 Bean 实例的属性赋值。
+- 初始化：在属性赋值后，初始化 Bean 实例。
+- 使用：Bean 实例被应用程序使用。
+- 销毁：在容器关闭时，销毁 Bean 实例。
+  
+Spring 提供了多种方式来定制 Bean 的初始化和销毁过程，具体来说是通过初始化回调方法和销毁回调方法实现的，主要包括：
+
+- 通过注解 `@PostConstruct` 和 `@PreDestroy` 分别定义初始化和销毁方法。
+- 在配置文件中指定 `init-method` 定义初始化方法，指定 `destroy-method` 定义销毁方法。
+- 实现 `InitializingBean` 和 `DisposableBean` 接口，分别定义初始化和销毁方法。
+
+::: {.callout-important}
+据官方文档表述，通过注解定义初始化和销毁方法是最为推荐的做法，而实现接口的方式则不太推荐使用，因为它会使 Bean 类与 Spring 框架产生耦合。
+:::

@@ -1,3 +1,9 @@
 ---
 title: 进程
 ---
+
+## Unix 进程管理
+
+![Google Chrome 关于调用 `fork()` 后的若干注意事项](https://source.chromium.org/chromium/chromium/src/+/main:base/process/launch_posix.cc;drc=ca7f4fde7513d4a2f9eb727c9c576c050f0af6fb;l=373)
+
+## Windows 进程管理

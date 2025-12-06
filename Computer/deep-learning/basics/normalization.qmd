@@ -1,0 +1,19 @@
+---
+title: 规范化
+---
+
+## Batch Normalization
+
+给定一个小批量的图像数据 $\mathbf{X} = \{\mathbf{x}_1, \mathbf{x}_2, \ldots, \mathbf{x}_m\}$，其中 $\mathbf{x}_i \in \mathbb{R}^{C \times H \times W}$。Batch Normalization（批量规范化，简称 BN）对每个通道 $c$ 计算该通道上所有像素的均值和标准差，最终得到的均值 $\mathbf{\mu}_c$ 和标准差 $\mathbf{\sigma}_c$ 分别为：
+
+$$\mathbf{\mu}_c = \frac{1}{m \cdot H \cdot W} \sum_{i=1}^{m} \sum_{h=1}^{H} \sum_{w=1}^{W} \mathbf{x}_{i, c, h, w}$$
+
+$$\mathbf{\sigma}_c = \sqrt{\frac{1}{m \cdot H \cdot W} \sum_{i=1}^{m} \sum_{h=1}^{H} \sum_{w=1}^{W} (\mathbf{x}_{i, c, h, w} - \mathbf{\mu}_c)^2 + \epsilon}$$
+
+## Layer Normalization
+
+Layer Normalization（层规范化，简称 LN）对每个样本 $\mathbf{x}_i$ 的所有通道和空间位置进行规范化。对于每个样本 $\mathbf{x}_i$，计算其均值 $\mathbf{\mu}_i$ 和标准差 $\mathbf{\sigma}_i$：
+
+$$\mathbf{\mu}_i = \frac{1}{C \cdot H \cdot W} \sum_{c=1}^{C} \sum_{h=1}^{H} \sum_{w=1}^{W} \mathbf{x}_{i, c, h, w}$$
+
+$$\mathbf{\sigma}_i = \sqrt{\frac{1}{C \cdot H \cdot W} \sum_{c=1}^{C} \sum_{h=1}^{H} \sum_{w=1}^{W} (\mathbf{x}_{i, c, h, w} - \mathbf{\mu}_i)^2 + \epsilon}$$
