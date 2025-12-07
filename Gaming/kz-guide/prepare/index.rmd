@@ -6,11 +6,11 @@ title: 准备工作
 
 正版、盗版 CS 客户端均可使用。总的来说正版体验比盗版好很多，如果选择使用盗版，可能面临如下问题：
 
-- 盗版来路不明，捆绑安装
-- 盗版夹带私货，例如客户端启动后直接连接到某某对战游戏平台
-- 游戏漏洞带来的体验上的问题（正版 CS 定期推送更新补丁修复游戏漏洞）
-- 连接游戏服务器麻烦（正版可以搜索服务器）
-- 无法输入中文
+- 盗版来路不明，捆绑安装。
+- 盗版夹带私货，例如客户端启动后直接连接到某某对战游戏平台。
+- 游戏漏洞带来的体验上的问题（正版 CS 定期推送更新补丁修复游戏漏洞）。
+- 连接游戏服务器麻烦（正版可以搜索服务器）。
+- 无法输入中文。
 - ...
 
 总之，能用正版就用正版。不过，对于刚入坑的玩家，由于对 KZ 各种配置不熟悉，建议先选择使用 Simen 4554 客户端。
@@ -23,7 +23,7 @@ title: 准备工作
 
 建议刚入门 KZ 时使用该客户端，对 KZ 有一定了解后，再换用其他插件。
 
-<a href='https://macrohard.fun/downloads/2024/06/23/Simen_Cs1.6_4554_Kz_1.2_setup.rar'>Simen 4554 客户端下载链接</a>
+[Simen 4554 客户端下载链接](https://macrohard.fun/downloads/2024/06/23/Simen_Cs1.6_4554_Kz_1.2_setup.rar)
 
 ### 普通 CS 1.6 客户端（推荐使用 Steam 正版）
 
@@ -31,9 +31,11 @@ title: 准备工作
 
 CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认版本，需要将其切换到 legacy 版本。
 
+::: { is="figure" }
 ![](use_legacy_00.avif){.center}
 
 ![](use_legacy_01.avif){.center}
+:::
 
 ## 开始之前
 
@@ -53,7 +55,9 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 正版 CS 中也可以通过 `Wait for vertical sync` 选项关闭。
 
+:::
 ![](disable_vsync.avif){.center}
+:::
 
 ### 原始鼠标输入
 
@@ -61,7 +65,9 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 正版 CS 中也可通过 `Raw mouse input` 选项开启。
 
+:::
 ![](enable_rawinput.avif){.center}
+:::
 
 ### FPS 最大值
 
@@ -69,7 +75,7 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 ## 插件安装
 
-<a href='https://macrohard.fun/downloads/2024/06/23/lan_server_v4.19.zip'>KZ-Rush 插件下载地址</a>
+[KZ-Rush 插件下载地址](https://macrohard.fun/downloads/2024/06/23/lan_server_v4.19.zip)
 
 CS 客户端插件资源文件需存放到 `cstrike` 目录下，对于正版 CS 客户端，其路径为 `<Steam 安装路径>\steamapps\common\Half-Life\cstrike`。
 
@@ -160,9 +166,9 @@ bind "=" "+hook" # 绳索
 
 #### 常用地图包下载
 
-长跳地图包（含 `kz_longjumps2`、`kz_longjumps3` 等长跳练习地图）：<a href='https://macrohard.fun/downloads/2024/06/24/lj_mappack.zip'>下载地址</a>
+- [长跳练习地图](https://macrohard.fun/downloads/2024/06/24/lj_mappack.zip)
 
-KZ average 水平地图包：<a href='https://macrohard.fun/downloads/2024/06/24/kz-rush_average_maps_21.03.21.zip'>下载地址</a>
+- [Rush averge 水平地图包](https://macrohard.fun/downloads/2024/06/24/kz-rush_average_maps_21.03.21.zip)
 
 #### 地图包使用方法
 
@@ -172,19 +178,21 @@ KZ average 水平地图包：<a href='https://macrohard.fun/downloads/2024/06/24
 
 上述地图包安装方法容易造成新建游戏菜单中地图数量过多难于查找的问题。对此，正版 CS 可以在  `<Steam 安装路径>\steamapps\common\Half-Life` 目录下创建 `cstrike_addon` 文件夹，将地图包内文件放入 `cstrike_addon`。
 
-然后，在游戏内点选 `allow custom addons` 即可使用地图包，不需要使用地图包时，将选项去掉即可。注意，该过程会造成游戏闪退，重启游戏即可。
+然后，在游戏内点选 allow custom addons 即可使用地图包，不需要使用地图包时，将选项去掉即可。注意，该过程会造成游戏闪退，重启游戏即可。
 
+:::{ is="figure" }
 ![](allow_addon_contents.avif){.center}
+:::
 
 ## 优化
 
 ### 16:9 分辨率 4:3 拉伸优化（针对正版 CS）
 
-<a href='https://macrohard.fun/downloads/2024/06/24/CS.Fixes.zip'>CS Fixes 下载地址</a>
+[下载地址](https://macrohard.fun/downloads/2024/06/24/CS.Fixes.zip)
 
 解压后，将 `CS.Fixes.asi` 文件移动到 `<Steam 安装路径>\steamapps\common\Half-Life` 下并重新启动游戏。
 
-GitHub 项目地址：<a href='https://github.com/Garey27/CS_Patches?tab=readme-ov-file'>Garey27/CS_Patches</a>
+[^cs-fixes]: GitHub 项目地址：[Garey27/CS_Patches](https://github.com/Garey27/CS_Patches)。
 
 ### 输入法闪退补丁
 
@@ -192,8 +200,8 @@ GitHub 项目地址：<a href='https://github.com/Garey27/CS_Patches?tab=readme-
 
 使用新版 `SDL2.dll` 后，输入法开启状态下不会闪退，但无法进行移动操作。这时需要将输入法切换为英文，或者开启大写锁定。
 
-<a href='https://macrohard.fun/downloads/2024/06/24/SDL2-2.30.1-win32-x86.zip'>新版 SDL2 模块下载地址</a>
+[新版 SDL2 模块下载地址](https://macrohard.fun/downloads/2024/06/24/SDL2-2.30.1-win32-x86.zip)
 
 解压后，将 `SDL2.dll` 文件移动到 `<Steam 安装路径>\steamapps\common\Half-Life` （覆盖原文件）下并重新启动游戏。
 
-GitHub 项目地址：<a href='https://github.com/libsdl-org/SDL'>libsdl-org/SDL</a>
+[^SDL2]: GitHub 项目地址：[libsdl-org/SDL](https://github.com/libsdl-org/SDL)。
