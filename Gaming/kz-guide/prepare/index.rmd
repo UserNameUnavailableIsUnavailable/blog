@@ -33,7 +33,9 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 ::: { is="figure" }
 ![](use_legacy_00.avif){.center}
+:::
 
+::: { is="figure" }
 ![](use_legacy_01.avif){.center}
 :::
 
@@ -55,7 +57,7 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 正版 CS 中也可以通过 `Wait for vertical sync` 选项关闭。
 
-:::
+::: { is="figure" }
 ![](disable_vsync.avif){.center}
 :::
 
@@ -65,7 +67,7 @@ CS 在 25 周年庆时推送了 25 周年特别版，该版本为目前的默认
 
 正版 CS 中也可通过 `Raw mouse input` 选项开启。
 
-:::
+::: { is="figure" }
 ![](enable_rawinput.avif){.center}
 :::
 
@@ -180,7 +182,7 @@ bind "=" "+hook" # 绳索
 
 然后，在游戏内点选 allow custom addons 即可使用地图包，不需要使用地图包时，将选项去掉即可。注意，该过程会造成游戏闪退，重启游戏即可。
 
-:::{ is="figure" }
+::: { is="figure" }
 ![](allow_addon_contents.avif){.center}
 :::
 

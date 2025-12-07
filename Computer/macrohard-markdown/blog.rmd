@@ -89,7 +89,7 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 [Macrohard](https://www.macrohard.fun){target="_blank"}
 ```
 
-解析器中预定义了 `left`（左对齐）、`center`（居中）、`right`（右对齐），可以通过下面的代码实现混合对齐效果：
+解析器中预定义了 `left`（左对齐）、`center`（居中）、`right`（右对齐）、`justify`（分散对齐），可以通过下面的代码实现混合对齐效果：
 
 ```markdown
 > 逝者如斯夫，不舍昼夜。
@@ -101,11 +101,15 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 >
 > ——《论语》{.right}
 
+::: {.callout-important}
+对齐属性是针对块级元素而言的，因此对内联元素（比如图片、内联代码等）使用该属性不会产生预期的效果。对块级元素使用该属性时，其内部的内容会相应地进行对齐。上面的例子中 `——《论语》{.right}` 看起来像是对内联元素使用了对齐属性，但实际上，这行文本在解析后会被放置在块级元素 `<p>`{.language-html} 元素内，进而实现其内部文本右对齐的效果。
+:::
+
 ## 容器
 
-使用 `::: :::` 可以定义一个 `<div>`{ .language-html } 容器，结合上面提到的属性语法，可以为容器指定相应的属性。容器允许嵌套，嵌套时，定义外层容器的冒号数量（**至少** 3 个）需要大于内层。
+使用 `::: :::` 可以定义一个容器（默认为 `<div>`），结合上面提到的属性语法，可以为容器指定相应的属性。容器允许嵌套，嵌套时，定义外层容器的冒号数量（**至少** 3 个）需要大于内层。
 
-例如，下面的代码定义了一个栏目块（`class="columns"`），其中包含了三栏文本（`class="column"`）。
+下面的代码定义了一个栏目块（`class="columns"`），其中包含了三栏文本（`class="column"`）。
 
 ```markdown
 :::: { #custom-block .columns width="200" }
@@ -157,6 +161,63 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 
 第三栏
 :::
+::::
+
+除了默认的 `<div>`{.language-html} 容器外，还可以通过 `is` 属性指定使用其他类型的容器，例如：
+
+```markdown
+:::{ .right is="figure" }
+![](./doro-maodie.gif)
+:::
+```
+
+这会产生如下效果：
+
+:::{ .right is="figure" }
+![](./doro-maodie.gif)
+:::
+
+:::: {.callout-important}
+当图片没有标题时，图片将被 **直接** 渲染为 `<img>`{.language-html} 元素。可以使用 `::: { is="figure" } :::` 来定义一个图片容器，并为容器指定一些属性来实现特定的排版效果。
+当为图片指定标题时，图片本身会被渲染为 `<img>`{.language-html} 元素，标题会被渲染为 `<figcaption>`{.language-html} 元素，二者会被包含在一个 **自动创建** 的 `<figure>`{.language-html} 元素内，指定的属性将应用于该 `<figure>` 元素，此时不应该再对图片使用 `::: { is="figure" } :::`。
+
+例如，直接对无标题的图片添加居中属性将不会产生任何效果，因为 `<img>`{.language-html} 元素是行内元素，行内元素无法被居中对齐：
+
+```markdown
+![](doro-maodie.gif){.center}
+```
+
+会产生如下 HTML 标记：
+
+```html
+<img src="doro-maodie.gif" class="center" data-viewable />
+```
+
+![](./doro-maodie.gif){.center}
+
+为图片添加标题后，图片和标题会被包含在一个 `<figure>`{.language-html} 元素内，此时对图片使用居中属性将会生效：
+
+```markdown
+![Doro 💖 耄耋](doro-maodie.gif){.center}
+```
+
+会产生如下 HTML 标记：
+
+```html
+<figure class="center">
+  <img src="doro-maodie.gif" data-viewable />
+  <figcaption>Doro 💖 耄耋</figcaption>
+</figure>
+```
+
+![Doro 💖 耄耋](doro-maodie.gif){.center}
+
+::: {.callout-tip}
+你可能注意到了 `data-viewable` 属性，该属性用于指示图片是可查看的（viewable），即点击图片后会弹出查看器 [^viewerjs]，在查看器中可以进行拖拽、旋转、镜像、放大、缩小等操作。
+
+[^viewerjs]: 该查看器基于 [fengyuanchen/viewerjs](https://github.com/fengyuanchen/viewerjs){target="_blank"} 实现。
+:::
+
 ::::
 
 ## 代码高亮
@@ -344,7 +405,6 @@ $$
 
 这会产生如下效果：
 
-```plain
 :::{data-teleport-to="strong-ordering"}
 - `a == b` $\Rightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
@@ -365,7 +425,6 @@ $$
 |`std::strong_ordering`|{#strong-ordering}|
 |`std::weak_ordering`|{#weak-ordering}|
 |`std::partial_ordering`|{#partial-ordering}|
-```
 
 有了传送功能，可以方便地将复杂的元素放置在文档的其他位置，从而实现更灵活的布局，这在创建表格时非常有用。
 
@@ -373,9 +432,12 @@ $$
 
 ::::{.columns}
 :::{.column width="50%"}
+
+通过下面的方式可创建 mermaid 流程图：
+
 ````markdown
 <!-- 注意大括号，这里需要用到属性语法 -->
-```{mermaid .center height="300px"}
+```{mermaid .center width="50%"}
 graph TD
     A[开始] --> B{是否满足条件？}
     B -- 是 --> C[执行操作]
@@ -383,9 +445,12 @@ graph TD
     C --> D
 ```
 ````
+
+以这样的方式创建的流程图会在原地产生一个 `<img>`{.language-html} 元素。
+
 :::
 :::{.column width="50%"}
-```{mermaid .center height="40vh"}
+```{mermaid .center width="50%"}
 graph TD
     A[开始] --> B{是否满足条件？}
     B -- 是 --> C[执行操作]
@@ -395,7 +460,7 @@ graph TD
 :::
 ::::
 
-以这样的方式创建的流程图是无法显示标题的，要想为流程图指定标题，需要借助于一个图片 URL 置空的插图元素，并在定义流程图时指定 `data-override-image` 属性为插图元素的 `id`（通过属性语法定义）。这样，流程图创建后，会覆盖插图元素：
+以上面所述的方式创建的流程图是无法显示标题的，并且在尺寸调节上存在一定问题。要解决这些问题，需要借助于一个图片 URL 置空的 `<img>`{.language-html} 元素，并在定义流程图时指定 `data-override-image` 属性为插图元素的 `id`（通过属性语法定义）。这样，流程图创建后，会覆盖插图元素：
 
 ::::{.columns}
 :::{.column width="50%"}
@@ -408,7 +473,7 @@ graph TD
     C --> D
 ```
 
-![$ABCD$ `flowchart`](){#flowchart}
+![$ABCD$ `flowchart`](){#flowchart .center width="50%"}
 ````
 :::
 
@@ -421,13 +486,9 @@ graph TD
     C --> D
 ```
 
-![$ABCD$ `flowchart`](){#flowchart .center height="40vh"}
+![$ABCD$ `flowchart`](){#flowchart .center width="50%"}
 :::
 ::::
-
-::: {.callout-important}
-需要注意的是，在流程图元素中指定的 `width`、`height` 属性对应于渲染得到的原图（SVG 格式）大小，而在插图元素中指定的 `width`、`height` 是缩放大小。
-:::
 
 ## 图片增强
 

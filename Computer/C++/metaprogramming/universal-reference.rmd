@@ -1,0 +1,112 @@
+---
+title: 万能引用
+---
+
+C++ 11 引入了 **万能引用（universal reference）** ，也称为 **转发引用（forwarding reference）** ，需要和一般的右值引用区分。万能引用是一种特殊的右值引用，能够绑定到左值或右值，具体取决于传递给它的实参类型。
+
+```cpp
+template <typename T>
+void func(T&& arg); // arg 是万能引用
+```
+
+## 引用折叠
+
+万能引用的关键在于**引用折叠**（reference collapsing）规则。
+这一规则产生是针对模板类型推导所产生的“引用的引用”问题：
+
+```cpp
+struct A {};
+template <typename T>
+void func(T&& arg);
+int main() {
+    A a;
+    func(a); // T -> A&, arg -> A& &&
+    func(std::move(a)); // T -> A&&, arg -> A&& &&
+}
+```
+
+可以看到 `arg` 变成了 `A& &&` 和 `A&& &&`，而 C++ 中并不允许出现“引用的引用”，C++ 通过引用折叠规则将其简化为单一引用：
+
+|原始类型| 折叠后类型|
+|:-:|:-:|
+|`T& &`| `T&`|
+|`T& &&`| `T&`|
+|`T&& &`| `T&`|
+|`T&& &&`| `T&&`|
+
+简而言之，只有在两个引用均为右值引用时，折叠结果才是右值引用，否则结果均为左值引用。对于 `T& &&` 这种情况，被引用的 xvalue 除了语义上变更为左值外，其生命周期还会被延长到与引用方一样长。
+
+## 完美转发
+
+首先考虑下面的例子：
+
+```cpp
+#include <iostream>
+int&& n = 1;
+
+template <class T> struct is_lvalue : std::false_type {};
+template <class T> struct is_lvalue<T&> : std::true_type {};
+template <class T> struct is_lvalue<T&&> : std::false_type {};
+
+void f(const int &) {
+    std::cout << "const int &" << std::endl;
+}
+
+void f(int &&) {
+    std::cout << "int &&" << std::endl;
+}
+
+
+int main (int argc, char *argv[]) {
+    static_assert(is_lvalue<decltype((n))>::value);
+    f(n);
+    return 0;
+}
+```
+
+
+当发生参数传递时，`n` 会被视作一个表达式计算结果，得到的类型为 `int&`，导致原本的右值语义丢失，传递给 `f` 的实际上是一个左值引用。
+
+当使用万能引用时，类似的情况就会发生在复制构造和移动构造的选用上：
+
+```cpp
+#include <iostream>
+
+class Foo
+{
+public:
+    Foo(int i1, int i2) : i1(i1), i2(i2) {}
+    Foo(const Foo&) { std::cout << "copy" << std::endl; }
+    Foo(Foo&&) { std::cout << "move" << std::endl; }
+private:
+    int i1;
+    int i2;
+};
+
+template <typename T, typename... VA>
+T* construct(VA&&... va)
+{
+    return new T(va...);
+}
+
+int main (int argc, char *argv[]) {
+    Foo f(1, 2);
+    Foo* foo1 = construct<Foo>(f); // copy
+    delete foo1;
+    Foo* foo2 = construct<Foo>(std::move(f)); // copy
+    delete foo2;
+    return 0;
+}
+```
+
+即便我们通过 `std::move` 传入了一个右值，依照引用折叠规则，`va` 也仍然是对右值的引用，然而由于前述的参数传递规则，`va` 在传递给 `T` 的构造函数时会作为表达式进行计算，导致右值语义丢失，最终调用的仍然是复制构造函数。
+
+**完美转发（perfect forwarding）** 就是针对上述问题引入的，通过结合使用万能引用和 `std::forward` 实现。在向 `T` 的构造函数传递参数时，使用 `std::forward<VA>(va)...` 来保持参数的值类别：
+
+```cpp
+template <typename T, typename... VA>
+T* construct(VA&&... va)
+{
+    return new T(std::forward<VA>(va)...);
+}
+```

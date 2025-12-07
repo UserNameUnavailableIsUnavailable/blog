@@ -1,85 +1,155 @@
 ---
-title: Value Categories
-categories: cpp
+title: 值的类别
 ---
 
-There are three types of value in C++: lvalue, xvalue, and prvalue. We'll explore these three types in this article.
+在 C++ 中，有三种主要类别的值：
 
-## The `Has` Property
+- 左值（left value, abbr. lvalue）
+- 将亡值（expiring value, abbr. xvalue）
+- 纯右值（pure rvalue, abbr. prvalue）
 
-Naturally, when we define a variable in C++, that variable holds a value. For example, the following C++ statement defines a variable named `a`.
+要区分值的类别，可以根据值的如下两个原则进行判断：
 
-```cpp
-int a{ 100 };
-```
+- 有标识（*has identity*）：表达式的值是否能够通过直接或间接获得的地址标识。
+- 可移动（*can be moved from*）：具有移动语义，其资源可以被复用。
 
-This C++ statement corresponds to the assembly instruction below:
+|值类别|有标识|可移动|
+|:-:|:-:|:-:|
+|左值|是|否|
+|将亡值|是|是|
+|纯右值|否|是|
 
-```nasm
-push dword 100
-```
-
-The above x86 assembly instruction will be assembled into the following machine code, and we can see that the integer `100` is represented in its hexadecimal form `64`:
-
-```text
-6A66 0064
-```
-
-Obviously, `a` as a variable, is actually an alias for a block of memory in the program stack, and we have full control over this block of memory, meaning we can either read from or write to this memory block. In such cases, we say `a` *has* an *entity*, and this entity is where the value `100` will be stored.
-
-However, not all values are stored in memory blocks we can have full control over. Before `100`, the integer literal in the above statement, are stored in the memory block aliased by `a`, already exists in the compiled code as an inherent part of the x86 instruction `6A66 0064`. Even though this instruction is stored in memory when the operating system loads the program, we cannot change the hexadecimal `64` to some other value since the operating system forbids us from writing to `.text` section, i.e., the memory section where program instructions is placed. Then, we can conclude that we cannot change literals present in our C++ program. We cannot write something like:
+下面的代码展示了如何通过模板特化来判断一个类型的值类别：
 
 ```cpp
-100 = 101; // error: assign 101 to literal 100
+template <class T> struct is_prvalue : std::true_type {};
+template <class T> struct is_prvalue<T&> : std::false_type {};
+template <class T> struct is_prvalue<T&&> : std::false_type {};
+ 
+template <class T> struct is_lvalue : std::false_type {};
+template <class T> struct is_lvalue<T&> : std::true_type {};
+template <class T> struct is_lvalue<T&&> : std::false_type {};
+ 
+template <class T> struct is_xvalue : std::false_type {};
+template <class T> struct is_xvalue<T&> : std::false_type {};
+template <class T> struct is_xvalue<T&&> : std::true_type {};
 ```
 
-Then, we say that the literal `100` does not have an entity.
+## 左值
 
-## The `Move` Property
+典型的左值包括：
 
-Let's delve into the above example. `a` is bound to a block of memory which we have full control over. On this basis, we say `a` *has* that *entity*. As programmers, we cannot deprive `a` of its entity, i.e., delete `a` and binds its associated memory block to another symbol. Therefore, we say `a`'s memory cannot be moved. We often say that `a` is non-moveable for simplicity.
-
-There do exist cases in which we can move entities refered by a symbol, of which the simplest case is literals. Since literals does not have associated entities and thus cannot be modified, we can "move" them to anywhere. Such "move" is more like "copy" rather than change an object's place. Anyone can claim that they get the ownership of a literal as long as they promise not to change their value. Some compilers may allow us to take the ownership of a literal without such promise, but will give us an error. If we try to change that literal through this problematic owership claim, the operating system will have our program crashed at run-time.
+- 变量
+- 函数
+- 由函数返回的左值引用
 
 ```cpp
-const char* s1 = "hello"; // ok, promise not to change a literal's value
-char* s2 = "hello"; // warning: cannot assign const char* to char*
-s2[0] = "H"; // will case a runtime error
+int a = 42;
+void foo() {}
+int& bar() { return a; }
+
+int main()
+{
+    static_assert(is_lvalue<decltype(a)>::value);
+    static_assert(is_lvalue<decltype(foo)>::value);
+    static_assert(is_lvalue<decltype(bar())>::value);
+}
 ```
 
-Another case in which we can move is when the C++ runtime creates temporary objects. Different from literals, such temporary objects are usually moveable.
+其中，比较难以理解的是 `foo` 为何是左值，毕竟下面的代码是合法的：
 
 ```cpp
-std::string s3 = "Hello";
-s3 + "World" = "hello, world";
+using function_t = void (*)();
+function_t f = foo;
 ```
 
-The above example first constructs a string object `s3`, then we concatenate `s3` with a string literal `"World"`, during which a temporary string object containing value `"HelloWorld"` will be created, i.e., such concatenation is equivalent to the following code:
+首先可以肯定的是 `foo` 具有标识，因此肯定是左值或者将亡值。左值意味着 `foo` 所指示的函数实体不可移动。`foo` 所指示的实体，实际上是 .text 段中的只读程序代码，其所有者是 `foo` 符号本身，我们无法将该实体的所有权转移给其他符号，因此 `foo` 作为一个符号，其所指示的实体是不可移动的，从而 `foo` 是左值。
+
+那为何我们仍然可以将其赋值给一个函数指针呢？这就涉及到赋值过程中的类型退化（type decay）。在赋值过程中，`foo` 的语义转变成了函数的入口地址，而函数的入口地址是在编译期就确定的常量值，因此是纯右值。
+
+## 将亡值
+
+将亡值有标识，且可移动。典型的将亡值包括：
+
+- 由函数返回的将亡值引用
+- 通过 `std::move` 获得的值
 
 ```cpp
-std::string temp = "HelloWorld";
-temp = "hello, world";
+struct Foo
+{
+    int data;
+};
+
+Foo&& get_foo() { return Foo{42}; }
+
+int main()
+{
+    static_assert(is_xvalue<decltype((get_foo()))>::value);
+    static_assert(is_xvalue<decltype((get_foo().data))>::value);
+    Foo f{42};
+    static_assert(is_xvalue<decltype((std::move(f)))>::value);
+}
 ```
 
-Obviously, `temp` as a temporary object, will be held by nobody after the concatenation and assignment operations complete and will be destructed automatically. An natural idea comes that we can take the ownership of such a will-be destructed object, and such idea is the core of move semantics introduced in C++ 11.
+## 纯右值
 
-## Value Categories
+纯右值没有标识，且可移动。直观来理解，一个东西没有所有者，自然可以被任意移动。
 
-Based on "Has" and "Move" property of a value, we can classify C++ values into three categoried.
+典型的纯右值包括：
 
-<table>
-    <tr>
-        <th>Has</th><th>Move</th><th>Category</th><th>Example</th>
-    </tr>
-    <tr>
-        <td>yes</td><td>no</td><td><b>lvalue</b></td><td>Ordinary variables</td>
-    </tr>
-    <tr>
-        <td>yes</td><td>yes</td><td><b>xvalue</b></td><td>Temporary Unnamed Objects</td>
-    </tr>
-    <tr>
-        <td>no</td><td>yes</td><td><b>prvalue</b></td><td>Literals</td>
-    </tr>
-</table>
+- 字面值常量
+- 由函数返回的纯右值
 
-Since both lvalues and xvalues have associated entities and thus can be modified, people define another more gneralized category — **glvalue** (general lvalue) to refer to any value that has an associated entity. Likewise, since both xvalues and prvalues are held by nobody, people define a category named **rvalue** to refer to any moveable value.
+```cpp
+struct Foo
+{
+    int data;
+};
+
+int get_foo() { return Foo{42}; }
+
+int main()
+{
+    static_assert(is_prvalue<decltype(42)>::value);
+    static_assert(is_prvalue<decltype(get_foo())>::value);
+}
+```
+
+::: {.callout-important}
+考虑下面的例子：
+
+```cpp
+int&& n = 1;
+
+decltype(n) // int&&
+decltype((n)) // int&
+```
+
+`1` 本身是纯右值，因此用 `int&&` 来接收它是合法的。而一旦 `n` 绑定到了 `1` 这个值上，这个纯右值被移动到了内存的某个位置，并且被 `n` 所标识。
+
+`decltype(n)` 返回的是 `n` 的类型，即 `int&&`。而 `decltype((n))` 是 `n` 放在表达式中进行计算后得到的类型，因此返回的是 `n` 所指示的实体的类型，由于 `n` 现在具有标识，因此其类型变成了左值引用 `int&`。
+
+这带给我们一个很重要的启示：一定要注意区分标识符本身和标识符所指示的实体。
+:::
+
+## 混合类型
+
+C++ 中的左值和右值实际上并没有上面那样严格，而是介于三种类型之间的混合类型：
+
+- 泛化左值（generalized lvalue, abbr. glvalue）：包括左值和将亡值。
+- 右值（rvalue）：包括将亡值和纯右值。
+
+```cpp
+struct Foo
+{
+    int data;
+};
+
+Foo&& get_foo() { return Foo{42}; }
+
+int main()
+{
+    const Foo& foo1 = get_foo(); // 合法，get_foo() 是泛化左值
+    Foo&& foo2 = get_foo(); // 合法，get_foo() 是右值
+}
+```
