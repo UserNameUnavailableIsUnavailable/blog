@@ -8,4 +8,4 @@ sidebar: null
 - [计算机](Computer/)
 - [数学](Mathematics/)
 - [游戏](Gaming/)
-- [琐碎记录](/trivial/)
+- [琐碎](trivial/)

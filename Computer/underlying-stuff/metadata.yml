@@ -1,7 +1,7 @@
 sidebar:
   back: ../index.html
   children:
-  - title: CSAPP 笔记
+  - title: 底层知识
     href: index.html
     children:
     - title: 第二章笔记

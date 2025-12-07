@@ -1,8 +1,0 @@
-sidebar:
-  back: ../index.html
-  children:
-  - title: 具体数学笔记
-    href: index.html
-    children:
-    - title: 递归问题
-      href: 1-recurrent-problems.html

@@ -1,0 +1,10 @@
+sidebar:
+  back: ../index.html
+  children:
+  - title: 计算机中的数学
+    href: index.html
+    children:
+    - title: 递归问题
+      href: recurrent-problems.html
+    - title: 整数除法优化
+      href: integer-division-optimization.html

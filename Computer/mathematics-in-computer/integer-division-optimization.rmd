@@ -1,0 +1,68 @@
+---
+title: 整数除法优化
+---
+
+除法指显著慢于乘法和加法等指令，现代编译器通常会将除法优化为乘法加移位操作，从而提升性能。
+
+给定被除数 $n$ 和除数 $d$，寄存器字长为 $W$ 位，其中 $d$ 和 $W$ 在编译时就已经确定且均为正整数，$0 \le n \lt 2^W$。当 $d = 2^k$ 时，商可以直接通过右移 $k$ 位计算得到，余数可以通过按位与操作计算得到：
+
+$$\text{q} = n \gg k.$$
+$$\text{r} = n \mathop{\&} (2^k - 1).$$
+
+当 $d$ 不是 $2$ 的幂时，将式子写成如下形式：
+
+$$\frac{n}{d} = \frac{n}{2^k} \cdot \frac{2^k}{d},\, k \in \mathbb{N}^+.$$
+
+现考虑式子的商部分 $q = \lfloor \frac{1}{2^k} \cdot n \cdot \frac{2^k}{d} \rfloor$，除以 $2^k$ 只需要移位即可，记 $m = \frac{2^k}{d}$，这样只需要计算出 $n \cdot m$，即可快速得到式子的商。
+向下取整并不要求我们计算出精确的 $m$（$m$ 本身并不是整数），我们需要以设法以一种简便的方式获取近似于 $m$ 的一个整数 $\tilde{m}$，计算出 $\tilde{q} = \lfloor \frac{n}{2^k} \cdot \tilde{m} \rfloor$，并且让 $\tilde{q} = q$。
+由于 $d \ne 2^l, l \in \mathbb{N}^+$，因此 $m$ 不是整数。
+接下来考虑到向下取整和向上取整，他们是最容易得到的两个近似值：
+
+$$\lfloor m \rfloor \lt m \lt \lceil m \rceil.$$
+
+若取 $\tilde{m} = \lfloor m \rfloor$ 并记 $\tilde{m} = \frac{2^k - e}{d}$，其中 $0 \lt e \lt d$，则 $\tilde{q} \le q$，即：
+
+$$\tilde{q} = \lfloor \frac{n}{2^k} \cdot \frac{2^k - e}{d} \rfloor.$$
+
+考虑 $n = d$ 时的情形：$\tilde{q} = \frac{2^k -e}{2^k} < 1$，而实际的商 $q = 1$，因此 $\tilde{m} = \lfloor m \rfloor$ 不满足要求。
+
+若取 $\tilde{m} = \lceil m \rceil$ 并记 $\tilde{m} = \frac{2^k + e}{d}$，其中 $0 \lt e \lt d$，则 $\tilde{q} \ge q$，即：
+
+$$\tilde{q} = \lfloor \frac{n}{2^k} \cdot \frac{2^k + e}{d} \rfloor = \lfloor \frac{n}{d} + \frac{n}{2^k} \cdot \frac{e}{n} \rfloor.$$
+
+$\frac{n}{d}$ 的小数部分 $0 \le f \le \frac{d-1}{d}$，因此只要 $\frac{n}{2^k} \cdot \frac{e}{d} \lt \frac{1}{d}$，就能保证 $\tilde{q} = q$，这就要求：
+
+$$k > \log_2 n + \log_2 e.$$
+
+考虑到 $0 \le n \lt 2^W$ 以及 $\log_2 e \lt \log_2 d \lt \lceil \log_2 d \rceil$，只要取 $k = W + \lceil \log_2 d \rceil$ 即可保证 $\tilde{q} = q$，这时 $\tilde{m} = \lceil \frac{2^W \cdot 2^{\lceil \log_2 d \rceil}}{d} \rceil$。
+
+由于 $2^{\lfloor \log_2 d \rfloor} < d = 2^{\log_2 d} < 2^{\lceil \log_2 d \rceil}$（$d$ 不是 $2$ 的幂，因此没有等号），因此 $2^W < \tilde{m} < 2^W \cdot 2^{\lceil \log_2 d \rceil - \lfloor \log_2 d \rfloor} = 2^{W+1}$。
+
+由于 $\tilde{m}$ 超出了寄存器的表示范围，我们可以将 $\tilde{m}$ 按如下方式分解：
+
+$$
+\begin{align}
+&\tilde{m}_\mathrm{l} = 2^W.\nonumber\\
+&\tilde{m}_\mathrm{h} = \tilde{m} - 2^W = (\lceil \frac{2^k}{d} - 2^W \rceil) \gg W.\nonumber\\
+&\tilde{m} = (\tilde{m}_\mathrm{h} \ll W) + \tilde{m}_\mathrm{l}.\nonumber\\
+\end{align}
+$$
+
+然后，代入 $\tilde{q} = \lfloor \frac{n}{2^k} \cdot \tilde{m} \rfloor$，得到：
+
+$$
+\begin{align}
+  q = \tilde{q} &= \nonumber\\
+  &= \left\lfloor \frac{1}{2^k} \left(\left(n \cdot \tilde{m}_\mathrm{h} \ll W\right) +  n \cdot \tilde{m}_\mathrm{l}\right) \right\rfloor.\nonumber\\
+  &= \left(\left(n \cdot \tilde{m}_\mathrm{h}\right) \ll \left(W - k\right)\right) + \left(\tilde{m}_\mathrm{l} \ll k\right).\nonumber\\
+\end{align}
+$$
+
+::: {.callout-note}
+乘法的结果将被存入一个字长为 $2W$ 位的寄存器中，不会发生溢出。
+:::
+
+这样，商的计算就简化为两次乘法和两次移位操作。
+计算出商 $q$ 后，余数可以通过如下方式计算得到：
+
+$$r = n - q \cdot d.$$
