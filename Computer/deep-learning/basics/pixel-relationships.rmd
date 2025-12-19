@@ -1,5 +1,5 @@
 ---
-title: Chapter 2 Notes
+title: Pixel Relationships in Digital Images
 ---
 
 ## Basic Relationships between Pixels
