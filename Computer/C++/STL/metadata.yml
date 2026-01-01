@@ -8,3 +8,5 @@ sidebar:
       href: emplace_back-vs-push_back.html
     - title: "理解 `shared_ptr` 与 `weak_ptr`"
       href: shared_ptr-and-weak_ptr/index.html
+    - title: "要不要使用 `std::thread::detach`？"
+      href: should_we_use_detach.html

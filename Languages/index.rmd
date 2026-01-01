@@ -1,0 +1,8 @@
+---
+title: 语言
+sidebar:
+  back: ../index.html
+---
+
+- [日本語](日本語/)
+- [français](français/)

@@ -1,0 +1,21 @@
+---
+title: BiBTeX 无法打开输出文件
+---
+
+使用 BiBTeX 处理参考文献时，遇到如下错误：
+
+```plain
+bibtex: Not writing to /path/to/document.blg (openout_any = p).
+I couldn't open file name `/path/to/document.blg'
+```
+
+这是由于 BiBTeX 存在如下写入权限策略：
+
+- `openout_any=a`：允许写入任何文件。
+- `openout_any=r`：不允许写入以 `.` 开头的文件（隐藏文件）。
+- `openout_any=p`：在 `r` 的基础上，只允许写入当前目录及其子目录中的文件，不允许写入父级目录。
+
+对上述错误，有两种解决方案：
+
+- 调整项目目录结构，确保 BiBTeX 输出文件位于当前目录或其子目录中（推荐）。
+- 修改 TeX 发行版的配置文件，放宽 `openout_any` 的限制。具体来说，打开 `<TeXLive 安装目录>/texmf-dist/web2c/texmf.cnf` 文件，找到 `openout_any` 配置项并修改其值为 `r` 或 `a`。

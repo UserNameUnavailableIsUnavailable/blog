@@ -1,0 +1,29 @@
+---
+title: "踩坑：安装 mmsegmentation"
+---
+
+预编译的 `mmcv` 模块对 PyTorch 和 CUDA 版本有特定要求，访问 <https://mmcv.readthedocs.io/en/latest/get_started/installation.html#install-with-pip>，在列表中选择可用的环境选项后，提前准备好相应的 PyTorch 环境并复制相应的安装命令。
+
+MMCV 目前已经很长时间无人维护，经测试，最新的 MMCV 2.2.0 版本存在版本不匹配问题，建议安装 MMCV 2.1.0 版本，与之匹配的 PyTorch 版本为 2.1.2。
+
+```powershell
+conda create -p ./.venv python=3.10 -y
+conda activate ./.venv
+pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+```
+
+然后，使用 `pip` 安装 `mmcv`、`mmsegmentation`（不要按照官网的建议使用 `mim` 安装）。
+
+```powershell
+pip install mmcv==2.1.0 mmsegmentation==1.2.2 -f https://download.openmmlab.com/mmcv/dist/cu118/torch2.1/index.html
+```
+
+安装完成后，需要注意 NumPy 的版本问题，只能选用 `1.x.x` 版本，否则会产生 ABI 不兼容的问题。
+
+```powershell
+# 首先降低 OpenCV 版本
+pip install opencv_python==4.6. opencv_python_headless==4.8
+# 然后安装 1.x.x 版本的 numpy
+pip install numpy<2
+```
+

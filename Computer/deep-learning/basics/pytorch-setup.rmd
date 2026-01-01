@@ -1,5 +1,5 @@
 ---
-title: PyTorch 基础
+title: PyTorch 环境搭建
 ---
 
 ## 环境准备

@@ -1,0 +1,53 @@
+---
+title: 要不要使用 `std::thread::detach`？
+---
+
+## 分析
+
+在 `std::thread` 的析构函数中，当线程没有被 `join` 或 `detach` 时，程序会调用 `std::terminate`，导致程序异常终止。因此，在使用 `std::thread` 时，必须确保每个线程在销毁前都被正确地 `join` 或 `detach`。
+
+实际开发中，使用 `detach` 非常罕见，因为一旦线程被分离，主线程无法再与其通信或等待其完成，这可能导致资源管理和同步问题。
+
+```cpp
+void worker() {
+    Socket s;
+    s.connect("example.com", 80);
+    // 处理网络通信
+}
+
+int main() {
+    std::thread t(worker);
+    // 主线程继续执行其他任务
+    t.detach(); // 分离线程
+    return 0;
+}
+```
+
+需要注意的是，`main` 函数返回后，`main` 函数的调用方会执行 `std::exit` 结束整个进程，导致所有线程强制终止，且栈展开（stack unwinding）不会发生，进而导致资源泄露等问题。
+
+::: {.callout-note}
+**题外话**
+
+`detach` 所带来的问题本质上是 `main` 函数退出时调用 `std::exit` 结束进程所致。
+Windows 和 Unix-like 平台均提供了退出当前线程的 API，分别是 `ExitThread` 和 `pthread_exit`。
+
+```cpp
+int main() {
+    std::thread t(worker);
+    // 主线程继续执行其他任务
+    t.detach(); // 分离线程
+    ExitThread(0); // 仅退出当前线程
+    // 或者在 Unix-like 平台上使用 pthread_exit(0);
+}
+```
+
+这样，分离的线程可以继续运行，直到其自然结束。当所有线程结束后，操作系统才会回收整个进程的资源，从而避免资源泄露等问题。但是，这种做法并不符合 C++ 标准，且可能导致程序行为不可预测，因此不推荐在实际项目中使用。
+:::
+
+使用 `std::thread::detach` 需要保证分离的线程在主线程退出前完成其任务，否则可能导致资源泄露和未定义行为。因此，因优先使用 `join`，或自行为 `detach` 的线程设计的其他同步机制。
+
+## 另请参阅
+
+- [`std::thread::detach`](https://en.cppreference.com/w/cpp/thread/thread/detach.html)
+- [When should I use `std::thread::detach`?](https://stackoverflow.com/questions/22803600/when-should-i-use-stdthreaddetach)
+- [C++ `std::thread::detach`](https://zhuanlan.zhihu.com/p/670105400)

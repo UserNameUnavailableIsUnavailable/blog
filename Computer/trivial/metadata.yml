@@ -32,3 +32,7 @@ sidebar:
         href: 2025/linux-desktop-screenshot-optimization/index.html
       - title: 在 Linux 服务器上部署 Clash 服务
         href: 2025/clash-service/index.html
+      - title: "踩坑：安装 mmsegmentation"
+        href: 2025/mmsegmentation-installation.html
+      - title: BiBTeX 无法打开输出文件
+        href: 2025/bibtex-cannot-open-output-file.html

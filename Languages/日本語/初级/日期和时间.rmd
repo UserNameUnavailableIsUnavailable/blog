@@ -1,0 +1,137 @@
+---
+title: 日付と時間
+---
+
+## 相对时间和频次
+
+::::{data-as="table" data-type="plain"}
+:::{data-type="record"}
+- おととい
+- <ruby>昨日<rt>きのう</rt></ruby>{color="red"}
+- <ruby>今日<rt>きょう</rt></ruby>{color="red"}
+- <ruby>明日<rt>あした</rt></ruby>{color="red"}
+- <ruby>明後日<rt>あさって</rt></ruby>{color="red"}
+- <ruby>毎日<rt>まいにち</rt></ruby>
+:::
+:::{data-type="record"}
+- おとといの<ruby>朝<rt>あさ</rt></ruby>
+- <ruby>昨日<rt>きのう</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>
+- <ruby>今朝<rt>けさ</rt></ruby>{color="red"}
+- <ruby>明日<rt>あした</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>
+- <ruby>明後日<rt>あさって</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>
+- <ruby>毎<rt>まい</rt>朝<rt>あさ</rt></ruby>
+:::
+:::{data-type="record"}
+- おとといの<ruby>晩<rt>ばん</rt></ruby>
+- <ruby>昨夜<rt>ゆうべ</rt></ruby>{color="red"}
+- <ruby>今晩<rt>こんばん</rt></ruby>
+- <ruby>明日<rt>あした</rt></ruby>の<ruby>晩<rt>ばん</rt></ruby>
+- <ruby>明後日<rt>あさって</rt></ruby>の<ruby>晩<rt>ばん</rt></ruby>
+- <ruby>毎<rt>まい</rt>晩<rt>ばん</rt></ruby>
+:::
+:::{data-type="record"}
+- <ruby>先<rt>せん</rt>々<rt>せん</rt>週<rt>しゅう</rt></ruby>
+- <ruby>先<rt>せん</rt>週<rt>しゅう</rt></ruby>
+- <ruby>今<rt>こん</rt></ruby><ruby>週<rt>しゅう</rt></ruby>
+- <ruby>来<rt>らい</rt>週<rt>しゅう</rt></ruby>
+- <ruby>再<rt>さ</rt>来<rt>らい</rt>週<rt>しゅう</rt></ruby>
+- <ruby>毎<rt>まい</rt>週<rt>しゅう</rt></ruby>
+:::
+:::{data-type="record"}
+- <ruby>先<rt>せん</rt>々<rt>せん</rt>月<rt>げつ</rt></ruby>
+- <ruby>先<rt>せん</rt>月<rt>げつ</rt></ruby>
+- <ruby>今<rt>こん</rt>月<rt>げつ</rt></ruby>
+- <ruby>来<rt>らい</rt>月<rt>げつ</rt></ruby>
+- <ruby>再<rt>さ</rt>来<rt>らい</rt>月<rt>げつ</rt></ruby>
+- <ruby>毎<rt>まい</rt>月<rt>つき</rt></ruby>{color="red"}
+:::
+:::{data-type="record"}
+- おととし{color="red"}
+- <ruby>去<rt>きょ</rt>年<rt>ねん</rt></ruby>
+- <ruby>今年<rt>ことし</rt></ruby>{color="red"}
+- <ruby>来<rt>らい</rt>年<rt>ねん</rt></ruby>
+- <ruby>再<rt>さ</rt>来<rt>らい</rt>年<rt>ねん</rt></ruby>
+- <ruby>毎<rt>まい</rt>年<rt>とし</rt></ruby>{color="red"}
+:::
+::::
+
+## 具体日期
+
+日语日期的表达方式与中文类似，顺序为“年-月-日”。
+
+表示“年”时使用“〜年（ねん）”，如 2026 年为“2026年（にせんにじゅうろくねん）”。
+
+表示“月”时使用“〜月（がつ）”：
+
+| 月份 | 读法 |
+| :----: | :------: |
+| 1 月 | いちがつ |
+| 2 月 | にがつ |
+| 3 月 | さんがつ |
+| 4 月 | しがつ{color="red"} |
+| 5 月 | ごがつ |
+| 6 月 | ろくがつ |
+| 7 月 | しちがつ{color="red"} |
+| 8 月 | はちがつ |
+| 9 月 | くがつ{color="red"} |
+| 10 月 | じゅうがつ |
+| 11 月 | じゅういちがつ |
+| 12 月 | じゅうにがつ |
+
+表示“日”时使用“〜日（にち）”，但有一些特殊读法需要记忆：
+
+| 日期 | 读法 |
+| :----: | :------: |
+| 朔日（1 日） | ついたち{color="red"} |
+| 2 日 | ふつか{color="red"} |
+| 3 日 | みっか{color="red"} |
+| 4 日 | よっか{color="red"} |
+| 5 日 | いつか{color="red"} |
+| 6 日 | むいか{color="red"} |
+| 7 日 | なのか{color="red"} |
+| 8 日 | ようか{color="red"} |
+| 9 日 | ここのか{color="red"} |
+| 10 日 | とおか{color="red"} |
+| 11 日 | じゅういちにち |
+| 12 日 | じゅうににち |
+| 13 日 | じゅうさんにち |
+| 14 日 | じゅうよっか{color="red"} |
+| 15 日 | じゅうごにち |
+| 16 日 | じゅうろくにち |
+| 17 日 | じゅうしちにち{color="red"} |
+| 18 日 | じゅうはちにち |
+| 19 日 | じゅうくにち{color="red"} |
+| 20 日 | はつか{color="red"} |
+| 21 日 | にじゅういちにち |
+| 22 日 | にじゅうににち |
+| 23 日 | にじゅうさんにち |
+| 24 日 | にじゅうよっか{color="red"} |
+| 25 日 | にじゅうごにち |
+| 26 日 | にじゅうろくにち |
+| 27 日 | にじゅうしちにち{color="red"} |
+| 28 日 | にじゅうはちにち |
+| 29 日 | にじゅうくにち{color="red"} |
+| 30 日 | さんじゅうにち |
+| 31 日 | さんじゅういちにち |
+
+::: {.callout-important}
+- 需要注意的是，有两种读法的数字（4、7、9）在月份和日期中只能按照表格中的读法使用，不能换用。
+- 在询问现在是几月时，使用何月（なんがつ）；在询问今天是几号时，使用何日（なんにち）。
+:::
+
+## 星期
+
+| 星期 | 读法 |
+| :----: | :------: |
+| 日曜日 | にちようび |
+| 月曜日 | げつようび |
+| 火曜日 | かようび |
+| 水曜日 | すいようび |
+| 木曜日 | もくようび |
+| 金曜日 | きんようび |
+| 土曜日 | どようび |
+
+::: {.callout-important}
+- 出现的汉字全部使用音读。
+- 询问今天是星期几时，使用何曜日（なんようび）。
+:::

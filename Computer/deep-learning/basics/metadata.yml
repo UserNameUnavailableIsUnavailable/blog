@@ -2,11 +2,11 @@ sidebar:
   back: ../index.html
   children:
   - title: 基础
-    href: basics/index.html
+    href: index.html
     children:
     - title: PyTorch 环境搭建
-      href: basics/pytorch-setup.html
+      href: pytorch-setup.html
     - title: 张量
-      href: basics/tensor.html
+      href: tensor.html
     - title: 变换
-      href: basics/transform.html
+      href: transform.html
