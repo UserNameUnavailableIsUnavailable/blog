@@ -10,3 +10,5 @@ sidebar:
       href: tensor.html
     - title: 变换
       href: transform.html
+    - title: 上采样
+      href: upsample/index.html

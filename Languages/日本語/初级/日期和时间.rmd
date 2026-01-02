@@ -7,51 +7,51 @@ title: 日期和时间
 ::::{data-as="table" data-type="plain"}
 :::{data-type="record"}
 - おととい
-- <ruby>昨日<rt>きのう</rt></ruby>{color="red"}
-- <ruby>今日<rt>きょう</rt></ruby>{color="red"}
-- <ruby>明日<rt>あした</rt></ruby>{color="red"}
-- <ruby>明後日<rt>あさって</rt></ruby>{color="red"}
-- <ruby>毎日<rt>まいにち</rt></ruby>
+- [昨日]^(きのう){color="red"}
+- [今日]^(きょう){color="red"}
+- [明日]^(あした){color="red"}
+- [明後日]^(あさって){color="red"}
+- [毎][日]^(まい)(にち)
 :::
 :::{data-type="record"}
-- おとといの<ruby>朝<rt>あさ</rt></ruby>
-- <ruby>昨日<rt>きのう</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>
-- <ruby>今朝<rt>けさ</rt></ruby>{color="red"}
-- <ruby>明日<rt>あした</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>
-- <ruby>明後日<rt>あさって</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>
-- <ruby>毎<rt>まい</rt>朝<rt>あさ</rt></ruby>
+- [おとといの][朝]^()(あさ)
+- [昨日][の][朝]^(きのう)(の)(あさ)
+- [今朝]^(けさ){color="red"}
+- [明日]^(あした){color="red"}
+- [明後日]^(あさって){color="red"}
+- [毎][朝]^(まい)(あさ)
 :::
 :::{data-type="record"}
-- おとといの<ruby>晩<rt>ばん</rt></ruby>
-- <ruby>昨夜<rt>ゆうべ</rt></ruby>{color="red"}
-- <ruby>今晩<rt>こんばん</rt></ruby>
-- <ruby>明日<rt>あした</rt></ruby>の<ruby>晩<rt>ばん</rt></ruby>
-- <ruby>明後日<rt>あさって</rt></ruby>の<ruby>晩<rt>ばん</rt></ruby>
-- <ruby>毎<rt>まい</rt>晩<rt>ばん</rt></ruby>
+- [おとといの][晩]^()(ばん)
+- [昨夜]^(ゆうべ){color="red"}
+- [今][晩]^(こん)(ばん)
+- [明日]^(あした){color="red"}
+- [明後日]^(あさって){color="red"}
+- [毎][晩]^(まい)(ばん)
 :::
 :::{data-type="record"}
-- <ruby>先<rt>せん</rt>々<rt>せん</rt>週<rt>しゅう</rt></ruby>
-- <ruby>先<rt>せん</rt>週<rt>しゅう</rt></ruby>
-- <ruby>今<rt>こん</rt></ruby><ruby>週<rt>しゅう</rt></ruby>
-- <ruby>来<rt>らい</rt>週<rt>しゅう</rt></ruby>
-- <ruby>再<rt>さ</rt>来<rt>らい</rt>週<rt>しゅう</rt></ruby>
-- <ruby>毎<rt>まい</rt>週<rt>しゅう</rt></ruby>
+- [先][々][週]^(せん)(せん)(しゅう)
+- [先][週]^(せん)(しゅう)
+- [今][週]^(こん)(しゅう)
+- [来][週]^(らい)(しゅう)
+- [再][来][週]^(さい)(らい)(しゅう)
+- [毎][週]^(まい)(しゅう)
 :::
 :::{data-type="record"}
-- <ruby>先<rt>せん</rt>々<rt>せん</rt>月<rt>げつ</rt></ruby>
-- <ruby>先<rt>せん</rt>月<rt>げつ</rt></ruby>
-- <ruby>今<rt>こん</rt>月<rt>げつ</rt></ruby>
-- <ruby>来<rt>らい</rt>月<rt>げつ</rt></ruby>
-- <ruby>再<rt>さ</rt>来<rt>らい</rt>月<rt>げつ</rt></ruby>
-- <ruby>毎<rt>まい</rt>月<rt>つき</rt></ruby>{color="red"}
+- [先][々][月]^(せん)(せん)(げつ)
+- [先][月]^(せん)(げつ)
+- [今][月]^(こん)(げつ)
+- [来][月]^(らい)(げつ)
+- [再][来][月]^(さい)(らい)(げつ)
+- [毎][月]^(まい)(つき){color="red"}
 :::
 :::{data-type="record"}
 - おととし{color="red"}
-- <ruby>去<rt>きょ</rt>年<rt>ねん</rt></ruby>
-- <ruby>今年<rt>ことし</rt></ruby>{color="red"}
-- <ruby>来<rt>らい</rt>年<rt>ねん</rt></ruby>
-- <ruby>再<rt>さ</rt>来<rt>らい</rt>年<rt>ねん</rt></ruby>
-- <ruby>毎<rt>まい</rt>年<rt>とし</rt></ruby>{color="red"}
+- [去][年]^(きょ)(ねん)
+- [今][年]^(こん)(ねん)
+- [来][年]^(らい)(ねん)
+- [再][来][年]^(さい)(らい)(ねん)
+- [毎][年]^(まい)(とし){color="red"}
 :::
 ::::
 
@@ -59,7 +59,7 @@ title: 日期和时间
 
 日语日期的表达方式与中文类似，顺序为“年-月-日”。
 
-表示“年”时使用“〜年（ねん）”，如 2026 年为“2026年（にせんにじゅうろくねん）”。
+表示“年”时使用“〜年（ねん）”，如 2026 年为“にせんにじゅうろくねん”。
 
 表示“月”时使用“〜月（がつ）”：
 

@@ -56,6 +56,116 @@ $$
 p = \frac{y_2 - y}{y_2 - y_1} p_{1y} + \frac{y - y_1}{y_2 - y_1} p_{2y}
 $$
 
-## 反卷积
+在 PyTorch 中，可以使用 `torch.nn.functional.interpolate` 函数来实现双线性插值的上采样操作：
+
+```python
+import torch
+import torch.nn.functional as F
+# 创建一个示例输入张量，形状为 (batch_size, channels, height, width)
+input_tensor = torch.tensor([[[[1, 2], [3, 4]]]], dtype=torch.float32) # 形状为 (1, 1, 2, 2)
+# 使用双线性插值进行上采样，目标尺寸为 (4, 4)
+output_tensor = F.interpolate(input_tensor, size=(4, 4), mode='bilinear', align_corners=False)
+print(output_tensor)
+```
+
+## 转置卷积
 
 转置卷积（Transposed Convolution），也称反卷积（Deconvolution）。是一种通过学习卷积核来实现上采样的方法。与标准卷积不同，反卷积通过在输入特征图上插入零值来增加空间尺寸，然后应用卷积操作以生成更高分辨率的输出。
+
+::: {.callout-note}
+反卷积并不是卷积的逆操作，该名称只是一个谬误。
+:::
+
+给定输入图像 $I = \begin{bmatrix}1&2\\3&4\end{bmatrix}$ 和卷积核 $K = \begin{bmatrix}0&1\\2&3\end{bmatrix}$，输入图像中的每个元素与卷积核进行数乘，形成 4 个小矩阵：
+
+$$
+\begin{aligned}
+I_{11} &= \begin{bmatrix}0&1\\2&3\end{bmatrix}\\
+I_{12} &= \begin{bmatrix}0&2\\4&6\end{bmatrix}\\
+I_{21} &= \begin{bmatrix}0&3\\6&9\end{bmatrix}\\
+I_{22} &= \begin{bmatrix}0&4\\8&12\end{bmatrix}
+\end{aligned}
+$$
+
+四个矩阵按输入图像中元素的位置按步长为 1 进行排列，重叠部分相加，得到输出图像：
+
+$$
+O = \begin{bmatrix}
+0&1&2\\
+2&10&10\\
+6&10&10
+\end{bmatrix}
+$$
+
+对于输入图像 $\mathbf{I} \in \mathbb{R} ^ {h \times w}$，卷积核 $\mathbb{K} \in \mathbb{R} ^ {k^2}$，步长为 $(s_h, s_w)$，填充为 $(p_h, p_w)$ 的转置卷积操作，每个输入像素都会与卷积核进行数乘，形成 $hw$ 个 $k \times k$ 的小矩阵。然后，这些小矩阵按输入图像中元素的位置以步长 $(s_h, s_w)$ 进行排列，重叠部分相加，得到输出图像，并按照填充去除边界的像素。因此，输出图像的尺寸为：
+
+$$
+\begin{equation}
+\begin{aligned}
+H &= (h - 1) \cdot s_h - 2p_h + k \\
+W &= (w - 1) \cdot s_w - 2p_w + k
+\end{aligned} \label{eq-deconv-output-size}
+\end{equation}
+$$
+
+考虑对 $\mathbb{I} \in \mathbb{R} ^ {H \times W}$ 执行普通卷积操作，使用相同大小的卷积核 $\mathbb{K} \in \mathbb{R} ^ {k^2}$，步长为 $(s_h, s_w)$，填充为 $(p_h, p_w)$，则输出图像的尺寸为：
+
+$$
+\begin{aligned}
+h &= \frac{H + 2p_h - k}{s_h} + 1 \\
+w &= \frac{W + 2p_w - k}{s_w} + 1
+\end{aligned}
+$$
+
+将 $h$ 和 $w$ 分别带入转置卷积的输出尺寸公式中，可以发现，转置卷积的输出尺寸正好是原始输入图像的尺寸 $H \times W$。这表明转置卷积 **在空间尺寸上** 与普通卷积操作是互逆的。一次规格相同的卷积操作，紧接着一次规格相同的转置卷积操作，可以恢复到原始的空间尺寸。
+
+::: {.callout-note}
+**与原图尺寸无关的上采样核设计**
+
+在 $\eqref{eq-deconv-output-size}$ 中，令 $H = 2h$ 和 $W = 2w$，可以得到下面的特解：
+
+$$
+\begin{cases}
+k = 4\\
+s_h = s_w = 2\\
+p_h = p_w = 1
+\end{cases}
+$$
+
+这意味着使用大小为 $4 \times 4$ 的卷积核，步长为 2，填充为 1 的转置卷积操作，可以将输入图像的空间尺寸扩大为原图的 2 倍。这是深度学习中常用的上采样技巧。类似地，可以通过调整卷积核大小、步长和填充来设计不同的与原图尺寸无关的上采样核。
+:::
+
+在 PyTorch 中，使用 `torch.nn.ConvTranspose2d` 类来实现转置参数化的转置卷积操作：
+
+```python
+import torch
+import torch.nn as nn
+# 定义转置卷积层
+deconv = nn.ConvTranspose2d(in_channels=1, out_channels=1, kernel_size=4, stride=2, padding=1)
+# 创建一个示例输入张量，形状为 (batch_size, in_channels, height, width)
+input_tensor = torch.tensor([[1, 2], [3, 4]], dtype=torch.float32).unsqueeze(0).unsqueeze(0) # 形状为 (1, 1, 2, 2)
+# 执行转置卷积操作
+output_tensor = deconv(input_tensor)
+```
+
+`torch.nn.Functional` 模块中也提供了 `conv_transpose2d` 函数，可以实现非参数化的转置卷积操作：
+
+```python
+import torch
+import torch.nn.functional as F
+# 创建一个示例输入张量，形状为 (batch_size, in_channels, height, width)
+input_tensor = torch.tensor([[1, 2], [3, 4]], dtype=torch.float32).unsqueeze(0).unsqueeze(0) # 形状为 (1, 1, 2, 2)
+# 定义卷积核张量，形状为 (in_channels, out_channels, kernel_height, kernel_width)
+kernel = torch.tensor([[0, 1], [2, 3]], dtype=torch.float32).unsqueeze(0).unsqueeze(0) # 形状为 (1, 1, 2, 2)
+# 执行转置卷积操作
+output_tensor = F.conv_transpose2d(input_tensor, kernel)
+print(output_tensor)
+```
+
+这个例子的计算结果与前面的手动计算结果相同：
+
+```plain
+tensor([[[[ 0.,  1.,  2.],
+          [ 2., 10., 10.],
+          [ 6., 17., 12.]]]])
+```
