@@ -526,6 +526,22 @@ footnote-container: footnotes
 :::
 ```
 
+## HTML
+
+为防止 XSS 攻击，本扩展默认不渲染 HTML 标记。但有时我们确实需要在文档中嵌入 HTML 代码，这时可以使用下面的语法：
+
+````plain
+```{data-html}
+<iframe src="presentation.html" width="100%" height=800px"></iframe>
+```
+````
+
+这会产生如下效果：
+
+```{data-html}
+<iframe src="presentation.html" width="100%" height=800px"></iframe>
+```
+
 ## 定义引用
 
 要定义引用，需要提供一个 BibTeX 文件（例如 `references.bib`），并在文档元信息中指定 `bibliography: references.bib`。引用的语法为 `[@citation-key]`，其中 `citation-key` 是 BibTeX 中定义的引用键。例如：
