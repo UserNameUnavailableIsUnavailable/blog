@@ -46,8 +46,8 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 
 |扩展|语法|效果|
 |---|---|---|
-|上标|`Foo^1^`|Foo^bar^|
-|下标|`Foo~1~`|Foo~bar~|
+|上标|`Foo^bar^`|Foo^bar^|
+|下标|`Foo~bar~`|Foo~bar~|
 |下划线|`_Foo_`|_Foo_ [^about_underline]|
 |删除线|`~~Foo~~`|~~Foo~~|
 
@@ -81,7 +81,29 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 
 [^about_heading_anchor]: 在不显式为标题指定 `id` 属性的情况下，本扩展将为标题自动提供 `id` 属性，并生成锚点元素，方便在页内跳转。
 
-一般而言，仅建议使用该语法来定义 `id`、`class` 以及 `width` 这样的简单属性，**不建议**定义过于复杂的属性（比如 `styles="color: red; display: block;"` 就过于复杂），以免导致意料之外的问题。
+一般而言，仅建议使用该语法来定义 `id`、`class` 等常用属性。
+
+要指定复杂属性，如样式属性 `style`，可以使用下面的语法：
+
+```plain
+## Bar {data-style-display="block" data-style-text-align="center"}
+```
+
+这将产生如下的 HTML 标记：
+
+```html
+<h2 id="hello" style="display: block; text-align: center;">Bar</h2>
+```
+
+::: {.callout-note}
+以 `data-` 开头的属性是本扩展特有的属性前缀，表示该属性需要经过解析器的特殊处理后才能生效。在后面还会介绍更多类似的属性前缀。
+:::
+
+下面的常用的样式属性已经被预定义为简化形式：
+
+- `width`：与 `data-style-width` 等价。
+- `height`： 与 `data-style-height` 等价。
+- `color`：与 `data-style-color` 等价。
 
 此特性还有一种常见的使用场景，比如下面的这个例子就可以实现在新页面打开链接：
 
@@ -166,20 +188,20 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 除了默认的 `<div>`{.language-html} 容器外，还可以通过 `is` 属性指定使用其他类型的容器，例如：
 
 ```markdown
-:::{ .right is="figure" }
+:::{ .right data-is="figure" }
 ![](./doro-maodie.gif)
 :::
 ```
 
 这会产生如下效果：
 
-:::{ .right is="figure" }
+:::{ .right data-is="figure" }
 ![](./doro-maodie.gif)
 :::
 
 :::: {.callout-important}
-当图片没有标题时，图片将被 **直接** 渲染为 `<img>`{.language-html} 元素。可以使用 `::: { is="figure" } :::` 来定义一个图片容器，并为容器指定一些属性来实现特定的排版效果。
-当为图片指定标题时，图片本身会被渲染为 `<img>`{.language-html} 元素，标题会被渲染为 `<figcaption>`{.language-html} 元素，二者会被包含在一个 **自动创建** 的 `<figure>`{.language-html} 元素内，指定的属性将应用于该 `<figure>` 元素，此时不应该再对图片使用 `::: { is="figure" } :::`。
+当图片没有标题时，图片将被 **直接** 渲染为 `<img>`{.language-html} 元素。可以使用 `::: { data-is="figure" } :::` 来定义一个图片容器，并为容器指定一些属性来实现特定的排版效果。
+当为图片指定标题时，图片本身会被渲染为 `<img>`{.language-html} 元素，标题会被渲染为 `<figcaption>`{.language-html} 元素，二者会被包含在一个 **自动创建** 的 `<figure>`{.language-html} 元素内，指定的属性将应用于该 `<figure>` 元素，此时不应该再对图片使用 `::: { data-is="figure" } :::`。
 
 例如，直接对无标题的图片添加居中属性将不会产生任何效果，因为 `<img>`{.language-html} 元素是行内元素，行内元素无法被居中对齐：
 
@@ -420,7 +442,7 @@ $$
 - 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
 :::
 
-|顺序|定义{.center}|<!-- 这里使用 .center，定义一栏仅居中标题，列表保持靠左 -->
+|顺序|定义{.center}|
 |:-:|---|
 |`std::strong_ordering`|{#strong-ordering}|
 |`std::weak_ordering`|{#weak-ordering}|
@@ -490,6 +512,123 @@ graph TD
 :::
 ::::
 
+## 复杂表格
+
+普通的 Markdown 表格语法存在如下局限性：
+
+- 无法在表格内嵌入复杂元素（可以通过传送语法绕过此限制）；
+- 仅支持水平表格（记录按行显示），无法创建垂直表格（记录按列显示）以及复合表格（记录按行和列混合显示）。
+- 无法实现复杂的单元格合并效果。
+
+通过使用容器语法结合属性语法，可以创建复杂的表格。例如，下面的代码创建了一个垂直表格：
+
+```plain
+::::{data-as="table" data-type="grid-vertical"}
+:::{data-type="properties"}
+- 属性 A{color="red"}
+- 属性 B{color="green"}
+- 属性 C{color="blue"}
+:::
+:::{data-type="properties"}
+- 属性 1{color="#123456"}
+- 属性 2{color="#789abc"}
+- 属性 3{color="#def012"}
+- 属性 4{color="#345678"}
+:::
+:::{data-type="record"}
+- A1
+- B1
+- C1
+:::
+:::{data-type="record"}
+- A2
+- B2
+- C2
+:::
+:::{data-type="record"}
+- A3
+- B3
+- C3
+:::
+:::{data-type="record"}
+- A4
+- B4
+- C4
+:::
+:::{data-type="caption"}
+`grid-vertical` 表格
+:::
+::::
+```
+
+::::{data-as="table" data-type="grid-vertical"}
+:::{data-type="properties"}
+- 属性 A{color="red"}
+- 属性 B{color="green"}
+- 属性 C{color="blue"}
+:::
+:::{data-type="properties"}
+- 属性 1{color="#123456"}
+- 属性 2{color="#789abc"}
+- 属性 3{color="#def012"}
+- 属性 4{color="#345678"}
+:::
+:::{data-type="record"}
+- A1
+- B1
+- C1
+:::
+:::{data-type="record"}
+- A2
+- B2
+- C2
+:::
+:::{data-type="record"}
+- A3
+- B3
+- C3
+:::
+:::{data-type="record"}
+- A4
+- B4
+- C4
+:::
+:::{data-type="caption"}
+`grid-vertical` 表格
+:::
+::::
+
+外层容器字段说明：
+
+- `data-as="table"`：指示该容器应被渲染为表格。
+- `data-type`：表格类型，可选值包括：
+    - `plain-horizontal`: 不包含属性标题的普通表格。
+    - `plain-vertical`: 不包含属性标题的普通垂直表格。
+    - `horizontal`: 包含属性标题的水平表格。
+    - `vertical`: 包含属性标题的垂直表格。
+    - `grid-horizontal`: 包含属性标题的复合水平表格。
+    - `grid-vertical`: 包含属性标题的复合垂直表格。
+
+内层容器字段说明：
+
+- `data-type`
+    - `properties`：用于标识表格属性字段：
+        - 当表格类型为 `plain-horizontal` 或 `plain-vertical` 时，忽略该容器；
+        - 当表格类型为 `horizontal` 时，表示属性标题行；
+        - 当表格类型为 `vertical` 表示属性标题列;
+        - 当表格类型为 `grid-horizontal` 时，第一个 `properties` 容器表示属性标题行，第二个 `properties` 容器表示属性标题列；
+        - 当表格类型为 `grid-vertical` 时，第一个 `properties` 容器表示属性标题列，第二个 `properties` 容器表示属性标题行。
+    - `record`：表格的记录字段， 每个 `record` 容器表示表格中的一行或一列，具体取决于表格类型：
+        - 当表格类型为 `plain-horizontal` 或 `horizontal` 时，一条记录代表表示表格中的一行；
+        - 当表格类型为 `plain-vertical` 或 `vertical` 时，一条记录表示表格中的一列；
+        - 当表格类型为 `grid-horizontal` 时，一条记录表示表格中的一行；
+        - 当表格类型为 `grid-vertical` 时，一条记录表示表格中的一列。
+    - `caption`：表格标题容器，**可选**，表示表格的标题。可以通过属性语法为标题容器指定属性，例如 `data-style-caption-side="top"` 或 `data-style-caption-side="bottom"` 来指定标题显示在表格的上方或下方，默认情况下，标题显示在表格的下方。
+
+从本质上讲，上述语法是对容器按行或列进行展开。
+
+定义在容器中的所有元素最终会被转换为 `<th>`{.language-html} 或 `<td>`{.language-html} 元素，具体取决于其在表格中的位置。另外，可通过属性语法定义 `rowspan` 和 `colspan` 属性来实现复杂的单元格合并效果。
+
 ## 图片增强
 
 公式、代码块和文本可以向下面这样在图片标题中混合使用：
@@ -501,6 +640,41 @@ graph TD
 ![普通文本 `code` $f\left(x\right)$](./doro-maodie.gif){ .center }
 
 另外，点击图片后可以使用 ImageViewer 工具查看图片，该工具支持图片放大、缩小、旋转等功能。
+
+## 注音
+
+可以使用下面的语法为文字添加注音：
+
+```plain
+[B1][B2][B3]...[BN]^(T1)(T2)(T3)...(TN)
+```
+
+其中，`B1`、`B2`、……、`BN` 分别代表需要添加注音的文字块，`T1`、`T2`、……、`TN` 分别代表对应文字块的注音内容。注音内容可以是日语假名、汉语拼音等。上述语句会被转换为如下等价的 HTML 标记：
+
+```html
+<ruby>
+    <rb>B1</rb><rt>T1</rt>
+    <rb>B2</rb><rt>T2</rt>
+    ...
+    <rb>BN</rb><rt>TN</rt>
+</ruby>
+```
+
+例如：
+
+```plain
+- [明日]^(あした)
+- [明][日]^(míng)(rì)
+- [郵][便][局]^(ゆう)(びん)(きょく)
+```
+
+会产生如下效果：
+
+- [明日]^(あした)
+- [明][日]^(míng)(rì)
+- [郵][便][局]^(ゆう)(びん)(きょく)
+
+在将一个词拆分注音时，注音的数量必须与文字块的数量一致，否则该注音将不会被渲染。鼠标光标悬停在注音文字上方时，会弹窗显示放大的注音效果以提升可读性。在拆分注音的情况下，可以点击弹窗中的按钮切换文字块单独注音和词语整体注音两种显示模式。
 
 ## 定义脚注
 
