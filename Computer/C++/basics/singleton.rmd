@@ -1,0 +1,160 @@
+---
+title: 单例
+---
+
+C++ 中实现单例模式需要遵循如下原则：
+
+- 私有化构造函数，防止外部创建实例。
+- 私有化析构函数，防止外部销毁实例。
+- 提供一个静态方法用于获取唯一实例。
+- 禁止拷贝构造函数和赋值操作符，防止复制实例。
+- 禁止移动构造函数和移动赋值操作符，防止移动实例。
+- 确保析构函数正确调用，防止资源泄漏。
+
+## 饿汉式单例
+
+饿汉式单例是在程序启动时就创建实例。这种方式简单且线程安全，但可能会浪费资源。
+
+```cpp
+class Singleton {
+private:
+    // 私有构造函数
+    Singleton() {}
+
+    // 私有析构函数
+    ~Singleton() {}
+
+    // 禁止拷贝构造函数和赋值操作符
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+    // 禁止移动构造函数和移动赋值操作符
+    Singleton(Singleton&&) = delete;
+    Singleton& operator=(Singleton&&) = delete;
+
+    // 静态实例
+    static Singleton instance;
+public:
+    // 获取唯一实例
+    static Singleton& GetInstance() {
+        return instance;
+    }
+};
+```
+
+## 懒汉式单例
+
+懒汉式单例是在第一次使用该实例时才创建它。这种方式可以节省资源，只有在需要时才会创建实例。
+
+传统的懒汉式单例在多线程环境下会出现线程安全问题，需要使用 DCLP（Double-Checked Locking Pattern）来确保线程安全。
+
+```cpp
+class Singleton {
+private:
+    // 私有构造函数
+    Singleton() {}
+
+    // 私有析构函数
+    ~Singleton() {}
+
+    // 禁止拷贝构造函数和赋值操作符
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+    // 禁止移动构造函数和移动赋值操作符
+    Singleton(Singleton&&) = delete;
+    Singleton& operator=(Singleton&&) = delete;
+
+    // 静态指针实例
+    static Singleton* instance_;
+    static std::mutex mtx_;
+public:
+    // 获取唯一实例
+    static Singleton& GetInstance() {
+        if (!instance_) {
+            std::lock_guard lock(mtx_);
+            if (!instance_) {
+                auto tmp = new Singleton();
+                // 使用内存屏障确保写操作的顺序
+                std::atomic_thread_fence(std::memory_order_release);
+                instance_ = tmp;
+            }
+        }
+        return *instance_;
+    }
+};
+```
+
+需要注意的是，`instance_ = new Singleton();`{.language-cpp} 无法确保原子性，而是会被拆分为三步：
+
+1. 通过 `new`{.language-cpp} 分配内存。
+2. 调用构造函数初始化对象。
+3. 将指针赋值给 `instance_`{.language-cpp}。
+
+考虑到编译器优化和 CPU 指令重排，步骤 2 和步骤 3 可能会发生次序交换，导致另一个线程看到一个未完全初始化的实例。因此，我们使用内存屏障来防止这种重排。
+
+除了内存屏障外，还可以使用 C++ 11 中的原子指针来确保线程安全，其作用效果等同于内存屏障：
+
+```cpp
+class Singleton {
+private:
+    // 私有构造函数
+    Singleton() {}
+
+    // 私有析构函数
+    ~Singleton() {}
+
+    // 禁止拷贝构造函数和赋值操作符
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+    // 禁止移动构造函数和移动赋值操作符
+    Singleton(Singleton&&) = delete;
+    Singleton& operator=(Singleton&&) = delete;
+
+    // 原子指针实例
+    static std::atomic<Singleton*> instance_;
+    static std::mutex mtx_;
+public:
+    // 获取唯一实例
+    static Singleton& GetInstance() {
+        Singleton* tmp = instance_.load(std::memory_order_acquire);
+        if (!tmp) {
+            std::lock_guard lock(mtx_);
+            tmp = instance_.load(std::memory_order_relaxed);
+            if (!tmp) {
+                tmp = new Singleton();
+                instance_.store(tmp, std::memory_order_release);
+            }
+        }
+        return *tmp;
+    }
+};
+```
+
+C++ 11 还提供了一种更简单的实现方式——**Meyers 单例**，即使用函数局部静态变量。该方法由编译器保证线程安全，且代码简洁：
+
+```cpp
+class Singleton {
+private:
+    // 私有构造函数
+    Singleton() {}
+
+    // 私有析构函数
+    ~Singleton() {}
+
+    // 禁止拷贝构造函数和赋值操作符
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+    // 禁止移动构造函数和移动赋值操作符
+    Singleton(Singleton&&) = delete;
+    Singleton& operator=(Singleton&&) = delete;
+public:
+    // 获取唯一实例
+    static Singleton& GetInstance() {
+        static Singleton instance;
+        return instance;
+    }
+};
+```
