@@ -8,3 +8,5 @@ sidebar:
       href: a-translate-example/index.html
     - title: 协程
       href: coroutine.html
+    - title: 只读数据段
+      href: read-only-data-section/index.html

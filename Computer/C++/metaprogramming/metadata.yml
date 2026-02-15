@@ -1,6 +1,8 @@
 sidebar:
   back: ../index.html
   children:
+  - title: 类模板特化
+    href: template-specialization.html
   - title: C++ 元编程
     href: index.html
   - title: 万能引用
