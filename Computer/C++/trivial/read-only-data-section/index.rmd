@@ -24,7 +24,7 @@ clang test.c -fms-extensions -o test.exe
 
 ## 数据段
 
-`const int X = 0;` 定义了一个只读的变量 `X`，并且这个变量在编译期就可确定其值。编译器会将 `X` 存储在程序的只读数据段（Read-Only Data Section）中。在 Linux ELF 规范中，这个段被称为 `.rodata`，而在 Windows PE 规范中，这个段被称为 `.rdata`。任何试图修改这个段中数据的操作都会导致 CPU 在运行时触发异常 [^cpu-except]，这时当前线程将从用户态陷入内核态，操作系统接管后处理该异常，并终止程序。
+`const int X = 0;`{.language-c} 定义了一个只读的变量 `X`，并且这个变量 **在编译期就可确定其值** 。编译器会将 `X` 存储在程序的只读数据段（Read-Only Data Section）中。在 Linux ELF 规范中，这个段被称为 `.rodata`，而在 Windows PE 规范中，这个段被称为 `.rdata`。任何试图修改这个段中数据的操作都会导致 CPU 在运行时触发异常 [^cpu-except]，这时当前线程将从用户态陷入内核态，操作系统接管后处理该异常，并终止程序。
 
 ![Linux `readelf` 工具输出的 ELF 文件段信息，其中包含了 `.rodata` 段](assets/elf-sections.avif){.center}
 
@@ -36,7 +36,7 @@ clang test.c -fms-extensions -o test.exe
 
 上述解释并不能让人满意，为什么执行 `mov X, 1` 会导致 CPU 触发异常呢？
 
-要理解这个问题，需要从 CPU 的虚拟内存管理机制说起。CPU 通过页表将不连续的物理内存空间细分为若干大小固定的页框（Page Frame），每个页框通常为 4KB [^4mb]。 程序中的虚拟地址通过页表映射到物理地址。当程序访问一个虚拟地址时，CPU 中的 MMU（Memory Management Unit）会检索对应的页表项（Page Table Entry），并将虚拟地址转换为真实的物理地址。以 32 位 x86 架构为例，每个页表项的大小为 4 B，其中有 20 位用于存储物理页框地址，剩余的 12 位用于存储各种标志位。
+要理解这个问题，需要从 CPU 的虚拟内存管理机制说起。CPU 通过页表将不连续的物理内存空间细分为若干大小固定的页框（Page Frame），每个页框通常为 4KB [^4mb]。 程序中的虚拟地址通过页表映射到物理地址。当程序访问一个虚拟地址时，CPU 中的 MMU（Memory Management Unit）会检索对应的页表项（Page Table Entry, abbr. PTE），并将虚拟地址转换为真实的物理地址。以 32 位 x86 架构为例，每个页表项的大小为 4 B，其中有 20 位用于存储物理页框地址，剩余的 12 位用于存储各种标志位。
 
 [^4mb]: 4KB 是 x86 架构中最常用的页大小，但 x86 CPU 也支持更大的页大小，例如 4 MB 的页，这些大页可以减少页表的层级，提高内存访问效率。但在现代操作系统中，4 KB 仍然是最常用的页大小。
 
