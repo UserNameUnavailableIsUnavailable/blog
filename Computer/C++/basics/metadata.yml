@@ -19,3 +19,5 @@ sidebar:
         href: class/assignment.html
       - title: 继承
         href: class/inheritance/index.html
+      - title: Copy and Swap 惯用法
+        href: class/copy-and-swap-idiom.html

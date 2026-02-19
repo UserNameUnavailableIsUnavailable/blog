@@ -1,0 +1,85 @@
+---
+title: Copy and Swap 惯用法
+---
+
+Copy and Swap 是一种常见的 C++ 编程惯用法，主要用于实现类的赋值运算符（`operator=`）。
+
+以下是实现赋值的传统做法：
+
+```cpp
+#include <utility> // for std::swap
+class MyClass {
+public:
+    MyClass() = default;
+    MyClass(const MyClass& other) {
+        // 复制构造函数的实现
+    }
+    MyClass(MyClass&& other) noexcept {
+        // 移动构造函数的实现
+    }
+    MyClass& operator=(MyClass& other) {
+        if (this != &other) { // 检查自赋值
+            // 方案一：
+            // 1. 释放当前对象的资源
+            // 2. 复制 other 的资源到当前对象
+            // 方案二（更安全）：
+            // 1. 创建一个副本 temp（调用复制构造函数）
+            // 2. 交换当前对象与 temp
+            // 3. temp 的析构函数会释放原来当前对象的资源
+        }
+        return *this; // 返回当前对象
+    }
+    MyClass& operator=(MyClass&& other) noexcept {
+        // 交换当前对象与 other
+        // other 的析构函数会释放原来当前对象的资源
+        return *this; // 返回当前对象
+     }
+};
+```
+
+Copy and swap 惯用法预先定义 `swap` 方法，并利用复制构造函数和交换函数来实现异常安全的赋值操作。以下是 copy and swap 惯用法的基本实现：
+
+```cpp
+#include <utility> // for std::swap
+class MyClass {
+public:
+    MyClass() = default;
+    MyClass(const MyClass& other) {
+        // 复制构造函数的实现
+    }
+    MyClass& operator=(MyClass other) { // 注意参数是按值传递的
+        swap(other); // 交换当前对象与副本
+        return *this; // 返回当前对象
+    }
+    void swap(MyClass& other) noexcept {
+        // 交换成员变量的实现
+    }
+};
+```
+
+可以看到，copy and swap 的实现方式更简洁，移动构造器和赋值重载的实现都可以方便地复用 `swap` 函数的逻辑，从而减少代码重复，并且提供了异常安全的保证。
+
+接下来，在拷贝赋值和移动赋值情况下，分别对比 copy and swap 的实现方式与传统实现方案的性能开销：
+
+|RHS|copy and swap|传统实现|
+|:-:|:-:|:-:|
+|lvalue|调用复制构造函数创建副本 `other`，然后执行 `swap`，即一次复制和一次交换|判断自赋值情形，再复制 `other` 的资源到当前对象，即一次复制和一次交换|
+|rvalue|调用移动构造函数创建副本 `other`，然后执行 `swap`，即一次移动和一次交换|与 `other` 交换，即一次交换|
+
+可以看到，copy and swap 相较于传统实现方案，只在移动赋值的情况下多出了一次移动构造函数的调用（更不用说编译优化可能会消除这次调用），而在拷贝赋值的情况下性能开销与传统实现方案相同。因此，在没有特殊赋值逻辑的情况下，copy and swap 是一种更简洁且异常安全的实现方式。
+
+:::: {.callout-tip}
+还可以在 `swap` 成员的基础上，为当前类定义一个友元函数 `swap`，以便在需要交换两个对象时直接调用该函数，而不需要通过成员函数的方式调用。
+
+```cpp
+friend void swap(MyClass& lhs, MyClass& rhs) noexcept {
+    lhs.swap(rhs); // 也可以直接在友元函数内实现交换逻辑，成员函数 swap 直接调用此友元函数
+}
+```
+
+这样，在需要交换两个对象时，可以直接调用 `swap(lhs, rhs)`{.language-cpp}，而不需要通过成员函数的方式调用 `lhs.swap(rhs)`{.language-cpp}，使得代码更加简洁和易读。
+
+::: {.callout-important}
+需要注意的是友元 `swap` 需要与标准库的 `std::swap` 区分。
+:::
+::::

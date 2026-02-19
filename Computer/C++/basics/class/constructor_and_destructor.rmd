@@ -43,7 +43,11 @@ int main (int argc, char *argv[]) {
 }
 ```
 
-可以看到，`Derived` 隐式地调用了 `Base` 的默认构造函数。
+可以看到，`Derived` 隐式地调用了 `Base` 的默认构造函数。在任何情况下，子类都必须先显式或隐式地调用父类构造函数，才能完成对象的构造。在不显式调用父类构造函数的情况下，编译器会自动调用父类的默认构造函数。
+
+::: {.callout-tip}
+父类对象的内存布局是子类对象内存布局的一个子集，在构造子类对象时，必须先构造父类对象，以确保父类部分的成员变量和虚表指针等基础设施被正确初始化。只有在父类部分被正确构造后，子类才能安全地访问和使用这些成员变量和虚表指针。在几乎所有的面向对象的编程语言中，子类构造函数中的第一条语句都是调用父类构造函数的语句。
+:::
 
 在继承场景下，子类有时需要显式调用父类的构造函数：
 
@@ -60,6 +64,48 @@ public:
     Derived(int value) : Base(value) {} // 显式调用父类构造函数
 };
 ```
+
+::: {.callout-important}
+编译器总是会为没有定义任何构造函数的类自动生成一个默认构造函数，称作 **合成默认构造函数（synthesized default constructor）** 。但是，如果类定义了任何带参构造函数，编译器就不会生成默认构造函数，这时除了显式定义默认构造函数外，还可通过 `= default`{.language-cpp} 让编译器生成默认构造函数。
+
+考虑这样一种情况，父类中定义了一个带参构造函数，但没有定义默认构造函数，在派生的子类构造函数中没有显式调用父类构造函数：
+
+```cpp
+class Base {
+public:
+    Base(int value) : x(value) {}
+private:
+    int x;
+};
+
+class Derived : public Base {
+public:
+    Derived() {} // error: no matching constructor for initialization of 'Base'
+};
+```
+
+在这种情况下，编译器无法自动调用父类的默认构造函数（因为父类没有默认构造函数），因此会导致编译错误。
+
+要解决这个问题，可以在子类构造函数中显式调用父类的带参构造函数：
+
+```cpp
+class Derived : public Base {
+public:
+    Derived() : Base(0) {} // 显式调用父类构造函数
+};
+```
+
+当然，也可以在父类中定义一个默认构造函数：
+
+```cpp
+class Base {
+public:
+    Base() = default; // 让编译器生成默认构造函数
+    Base(int value) : x(value) {}
+private:
+    int x;
+};
+:::
 
 ### 成员的初始化
 
