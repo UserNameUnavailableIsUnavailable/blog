@@ -10,3 +10,5 @@ sidebar:
       href: shared_ptr-and-weak_ptr/index.html
     - title: "要不要使用 `std::thread::detach`？"
       href: should_we_use_detach.html
+    - title: 内存序
+      href: memory-order/index.html
