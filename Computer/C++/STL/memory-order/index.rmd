@@ -449,7 +449,7 @@ void thread2() { // running on CPU#2
 
 除了 acquire 内存序，C++ 11 还引入了 consume 内存序，consume 内存序的语义与 acquire 内存序类似，但它的约束范围更小，仅仅对相关的数据在保证原子性的基础上限制了编译器的指令重排，换句话说，在硬件层面，编译器生成的代码仍是一条普通的 relaxed 原子指令。Consume 主要是尝试在 acquire 内存序的基础上减少现在进一步提升性能。然而，在之前介绍 acquire 内存序的小节中，我们实际上已经注意到采用 relaxed 内存序读取以 release 内存序写入的变量时，读者线程仍有可能观察到 release 内存序之前的操作的旧值。因此，这个内存序的实际定位，在 C++ 26 标准中，consume 内存序被废弃了。
 
-#### acquire-release 内存序
+### acquire-release 内存序
 
 > `std::memory_order_acq_rel`
 >
