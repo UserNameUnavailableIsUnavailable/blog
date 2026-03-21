@@ -1,12 +1,12 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: x86_64 汇编
-    href: index.html
+    href: index
     children:
     - title: PROLOG 和 EPILOG
-      href: prolog-and-epilog.html
+      href: prolog-and-epilog
     - title: “你好，世界！”
-      href: hello-world.html
+      href: hello-world
     - title: 动态重定位
-      href: relocation/index.html
+      href: relocation

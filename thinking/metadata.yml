@@ -1,7 +1,15 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 思考
-    href: index.html
+    href: index
   - title: "2025"
-    href: 2025/index.html
+    children:
+    - title: 关于重构博客网站的一些想法
+      href: "2025/0520"
+    - title: 最近的一些计划
+      href: "2025/0830"
+  - title: "2026"
+    children:
+    - title: 2026 年一些计划
+      href: "2026/0213"

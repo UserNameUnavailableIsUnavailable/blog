@@ -1,11 +1,11 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 类模板特化
-    href: template-specialization.html
+    href: template-specialization
   - title: C++ 元编程
-    href: index.html
+    href: index
   - title: 万能引用
-    href: universal-reference.html
+    href: universal-reference
   - title: "`type_identity`"
-    href: type_identity.html
+    href: type_identity

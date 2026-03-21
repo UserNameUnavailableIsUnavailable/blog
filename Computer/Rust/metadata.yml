@@ -1,8 +1,8 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: Rust
-    href: index.html
+    href: index
     children:
     - title: 所有权
-      href: ownership.html
+      href: ownership

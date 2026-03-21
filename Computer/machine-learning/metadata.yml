@@ -1,8 +1,8 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 模式识别与机器学习
-    href: index.html
+    href: index
     children:
       - title: 概率分布
         href: probability-distributions/

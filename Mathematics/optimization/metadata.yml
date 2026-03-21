@@ -1,13 +1,13 @@
   sidebar:
-    back: ../index.html
+    back: ..
     children:
       - title: 最优化
-        href: index.html
+        href: index
         children:
         - title: 基本概念
-          href: basic-concepts/index.html
+          href: basic-concepts
         - title: 常用定理、结论
-          href: useful-tools/index.html
+          href: useful-tools
         - title: Lagrange 法
-          href: lagrangian-methods/index.html
+          href: lagrangian-methods
 

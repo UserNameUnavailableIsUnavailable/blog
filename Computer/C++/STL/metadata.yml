@@ -1,14 +1,14 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: C++ STL
-    href: index.html
+    href: index
     children:
     - title: "`emplace_back` 与 `push_back`"
-      href: emplace_back-vs-push_back.html
+      href: emplace_back-vs-push_back
     - title: "理解 `shared_ptr` 与 `weak_ptr`"
-      href: shared_ptr-and-weak_ptr/index.html
+      href: shared_ptr-and-weak_ptr
     - title: "要不要使用 `std::thread::detach`？"
-      href: should_we_use_detach.html
+      href: should_we_use_detach
     - title: 内存序
-      href: memory-order/index.html
+      href: memory-order

@@ -1,12 +1,12 @@
   sidebar:
-    back: ../index.html
+    back: ..
     children:
     - title: Vector Calculus
-      href: index.html
+      href: index
       children:
       - title: Basics
-        href: basic-concepts.html
+        href: basic-concepts
       - title: Five Big Theorems
-        href: five-big-theorems.html
+        href: five-big-theorems
       - title: Derivatives
-        href: derivatives.html
+        href: derivatives

@@ -1,8 +1,8 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
     - title: 现代 C++
-      href: index.html
+      href: index
       children:
       - title: 顺序
-        href: order.html
+        href: order

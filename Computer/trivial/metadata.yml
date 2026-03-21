@@ -1,38 +1,38 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 琐碎记录
-    href: index.html
+    href: index
     children:
     - title: "2025"
       children:
       - title: Chocolatey 安装
-        href: 2025/chocolatey/index.html
+        href: 2025/chocolatey
       - title: Microsoft PC Manager 引起的性能问题
-        href: 2025/Bullshit-Microsoft-PC-Manager/index.html
+        href: 2025/Bullshit-Microsoft-PC-Manager
       - title: 解决 “blink.cmp  No fuzzy matching library found!”
-        href: 2025/blink_cmp-prebuilt-binaries-issue/index.html
+        href: 2025/blink_cmp-prebuilt-binaries-issue
       - title: 使用 Vim 进行二进制文件编辑时的问题
-        href: 2025/vim-binary-file-editing-issue/index.html
+        href: 2025/vim-binary-file-editing-issue
       - title: "调查：PowerShell 对外部程序输出数据的处理方式"
-        href: 2025/external-commands-in-pwsh/index.html
+        href: 2025/external-commands-in-pwsh
       - title: Linux 修改登录 shell 为 PowerShell
-        href: 2025/change-login-shell-to-pwsh.html
+        href: 2025/change-login-shell-to-pwsh
       - title: 让 fcitx5 更符合 Windows 使用习惯
-        href: 2025/fcitx-customization/index.html
+        href: 2025/fcitx-customization
       - title: 由 Windows 休眠导致 Linux 无法挂载 NTFS 分区的问题
-        href: 2025/windows-hibernation-ntfs-mount-issue.html
+        href: 2025/windows-hibernation-ntfs-mount-issue
       - title: 常见的 Shell 操作符
-        href: 2025/shell-operators.html
+        href: 2025/shell-operators
       - title: 设置 Ubuntu 默认终端
-        href: 2025/set-ubuntu-default-terminal/index.html
+        href: 2025/set-ubuntu-default-terminal
       - title: nautilus 自定义
-        href: 2025/customize-nautilus-extensions/index.html
+        href: 2025/customize-nautilus-extensions
       - title: Linux 桌面截屏优化
-        href: 2025/linux-desktop-screenshot-optimization/index.html
+        href: 2025/linux-desktop-screenshot-optimization
       - title: 在 Linux 服务器上部署 Clash 服务
-        href: 2025/clash-service/index.html
+        href: 2025/clash-service
       - title: "踩坑：安装 mmsegmentation"
-        href: 2025/mmsegmentation-installation.html
+        href: 2025/mmsegmentation-installation
       - title: BiBTeX 无法打开输出文件
-        href: 2025/bibtex-cannot-open-output-file.html
+        href: 2025/bibtex-cannot-open-output-file

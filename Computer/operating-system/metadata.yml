@@ -1,14 +1,14 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 操作系统
-    href: index.html
+    href: index
     children:
     - title: 线程
-      href: thread.html
+      href: thread
     - title: Unix 中的僵尸进程
-      href: defunct-process.html
+      href: defunct-process
     - title: Shell 重定向实现原理详解
-      href: redirection-expatiation.html
+      href: redirection-expatiation
     - title: 对虚拟化技术的小结——为何 Linux 下用不了 Virtual Box 了？
-      href: why-vbox-fails-in-linux.html
+      href: why-vbox-fails-in-linux

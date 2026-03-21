@@ -1,16 +1,16 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: C++ 笔记
-    href: index.html
+    href: index
     children:
     - title: C++ 基础
-      href: basics/index.html
+      href: basics
     - title: C++ STL
-      href: STL/index.html
+      href: STL
     - title: C++ 元编程
-      href: metaprogramming/index.html
+      href: metaprogramming
     - title: 现代 C++
-      href: modern/index.html
+      href: modern
     - title: C++ 琐碎问题记录
-      href: trivial/index.html
+      href: trivial

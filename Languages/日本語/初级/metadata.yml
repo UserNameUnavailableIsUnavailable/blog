@@ -1,9 +1,9 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 初级
-    href: index.html
+    href: index
   - title: ます形
-    href: ます形.html
+    href: ます形
   - title: 日期和时间
-    href: 日期和时间.html
+    href: 日期和时间

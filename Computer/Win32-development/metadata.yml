@@ -1,12 +1,12 @@
   sidebar:
-    back: ../index.html
+    back: ..
     children:
     - title: Win32 开发
-      href: index.html
+      href: index
       children:
       - title: 字符编码
-        href: character-encoding/index.html
+        href: character-encoding
       - title: Windows 乱码问题研究
-        href: survey-on-Windows-garbling-issue/index.html
+        href: survey-on-Windows-garbling-issue
       - title: "`CreateProcess` 的陷阱"
-        href: CreateProcess-pitfall/index.html
+        href: CreateProcess-pitfall

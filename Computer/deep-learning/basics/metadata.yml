@@ -1,14 +1,14 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 基础
-    href: index.html
+    href: index
     children:
     - title: PyTorch 环境搭建
-      href: pytorch-setup.html
+      href: pytorch-setup
     - title: 张量
-      href: tensor.html
+      href: tensor
     - title: 变换
-      href: transform.html
+      href: transform
     - title: 上采样
-      href: upsample/index.html
+      href: upsample

@@ -1,8 +1,8 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: Probability Theory
-    href: index.html
+    href: index
     children:
     - title: Conditions
-      href: conditions.html
+      href: conditions

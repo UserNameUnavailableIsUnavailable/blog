@@ -1,17 +1,17 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: Spring 框架
-    href: index.html
+    href: index
     children:
     - title: 最小 Spring 框架示例
-      href: minimal/index.html
+      href: minimal
     - title: IoC 容器
-      href: IoC/index.html
+      href: IoC
       children:
       - title: 初探 IoC
-        href: IoC/introduction-to-IoC.html
+        href: IoC/introduction-to-IoC
       - title: 使用注解配置 IoC 容器
-        href: IoC/annotation-based-configuration/index.html
+        href: IoC/annotation-based-configuration
       - title: Bean 的重要性质
-        href: IoC/bean-nature/index.html
+        href: IoC/bean-nature

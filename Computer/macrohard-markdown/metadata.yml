@@ -1,10 +1,10 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
     - title: Macrohard Markdown 博客/幻灯片生成工具
-      href: index.html
+      href: index
       children:
       - title: Macrohard Markdown 博客/幻灯片生成工具介绍
-        href: blog.html
+        href: blog
       - title: 双栏排版示例
-        href: double-column.html
+        href: double-column

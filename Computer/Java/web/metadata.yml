@@ -1,12 +1,12 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: Java Web 开发
-    href: index.html
+    href: index
     children:
       - title: 环境准备
-        href: environment/index.html
+        href: environment
       - title: 深入理解 Servlet
-        href: understanding-servlet/index.html
+        href: understanding-servlet
       - title: Web 应用的目录结构
-        href: directory-structure/index.html
+        href: directory-structure

@@ -1,9 +1,0 @@
-sidebar:
-  back: ../index.html
-  children:
-  - title: "20250420"
-    href: 2025/20250420.html
-  - title: "20250423"
-    href: 2025/20250423.html
-  - title: "20250520"
-    href: 2025/20250520.html

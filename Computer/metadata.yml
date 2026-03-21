@@ -1,5 +1,5 @@
 sidebar:
-  back: ../index.html
+  back: ..
   children:
   - title: 计算机
-    href: index.html
+    href: index
