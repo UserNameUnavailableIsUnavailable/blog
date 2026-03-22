@@ -1,11 +1,11 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 琐碎记录
     href: index
-    children:
+    items:
     - title: "2025"
-      children:
+      items:
       - title: Chocolatey 安装
         href: 2025/chocolatey
       - title: Microsoft PC Manager 引起的性能问题

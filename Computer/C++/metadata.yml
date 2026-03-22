@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: C++ 笔记
     href: index
-    children:
+    items:
     - title: C++ 基础
       href: basics
     - title: C++ STL

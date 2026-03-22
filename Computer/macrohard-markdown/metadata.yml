@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
     - title: Macrohard Markdown 博客/幻灯片生成工具
       href: index
-      children:
+      items:
       - title: Macrohard Markdown 博客/幻灯片生成工具介绍
         href: blog
       - title: 双栏排版示例

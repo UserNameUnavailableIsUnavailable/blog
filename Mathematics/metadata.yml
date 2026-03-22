@@ -1,6 +1,6 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 最优化
     href: optimization
   - title: 概率论

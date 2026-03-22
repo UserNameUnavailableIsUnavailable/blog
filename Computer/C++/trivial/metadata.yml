@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: C++ 琐碎问题记录
     href: index
-    children:
+    items:
     - title: A `Translate` Example
       href: a-translate-example
     - title: 协程

@@ -1,16 +1,16 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: C++ 基础
     href: index
-    children:
+    items:
     - title: Value Categories
       href: value-categories
     - title: 初始化列表
       href: initializer-list
     - title: 面向对象基础
       href: class
-      children:
+      items:
       - title: "`struct`{.language-cpp} 与 `class`{.language-cpp} 的区别"
         href: class/struct_class
       - title: 构造函数与析构函数

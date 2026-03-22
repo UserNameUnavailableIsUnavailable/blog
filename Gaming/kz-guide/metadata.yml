@@ -1,6 +1,6 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: KZ 教程
     href: index
   - title: 准备工作

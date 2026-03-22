@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 底层知识
     href: index
-    children:
+    items:
     - title: 第二章笔记
       href: ch02
     - title: 第三章笔记

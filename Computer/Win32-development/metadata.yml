@@ -1,9 +1,9 @@
-  sidebar:
+  series:
     back: ..
-    children:
+    items:
     - title: Win32 开发
       href: index
-      children:
+      items:
       - title: 字符编码
         href: character-encoding
       - title: Windows 乱码问题研究

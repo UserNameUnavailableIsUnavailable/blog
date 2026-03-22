@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 基础
     href: index
-    children:
+    items:
     - title: PyTorch 环境搭建
       href: pytorch-setup
     - title: 张量

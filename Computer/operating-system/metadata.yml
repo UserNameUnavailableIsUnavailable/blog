@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 操作系统
     href: index
-    children:
+    items:
     - title: 线程
       href: thread
     - title: Unix 中的僵尸进程

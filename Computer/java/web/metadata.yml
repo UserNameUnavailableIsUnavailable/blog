@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: Java Web 开发
     href: index
-    children:
+    items:
       - title: 环境准备
         href: environment
       - title: 深入理解 Servlet

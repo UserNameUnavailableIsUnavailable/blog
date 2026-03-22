@@ -1,17 +1,17 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: CSOL 集成工具开发者文档
     href: index
-    children:
+    items:
     - title: 控制器
       href: Controller
-      children:
+      items:
       - title: 交互
         href: Controller/interaction
     - title: 执行器
       href: Executor
-      children:
+      items:
       - title: 模块化编程
         href: Executor/module
       - title: 运行时

@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: index
-  children:
+  items:
   - title: SimpleOS 设计与实现
     href: index
-    children:
+    items:
     - title: 应用程序二进制接口
       href: application-binary-interface
     - title: C 语言、汇编联合编程

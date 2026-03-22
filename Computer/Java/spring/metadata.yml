@@ -1,14 +1,14 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: Spring 框架
     href: index
-    children:
+    items:
     - title: 最小 Spring 框架示例
       href: minimal
     - title: IoC 容器
       href: IoC
-      children:
+      items:
       - title: 初探 IoC
         href: IoC/introduction-to-IoC
       - title: 使用注解配置 IoC 容器

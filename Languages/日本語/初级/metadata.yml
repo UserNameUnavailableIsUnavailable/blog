@@ -1,6 +1,6 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 初级
     href: index
   - title: ます形

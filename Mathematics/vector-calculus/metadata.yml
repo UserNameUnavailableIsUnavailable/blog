@@ -1,9 +1,9 @@
-  sidebar:
+  series:
     back: ..
-    children:
+    items:
     - title: Vector Calculus
       href: index
-      children:
+      items:
       - title: Basics
         href: basic-concepts
       - title: Five Big Theorems

@@ -1,8 +1,8 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
     - title: 现代 C++
       href: index
-      children:
+      items:
       - title: 顺序
         href: order

@@ -1,6 +1,6 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 类模板特化
     href: template-specialization
   - title: C++ 元编程

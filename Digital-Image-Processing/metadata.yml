@@ -1,5 +1,5 @@
-sidebar:
-  children:
+series:
+  items:
   - title: Back
     href: 
   - title: Digital Image Processing

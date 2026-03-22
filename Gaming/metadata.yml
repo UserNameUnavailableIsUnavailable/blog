@@ -1,5 +1,5 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 游戏
     href: index

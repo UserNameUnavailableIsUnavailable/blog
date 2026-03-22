@@ -1,5 +1,5 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: 深度学习
     href: index

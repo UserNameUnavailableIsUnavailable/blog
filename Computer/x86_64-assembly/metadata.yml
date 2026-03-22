@@ -1,9 +1,9 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: x86_64 汇编
     href: index
-    children:
+    items:
     - title: PROLOG 和 EPILOG
       href: prolog-and-epilog
     - title: “你好，世界！”

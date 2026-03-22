@@ -1,6 +1,6 @@
-sidebar:
+series:
   back: ..
-  children:
+  items:
   - title: Java
     href: index
   - title: Java Web

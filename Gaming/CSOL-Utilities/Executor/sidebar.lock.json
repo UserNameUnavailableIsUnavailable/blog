@@ -2,7 +2,7 @@
     "type": "section",
     "title": "执行器",
     "href": "/CSOL-Utilities/Executor/index.html",
-    "children": [
+    "items": [
         {
             "type": "document",
             "title": "自动操作",
