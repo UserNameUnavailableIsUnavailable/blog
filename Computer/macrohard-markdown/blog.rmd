@@ -716,6 +716,10 @@ footnote-container: footnotes
 <iframe src="presentation.html" width="100%" height=800px"></iframe>
 ```
 
+::: { .callout-tip }
+目前，`<iframe>`{.language-html} 与当前文档共用主题。修改当前文档或 `<iframe>`{.language-html} 其中之一的主题都会引起二者主题的改变。
+:::
+
 ## 定义引用
 
 要定义引用，需要提供一个 BibTeX 文件（例如 `references.bib`），并在文档元信息中指定 `bibliography: references.bib`。引用的语法为 `[@citation-key]`，其中 `citation-key` 是 BibTeX 中定义的引用键。例如：

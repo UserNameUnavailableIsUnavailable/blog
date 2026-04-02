@@ -1,10 +1,10 @@
-sidebar:
-  back: ../index.html
-  children:
+series:
+  back: ..
+  items:
   - title: 底层知识
-    href: index.html
-    children:
+    href: index
+    items:
     - title: 第二章笔记
-      href: ch02.html
+      href: ch02
     - title: 第三章笔记
-      href: ch03.html
+      href: ch03

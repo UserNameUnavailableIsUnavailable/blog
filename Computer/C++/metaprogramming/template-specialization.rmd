@@ -1,0 +1,98 @@
+---
+title: 模板特化
+---
+
+模板特化是指为泛型模板提供针对特定类型的实现，实现对特定类型的特殊处理。C++ 支持两种主要的模板特化方式：全特化和偏特化。
+全特化是为特定类型提供完整的实现，而偏特化则是为一部分类型参数提供特化实现。
+
+## 函数模板特化
+
+C++ 函数模板只能进行全特化，不能进行偏特化，例如：
+
+```cpp
+template <typename T>
+void foo(T v) {
+    std::cout << "Generic: " << v << std::endl;
+}
+
+// 全特化
+template <>
+void foo<int>(int v) {
+    std::cout << "Specialized for int: " << v << std::endl;
+}
+
+// 重载
+void foo(int v) {
+    std::cout << "Overloaded for int: " << v << std::endl;
+}
+```
+
+从形式上看，函数特化似乎和函数重载功能类似，区别在于二者的目的不同。例如：
+
+```cpp
+template <typename T>
+void bar(T v) {
+    // ...
+    foo<T>(v);
+}
+```
+
+要想在模板函数 `bar` 中调用 `foo` 的特化版本，必须使用函数特化，重载则无法达到上述目标。
+
+## 类模板特化
+
+类模板既支持全特化也支持偏特化，例如：
+
+```cpp
+template <typename X, typename Y>
+class Foo {
+public:
+    void info() {
+        std::cout << "Generic Foo" << std::endl;
+    }
+}
+
+// 偏特化
+template <typename X>
+class Foo<X, int> {
+public:
+    void info() {
+        std::cout << "Partial Specialized Foo for Y = int" << std::endl;
+    }
+};
+
+// 全特化
+template <>
+class Foo<int, int> {
+public:
+    void info() {
+        std::cout << "Fully Specialized Foo for X = int, Y = int" << std::endl;
+    }
+};
+```
+
+类模板特化可进一步分为：
+
+- 绝对类型特化：为特定类型提供特化实现，例如 `Foo<int, int>`。
+- 引用/指针类型特化：为引用或指针类型提供特化实现，例如 `Foo<X*, Y&>`。
+- 类类型特化：为特定类类型提供特化实现，例如 `Foo<std::string, std::vector<T>>`。
+
+以引用/指针类型特化为例：
+
+```cpp
+template <typename X, typename Y>
+class Bar {
+public:
+    void info() {
+        std::cout << "Generic Bar" << std::endl;
+    }
+};
+
+template <typename X, typename Y>
+class Bar<X*, Y&> { // 偏特化指针和引用类型
+public:
+    void info() {
+        std::cout << "Specialized Bar for pointer and reference types" << std::endl;
+    }
+};
+```

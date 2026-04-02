@@ -1,9 +1,9 @@
-sidebar:
-  back: ../index.html
-  children:
+series:
+  back: ..
+  items:
   - title: 模式识别与机器学习
-    href: index.html
-    children:
+    href: index
+    items:
       - title: 概率分布
         href: probability-distributions/
       - title: 线性分类模型

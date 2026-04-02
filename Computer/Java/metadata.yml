@@ -1,9 +1,9 @@
-sidebar:
-  back: ../index.html
-  children:
+series:
+  back: ..
+  items:
   - title: Java
-    href: index.html
+    href: index
   - title: Java Web
-    href: web/index.html
+    href: web
   - title: Spring 框架
-    href: spring/index.html
+    href: spring

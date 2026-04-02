@@ -1,9 +1,9 @@
-sidebar:
-  back: ../index.html
-  children:
+series:
+  back: ..
+  items:
   - title: 最优化
-    href: optimization/index.html
+    href: optimization
   - title: 概率论
-    href: probability/index.html
+    href: probability
   - title: 向量微积分
-    href: vector-calculus/index.html
+    href: vector-calculus

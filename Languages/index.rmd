@@ -1,6 +1,6 @@
 ---
 title: 语言
-sidebar:
+series:
   back: ../index.html
 ---
 

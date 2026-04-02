@@ -2,7 +2,7 @@
 title: 个人博客
 title-numbering: false
 format: html
-sidebar: null
+series: null
 ---
 
 - [计算机](Computer/)

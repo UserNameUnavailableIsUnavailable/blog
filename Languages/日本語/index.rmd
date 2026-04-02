@@ -1,6 +1,6 @@
 ---
 title: 日语
-sidebar:
+series:
   back: ../index.html
 ---
 

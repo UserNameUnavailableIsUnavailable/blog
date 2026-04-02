@@ -1,9 +1,9 @@
-sidebar:
-  children:
+series:
+  items:
   - title: 返回
-    href: /index.html
+    href: 
   - title: 论文
-    href: index.html
-    children:
+    href: index
+    items:
     - title: Deep Residual Learning for Image Recognition
-      href: deep-residual-learning-for-image-recognition/index.html
+      href: deep-residual-learning-for-image-recognition

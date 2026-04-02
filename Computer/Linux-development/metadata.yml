@@ -1,8 +1,8 @@
-sidebar:
-  back: ../index.html
-  children:
+series:
+  back: ..
+  items:
   - title: Linux 开发
-    href: index.html
-    children:
+    href: index
+    items:
     - title: "缓冲模式"
-      href: setvbuf.html
+      href: setvbuf

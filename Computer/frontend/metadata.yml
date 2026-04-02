@@ -1,8 +1,8 @@
-sidebar:
-  back: ../index.html
-  children:
+series:
+  back: ..
+  items:
   - title: 前端
-    href: index.html
-    children:
+    href: index
+    items:
     - title: 跨域问题
-      href: cross-origin.html
+      href: cross-origin

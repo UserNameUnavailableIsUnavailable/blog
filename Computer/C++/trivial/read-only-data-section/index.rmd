@@ -1,0 +1,59 @@
+---
+title: 程序中的只读数据段
+---
+
+## 一个例子
+
+```c { data-file-name="test.c" }
+const int X = 0;
+
+int main(int argc, char *argv[])
+{
+    __asm mov X, 1;
+    return 0;
+}
+```
+
+使用 clang 编译上面的源文件：
+
+```powershell
+clang test.c -fms-extensions -o test.exe
+```
+
+运行 `test.exe`，在 Linux 下出现 Segmentation fault (core dumped)，在 Windows 下，事件查看器中会记录应用程序崩溃事件。
+
+## 数据段
+
+`const int X = 0;`{.language-c} 定义了一个只读的变量 `X`，并且这个变量 **在编译期就可确定其值** 。编译器会将 `X` 存储在程序的只读数据段（Read-Only Data Section）中。在 Linux ELF 规范中，这个段被称为 `.rodata`，而在 Windows PE 规范中，这个段被称为 `.rdata`。任何试图修改这个段中数据的操作都会导致 CPU 在运行时触发异常 [^cpu-except]，这时当前线程将从用户态陷入内核态，操作系统接管后处理该异常，并终止程序。
+
+![Linux `readelf` 工具输出的 ELF 文件段信息，其中包含了 `.rodata` 段](assets/elf-sections.avif){.center}
+
+![Windows `dumpbin` 工具输出的 PE 文件段信息，其中包含了 `.rdata` 段](assets/pe-sections.avif){.center}
+
+[^cpu-except]: 在 x86 架构中，CPU 会触发一般保护故障（General Protection Fault，abbr. #GP）。CPU 异常不同于 C++ 语境下的异常。C++ 语境下的异常是在程序中通过 `throw` 语句显式抛出的，这类异常发生在用户态，异常处理也在用户态完成。而 CPU 异常是由硬件自动触发的，通常是由于非法内存访问、除零错误等引起的。这些异常在用户态发生，被 CPU 检测到后陷入内核态，由操作系统提供的中断处理程序处理。处理完成后，操作系统会根据异常的类型决定是否终止程序或采取其他措施。例如，常见的缺页故障（Page Fault）就属于可恢复的异常，操作系统会尝试加载缺失的页并继续执行程序；而非法内存访问则一般认定为不可恢复的异常，操作系统会终止程序并生成相应的错误报告。
+
+## x86 页表项结构
+
+上述解释并不能让人满意，为什么执行 `mov X, 1`{.language-nasm} 会导致 CPU 触发异常呢？
+
+要理解这个问题，需要从 CPU 的虚拟内存管理机制说起。CPU 通过页表将不连续的物理内存空间细分为若干大小固定的页框（Page Frame），每个页框通常为 4 KiB [^4mb]。 程序中的虚拟地址通过页表映射到物理地址。当程序访问一个虚拟地址时，CPU 中的 MMU（Memory Management Unit）会检索对应的页表项（Page Table Entry, abbr. PTE），并将虚拟地址转换为真实的物理地址。以 32 位 x86 架构为例，每个页表项的大小为 4 B，其中有 20 位用于存储物理页框地址，剩余的 12 位用于存储各种标志位。
+
+[^4mb]: 4 KiB 是 x86 架构中最常用的页大小，但 x86 CPU 也支持更大的页大小，例如 4 MiB 的页，这些大页可以减少页表的层级，提高内存访问效率。但在现代操作系统中，4 KiB 仍然是最常用的页大小。
+
+![x86 页表项结构](assets/x86-pte-structure.avif){.center}
+
+![x86 4 KiB 粒度页表项结构说明](assets/x86-4kb-pte.avif){.center}
+
+在这些标志位中，有几个重要的标志位：
+
+- P（Present）：表示该页是否存在于物理内存中，如果该位为 0，则访问该页会触发缺页异常。操作系统利用这一机制来实现页面的按需加载；
+- R/W（Read/Write）：表示该页是否可写；如果该位为 0，则该页为只读。操作系统会利用这一机制来保护只读数据；
+- U/S（User/Supervisor）：表示该页是否可被用户态访问；如果该位为 0，则该页只能被内核态访问。操作系统利用这一机制实现用户态与内核态的内存隔离；
+- A（Accessed）：表示该页是否被访问过。当程序访问该页时，CPU 会自动将该位设置为 1。操作系统可以利用这一机制来实现页面替换算法，例如 LRU（Least Recently Used）；
+- D（Dirty）：表示该页是否被写入过。当程序写入该页时，CPU 会自动将该位设置为 1。操作系统可以利用这一机制来实现写回缓存策略。
+
+当程序执行 `mov X, 1` 时，CPU 会尝试访问存储 `X` 的内存地址。由于 `X` 存储在只读数据段中，对应的页表项的 R/W 位被设置为 0，表示该页为只读。当 CPU 检测到程序试图写入一个只读页时，就会触发一般保护故障（#GP），导致当前线程陷入内核态，由操作系统处理该异常，最终导致程序崩溃。
+
+:::{.callout-important}
+需要注意的是，CPU 对访问的检测是以一个页面为单位的。观察 `readelf` 工具输出的 ELF 文件段信息，可以看到 `.rodata` 等段的起始地址和大小都是按照 4 KiB 对齐的。
+:::

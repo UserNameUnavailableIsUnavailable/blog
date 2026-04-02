@@ -1,10 +1,12 @@
-sidebar:
-  back: ../index.html
-  children:
+series:
+  back: ..
+  items:
   - title: C++ 琐碎问题记录
-    href: index.html
-    children:
+    href: index
+    items:
     - title: A `Translate` Example
-      href: a-translate-example/index.html
+      href: a-translate-example
     - title: 协程
-      href: coroutine.html
+      href: coroutine
+    - title: 只读数据段
+      href: read-only-data-section
