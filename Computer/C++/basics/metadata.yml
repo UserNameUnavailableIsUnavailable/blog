@@ -1,21 +1,25 @@
 sidebar:
-  back: ../index.html
+  back: ../index
   children:
   - title: C++ 基础
-    href: index.html
+    href: index
     children:
     - title: Value Categories
-      href: value-categories.html
+      href: value-categories
     - title: 初始化列表
-      href: initializer-list.html
+      href: initializer-list
+    - title: 字节序判断
+      href: endian
     - title: 面向对象基础
-      href: class/index.html
+      href: class
       children:
       - title: "`struct`{.language-cpp} 与 `class`{.language-cpp} 的区别"
-        href: class/struct_class.html
+        href: class/struct_class
       - title: 构造函数与析构函数
-        href: class/constructor_and_destructor.html
+        href: class/constructor_and_destructor
       - title: 赋值
-        href: class/assignment.html
+        href: class/assignment
       - title: 继承
-        href: class/inheritance/index.html
+        href: class/inheritance
+    - title: 类型转换
+      href: casting

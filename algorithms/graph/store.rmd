@@ -1,0 +1,41 @@
+---
+title: 存储
+---
+
+## 邻接表
+
+使用唯一的 `id` 标识每个顶点，根据实际需求使用顺序表、散列表等结构存储 `id` 对应的真实节点。`payload` 存放顶点的数据内容，如 
+
+```cpp
+template <typename PayloadType>
+struct Vertex {
+    std::size_t id;
+    PayloadType payload;
+};
+```
+
+对图中的每个节点 `v`，建立与之相关联的边表。边以 `v` 为起点，具有如下结构：
+
+```cpp
+template <typename PayloadType>
+struct Edge {
+    std::size_t target_id;
+    PayloadType payload;
+};
+```
+
+在假定 `id` 可以作为 `vector` 索引的隐含存储的情况下，就可以向下面这样使用邻接表存储图结构：
+
+```cpp
+template <typename VertexPayloadType, typename PayloadType>
+class AdjacentGraph : public Graph {
+private:
+    std::vector<Vertex<VertexPayloadType>> vertices;
+    std::vector<std::vector<Edge<PayloadType>>> edges;
+};
+```
+
+::: {.callout-note}
+一些教材并未将顶点作为图结构的一部分，这也是可以的。设置 `id` 的目的就是为了将 payload 与图存储结构解耦，只关注图本身的结构特性。
+进一步地，如果节点或边并不包含任何负载，则上述数据结构还可进一步简化，这常见于算法题。
+:::

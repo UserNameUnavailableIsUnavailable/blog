@@ -1,0 +1,15 @@
+---
+title: 内存序
+---
+
+内存序规定了其他非原子的普通操作在原子操作周围的排布顺序。
+
+> `std::memory_order` specifies how memory accesses, including regular, non-atomic memory accesses, are to be ordered around an atomic operation.
+
+## `std::memory_order_relaxed`
+
+## `std::memory_order_acquire` 和 `std::memory_order_release`
+
+## `std::memory_order_acq_rel`
+
+## `std::memory_order_seq_cst`

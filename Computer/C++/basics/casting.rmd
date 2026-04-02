@@ -1,0 +1,11 @@
+---
+title: 类型转换
+---
+
+## `const_cast`
+
+## `static_cast`
+
+## `reinterpret_cast`
+
+## `dynamic_cast`

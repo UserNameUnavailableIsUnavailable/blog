@@ -1,0 +1,87 @@
+---
+title: 判断字节序
+---
+
+## C++ 20 之前
+
+根据字节序的约定，若低地址对应于数值的低位字节，则为小端方式；反之，若低地址对应于数值的高位字节，则为大端方式。下面所示的方法是最为稳妥的判断方法。
+
+```cpp
+int main() {
+    std::uint16_t word;
+    std::uint8_t bytes[2] = {
+        0x00, // 低地址字节
+        0xFF  // 高地址字节
+    };
+    std::memcpy(&word, bytes, sizeof(word));
+    if (word == 0xFF00) {
+        std::cout << "small endian" << std::endl;
+    } else if (word == 0x00FF) {
+        std::cout << "big endian" << std::endl;
+    } else {
+        std::cout << "unexpected" << std::endl;
+    }
+}
+```
+
+::: {.callout-caution}
+下面的代码示例采用联合体来判断字节序，并且广泛使用，在主流编译器平台都没有问题。但实际上，使用联合体来访问同一内存位置的不同成员是未定义行为，因此应该尽量避免。
+
+```cpp
+union EndianTest {
+    std::uint16_t word;
+    struct {
+        std::uint8_t low; // 低地址字节
+        std::uint8_t high; // 高地址字节
+    } bytes;
+};
+
+int main() {
+    EndianTest test {
+        .bytes = {
+            .low = 0x00,
+            .high = 0xFF
+        }
+    };
+    if (test.word == 0xFF00) {
+        // 高地址字节对应数值高字节
+        std::cout << "small endian" << std::endl;
+    } else if (test.word = 0x00FF) {
+        // 低地址字节对应数值高字节
+        std::cout << "big endian" << std::endl;
+    } else {
+        std::cout << "unexpected" << std::endl;
+    }
+}
+```
+:::
+
+上面提及的方法是在运行时进行判断，是否可以在编译期就进行判断呢？答案是可以的，但需要使用编译期提供的预定义宏，并且需要了解不同处理器平台字节序规定，例如，x86 平台是典型的小端字节序，ARM 平台是典型的大端字节序，那么，在 MSVC 中就可以采用如下方法判断：
+
+```cpp
+#if defined(_M_IX86) || defined(_M_X64)
+    std::cout << "small endian" << std::endl;
+#elif defined(_M_ARM) || defined(_M_ARM64)
+    std::cout << "big endian" << std::endl;
+// other platforms
+#endif
+```
+
+## C++ 20 及之后
+
+C++ 20 引入了 `<bit>` 头文件，其中包含了 `std::endian` 枚举类型，可以直接在编译期判断当前系统的字节序：
+
+```cpp
+#include <bit>
+#include <iostream>
+
+int main() {
+    if (std::endian::native == std::endian::little) {
+        std::cout << "small endian" << std::endl;
+    } else if (std::endian::native == std::endian::big) {
+        std::cout << "big endian" << std::endl;
+    } else {
+        std::cout << "unknown endian" << std::endl;
+    }
+}
+```

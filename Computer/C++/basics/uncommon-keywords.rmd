@@ -1,0 +1,74 @@
+---
+title: C/C++ 不常用关键字/标识符汇总
+---
+
+::: {.callout-important}
+本文提及的内容并不都是关键字。关键字不能作为符号名称使用，但标识符可以。例如，`override`{.language-cpp} 是 C++ 的标识符，用于显式地标记函数重载，但与关键字不同之处在于 `override`{.language-cpp} 可以作为符号名称使用：
+
+```cpp
+int override = 100;
+```
+:::
+
+## `final`{.language-cpp}
+
+`final`{.language-cpp} **标识符**将类的虚成员函数标记为不可重载，或将一个类标记为不可派生。
+
+```cpp
+class Base {
+public:
+    virtual void foo() final;
+};
+
+class Derived {
+public:
+    virtual void foo() override; // Declaration of foo overrides a final function
+};
+```
+
+```cpp
+class Base final {
+
+};
+
+class Derived : public Base { // Base is marked final
+
+};
+```
+
+## `mutable`{.language-cpp}
+
+`mutable`{.language-cpp} **关键字**允许在 `const`{.language-cpp} 成员函数中修改成员变量。
+
+```cpp
+class Foo {
+    mutable int value;
+public:
+    void setValue(int v) const {
+        value = v; // ok
+    }
+};
+
+struct Bar {
+    mutable int count;
+};
+
+const Bar b{0};
+b.count++; // ok
+```
+
+## `restrict`{.language-cpp}
+
+`restrict`{.language-cpp} **关键字**是 C99 引入的一个类型限定符，表示指针所指向的数据只能通过该指针访问。这有助于编译器进行优化，因为它可以假设没有其他指针会修改该数据。C++ 中没有 `restrict`{.language-cpp} 关键字，但在主流编译器平台均提供了相应的扩展，如 MSVC 中的 `__restrict`{.language-cpp} 和 GCC/Clang 中的 `__restrict__`{.language-cpp}。
+
+`memcpy` 函数是一个典型的使用 `restrict`{.language-cpp} 关键字的函数。该函数要求 `src` 和 `dest` 指针所指向的内存区域不能重叠。
+
+```c
+void memcpy(void* restrict dest, void const* restrict src, std::size_t n);
+```
+
+与 `memcpy` 相对的是 `memmove` 函数，该函数允许 `src` 和 `dest` 指针所指向的内存区域重叠。`memmove` 在执行复制操作时，需要额外的逻辑处理重叠情况，因此开销略高于 `memcpy`。
+
+```c
+void memmove(void* dest, void const* src, std::size_t n);
+```
