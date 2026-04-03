@@ -1,8 +1,0 @@
-series:
-  back: ..
-  items:
-    - title: 现代 C++
-      href: index
-      items:
-      - title: 顺序
-        href: order

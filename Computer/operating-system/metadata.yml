@@ -12,3 +12,8 @@ series:
       href: redirection-expatiation
     - title: 对虚拟化技术的小结——为何 Linux 下用不了 Virtual Box 了？
       href: why-vbox-fails-in-linux
+    - title: 内存管理
+      href: memory
+      items:
+      - title: 硬件视角的内存管理
+        href: memory/hardware

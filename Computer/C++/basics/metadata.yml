@@ -8,8 +8,6 @@ series:
       href: value-categories
     - title: 初始化列表
       href: initializer-list
-    - title: 判断字节序
-      href: endian
     - title: 面向对象基础
       href: class
       items:
@@ -21,6 +19,13 @@ series:
         href: class/assignment
       - title: 继承
         href: class/inheritance
+        items:
+        - title: 虚函数与多态
+          href: class/inheritance/polymorphism
+        - title: 虚表剖析
+          href: class/inheritance/vtable
+        - title: 多继承
+          href: class/inheritance/multi-inheritance
     - title: C/C++ 不常用关键字/说明符汇总
       href: uncommon-keywords-and-specifiers
     - title: 类型转换

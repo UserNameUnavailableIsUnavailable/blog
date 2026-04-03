@@ -10,7 +10,5 @@ series:
       href: STL
     - title: C++ 元编程
       href: metaprogramming
-    - title: 现代 C++
-      href: modern
     - title: C++ 琐碎问题记录
       href: trivial

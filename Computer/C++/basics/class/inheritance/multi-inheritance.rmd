@@ -1,0 +1,119 @@
+---
+title: 多继承
+---
+
+多继承是指一个类可以同时继承自多个基类。一般而言，能用单继承解决问题，就不要引入多继承。使用多继承非常容易造成二义性和菱形继承问题。不过，多继承在组合多个类的功能时还是有一定用武之地的。
+
+## 基本使用
+
+一般场景下，多继承的使用与单继承没有什么区别：
+
+```cpp
+class A {
+public:
+    void foo() {}
+};
+
+class B {
+public:
+    void bar() {}
+};
+
+class C : public A, public B {
+
+};
+
+int main () {
+    C c;
+    c.foo(); // ok
+    c.bar(); // ok
+    return 0;
+}
+```
+
+## 二义性问题
+
+当一个类同时继承自多个基类，而这些基类中存在同名成员时，就会产生二义性问题：
+
+```cpp
+class A {
+public:
+    void foo() { std::cout << "A::foo()" << std::endl; }
+};
+
+class B {
+public:
+    void foo() { std::cout << "B::foo()" << std::endl; }
+};
+
+class C : public A, public B {
+
+};
+
+int main () {
+    C c;
+    // c.foo(); // error: request for member 'foo' is ambiguous
+    return 0;
+}
+```
+
+在高级语言层面，类 `A` 和 `B` 中的 `foo()` 具有相同的函数原型。但是编译器在编译时会为二者生成不同的函数签名，因此，若仅仅只是让 `C` 继承 `A` 和 `B`，编译是能够通过的。但此时，对于 `C` 而言，其内部拥有两个不同的 `foo()` 函数，分别对应于 `A::foo()` 和 `B::foo()`。歧义的根源在于仅凭 `C.foo()` 无法确定 `foo` 应该被解析为哪个签名。要解决上述问题，可以通过显式地指定需要调用的函数来消除二义性：
+
+
+```cpp
+int main () {
+    C c;
+    c.A::foo(); // 调用 A::foo()
+    c.B::foo(); // 调用 B::foo()
+    return 0;
+}
+```
+
+::: {.callout-warning}
+上述方式虽然能解决问题，但是在实际开发当中不应该使用。
+:::
+
+## 菱形继承问题
+
+当一个类同时继承自两个基类，而这两个基类又都继承自同一个祖先类时，就会产生菱形继承问题：
+
+```cpp
+class A {
+public:
+    void foo() { std::cout << "A::foo()" << std::endl; }
+};
+
+class B : public A {};
+class C : public A {};
+
+class D : public B, public C {};
+
+int main() {
+    D d;
+    // d.foo(); // error: request for member 'foo' is ambiguous
+    return 0;
+}
+```
+
+菱形继承产生的原因与二义性问题类似。不过，菱形继承区别于二义性问题的一点在于 `foo` 函数实际上只产生了一份来自基类的函数签名。因此，报错的原因仅仅只是编译器并不知道 `B` 和 `C` 中的 `foo` 实际上来源于同一基类。C++ 通过引入 **虚继承（virtual inheritance）** 来解决菱形继承问题，只需要在 `B` 和 `C` 的继承声明中添加 `virtual` 关键字即可：
+
+```cpp
+class A {
+public:
+    void foo() { std::cout << "A::foo()" << std::endl; }
+};
+
+class B : virtual public A {};
+class C : virtual public A {};
+class D : public B, public C {};
+
+int main() {
+    D d;
+    d.foo(); // ok
+    return 0;
+}
+```
+
+::: {.callout-tip}
+菱形继承的一个经典案例是 C++ STL 中的 `iostream` 类，它继承自 `istream` 和 `ostream`，而这两个类又都继承自 `base_ios`。
+:::
