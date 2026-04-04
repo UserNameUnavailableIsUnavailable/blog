@@ -15,5 +15,7 @@ series:
     - title: 内存管理
       href: memory
       items:
-      - title: 硬件视角的内存管理
-        href: memory/hardware
+      - title: 概览
+        href: memory/introduction
+      - title: 分页
+        href: memory/paging

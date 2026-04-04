@@ -1,0 +1,8 @@
+series:
+  back: ..
+  items:
+  - title: Summary of Issues by Stage
+    href: index
+    items:
+    - title: "2026"
+      href: "2026"

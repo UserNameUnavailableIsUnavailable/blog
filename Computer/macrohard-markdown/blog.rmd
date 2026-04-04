@@ -9,9 +9,9 @@ reference-container: references
 
 ## 概述
 
-本文介绍 Macrohard 站点使用的 Markdown 博客幻灯片生成工具，需要读者具备 HTML 和 Markdown 基础。该实现基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 解析器以及其强大的衍生插件，部分缺少对应插件或现有插件无法满足需求的的特性则由我自行实现，这些特性的实现将在完善后作为插件开源。
+本文介绍 Macrohard 站点使用的 Markdown 博客幻灯片生成工具，需要读者具备 HTML 和 Markdown 基础。该实现基于 [Markdown-It](https://github.com/markdown-it/markdown-it) 解析器以及其强大的衍生插件。
 
-本扩展采用纯前端实现，因此发布内容不需要本地编译，与同类产品 [Quarto](https://quarto.org) 不同（基于 [Pandoc](https://pandoc.org/)）。由于个人时间和精力有限，故仅实现了 R Markdown 扩展语法的一个子集。
+本扩展采用纯前端实现，因此发布内容不需要本地编译，与同类产品 [Quarto](https://quarto.org) 不同（基于 [Pandoc](https://pandoc.org/)）。
 
 ## 预览
 
@@ -184,6 +184,69 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 第三栏
 :::
 ::::
+
+默认情况下，`columns` 中内容过长不会自动换行。可添加 `.wrap` 解决：
+
+::::::{.columns}
+:::::{.column width="50%"}
+```markdown
+:::: { .columns .wrap }
+::: { .column }
+1
+:::
+::: { .column }
+2
+:::
+::: { .column }
+3
+:::
+::: { .column }
+4
+:::
+::: { .column }
+5
+:::
+::: { .column }
+6
+:::
+::::
+```
+:::::
+:::::{.column width="50%"}
+::::{.columns .wrap}
+:::{.column}
+第 1 栏
+:::
+:::{.column}
+第 2 栏
+:::
+:::{.column}
+第 3 栏
+:::
+:::{.column}
+第 4 栏
+:::
+:::{.column}
+第 5 栏
+:::
+:::{.column}
+第 6 栏
+:::
+:::{.column}
+第 7 栏
+:::
+:::{.column}
+第 8 栏
+:::
+:::{.column}
+第 9 栏
+:::
+:::{.column}
+第 10 栏
+:::
+::::
+:::::
+::::::
 
 除了默认的 `<div>`{.language-html} 容器外，还可以通过 `is` 属性指定使用其他类型的容器，例如：
 
@@ -459,7 +522,7 @@ $$
 
 ````markdown
 <!-- 注意大括号，这里需要用到属性语法 -->
-```{mermaid .center width="50%"}
+```{mermaid width="50%"}
 graph TD
     A[开始] --> B{是否满足条件？}
     B -- 是 --> C[执行操作]
@@ -467,12 +530,11 @@ graph TD
     C --> D
 ```
 ````
-
-以这样的方式创建的流程图会在原地产生一个 `<img>`{.language-html} 元素。
-
 :::
+
 :::{.column width="50%"}
-```{mermaid .center width="50%"}
+以这样的方式创建的流程图会在原地产生一个 `<svg>`{.language-html} 元素。
+```{mermaid}
 graph TD
     A[开始] --> B{是否满足条件？}
     B -- 是 --> C[执行操作]
@@ -482,35 +544,41 @@ graph TD
 :::
 ::::
 
-以上面所述的方式创建的流程图是无法显示标题的，并且在尺寸调节上存在一定问题。要解决这些问题，需要借助于一个图片 URL 置空的 `<img>`{.language-html} 元素，并在定义流程图时指定 `data-override-image` 属性为插图元素的 `id`（通过属性语法定义）。这样，流程图创建后，会覆盖插图元素：
+:::::: { .columns }
+::::: { .column width="50%" }
+以上面所述的方式创建的流程图无法添加标题、无法定义居中等样式。这时，可以使用下面的方式：
 
-::::{.columns}
-:::{.column width="50%"}
 ````markdown
-```{mermaid .center data-override-image="flowchart"}
+[//]: # 使用 .center 居中
+::::{data-is="figure" .center}
+```{mermaid}
 graph TD
     A[开始] --> B{是否满足条件？}
     B -- 是 --> C[执行操作]
     B -- 否 --> D[结束]
     C --> D
 ```
-
-![$ABCD$ `flowchart`](){#flowchart .center width="50%"}
-````
-:::
-
-:::{.column width="50%"}
-```{mermaid data-override-image="flowchart"}
-graph TD
-    A[开始] --> B{是否满足条件？}
-    B -- 是 --> C[执行操作]
-    B -- 否 --> D[结束]
-    C --> D
-```
-
-![$ABCD$ `flowchart`](){#flowchart .center width="50%"}
+::: {data-is="figcaption"}
+`mermaid` flowchart
 :::
 ::::
+````
+:::::
+::::: { .column width="50%" }
+:::: {data-is="figure" .center}
+```{mermaid}
+graph TD
+    A[开始] --> B{是否满足条件？}
+    B -- 是 --> C[执行操作]
+    B -- 否 --> D[结束]
+    C --> D
+```
+:::{data-is="figcaption"}
+`mermaid` flowchart
+:::
+::::
+:::::
+::::::
 
 ## 复杂表格
 
@@ -718,6 +786,22 @@ footnote-container: footnotes
 
 ::: { .callout-tip }
 目前，`<iframe>`{.language-html} 与当前文档共用主题。修改当前文档或 `<iframe>`{.language-html} 其中之一的主题都会引起二者主题的改变。
+:::
+
+## 注释
+
+由于默认情况下 HTML 标记会被视作纯文本渲染，因此无法使用 HTML 注释来添加注释内容，但可以使用下面的语法来添加注释：
+
+```markdown
+[]: # (This is a comment)
+[]: # "And this is a comment"
+[]: # 'Also this is a comment'
+[//]: # (Yet another comment)
+[comment]: # (Still another comment)
+```
+
+::: {.callout-tip}
+相关讨论参见 <https://github.com/orgs/quarto-dev/discussions/3330>{target="_blank"}。
 :::
 
 ## 定义引用

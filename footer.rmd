@@ -1,5 +1,5 @@
 :::::{.center}
-::::{.columns}
+::::{.columns .wrap}
 :::{.column}
 ![](https://www.macrohard.fun/assets/工信部.ico){width="16"} [苏 ICP 备 2023037770 号-1](https://beian.miit.gov.cn){target="_blank"}
 :::
