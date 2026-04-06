@@ -4,7 +4,7 @@ title: "Some insights on Fourier transforms"
 
 ## Basics
 
-Informally, a function $f(x)$ can be represented as a series of sinusoids:
+Informally, a function $f(x)$ can be represented as a tree of sinusoids:
 
 $$
 f(t) = A_0 + \sum_{n=1}^{\infty} \left(\sin \left(n \omega t + \varphi_n \right) \right).

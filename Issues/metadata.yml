@@ -1,8 +1,8 @@
-series:
+tree:
   back: ..
   items:
-  - title: Summary of Issues by Stage
+  - title: 问题汇总
     href: index
     items:
-    - title: "2026"
+    - title: "2026 年问题汇总"
       href: "2026"

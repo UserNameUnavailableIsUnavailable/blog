@@ -301,7 +301,7 @@
       </choose>
     </group>
   </macro>
-  <!-- Series -->
+  <!-- tree -->
   <macro name="collection">
     <choose>
       <if variable="collection-title" match="any">

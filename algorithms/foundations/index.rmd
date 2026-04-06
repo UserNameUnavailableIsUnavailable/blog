@@ -26,7 +26,7 @@ $$\lfloor\frac{n}{2}\rfloor + \lceil\frac{n}{2}\rceil = n.$$
 
 $$\lceil\frac{n}{m}\rceil = \lfloor\frac{n - 1}{m}\rfloor + 1.$$
 
-### Summation of Geometric Series
+### Summation of Geometric tree
 
 Given an array $\left\{a_n\right\} = a_1 q_{n-1}$, the summation of this array is $S_n = a_1 \frac{1 - q^n}{1 - q} = \underbrace{\frac{a_1 - a_{n+1}}{1 - q}}_\text{this form is better}.$
 
@@ -141,7 +141,7 @@ g(n) &\le f(n) \sum_{i=0}^{\log_b n -1} c^i\\
 \end{align*}
 $$
 
-For the geometric series to converge, $c$ has to be within $(0, 1)$. Then, we can conclude that when $af\left(\frac{n}{b}\right) \le cf(n)$ for some constant $c \lt 1$, $g(n) = O\left(f(n)\right)$.
+For the geometric tree to converge, $c$ has to be within $(0, 1)$. Then, we can conclude that when $af\left(\frac{n}{b}\right) \le cf(n)$ for some constant $c \lt 1$, $g(n) = O\left(f(n)\right)$.
 
 With the above conclusions, we can further deduce:
 

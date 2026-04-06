@@ -1,6 +1,6 @@
 ---
 title: 日语
-series:
+tree:
   back: ../index.html
 ---
 

@@ -1,0 +1,35 @@
+---
+title: "2026 年问题汇总"
+---
+
+## 在 Ubuntu 中安装最新版 Node.js 的办法
+
+Ubuntu 官方源提供的 Node.js 版本过于老旧，无法正常使用。
+见 [NodeSource](https://deb.nodesource.com/) 提供的安装脚本。
+
+## Windows 端口管理
+
+Windows 下的端口管理方式与 Linux 不同，采用动态端口范围（Dynamic Port Range）。该范围内的端口会被系统动态分配给系统服务使用，会导致一些应用程序无法绑定到这些端口上。
+
+查看当前系统的动态端口范围：
+
+```shell
+netsh int ipv4 show dynamicport tcp
+```
+
+查看动态端口范围内已经被占用的端口：
+
+```shell
+netsh interface ipv4 show excludedportrange protocol=tcp
+```
+
+一旦某个端口范围被占用，系统就会将其排除在动态端口范围之外，导致该范围内的端口无法被应用程序使用。尤其是动态端口范围被设定从 1024 开始时，就很容易造成端口冲突问题。
+
+解决办法是调整动态端口范围，避免与应用程序使用的端口冲突。可以将动态端口范围调整为 49152-65535（需要管理员权限）：
+
+```shell
+netsh int ipv4 set dynamicport tcp start=49152 num=16384
+netsh int ipv6 set dynamicport tcp start=49152 num=16384
+```
+
+随后，运行 `net stop winnat`{.language-shell} 和 `net start winnat`{.language-shell} 来重启 Windows NAT 服务，使更改生效。
