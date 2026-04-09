@@ -1,0 +1,72 @@
+---
+title: vcpkg 与 CMake 集成实践
+---
+
+本节以搭建一个迷你 gRPC 服务器为例，使用 vcpkg 管理依赖，基于 CMake 构建整个项目。
+
+任何 CMake 清单文件第一条语句必须是 `cmake_minimum_required`，用于指定 CMake 的最低版本要求：
+
+```cmake
+cmake_minimum_required(VERSION 3.20)
+```
+
+要使用 vcpkg，需要确保 `VCPKG_ROOT` 环境变量设置。在使用 Visual Studio 2022 及以上版本（需要确保 vcpkg 功能开启）开发者 Shell 时，该环境变量会预先配置好。在 CMake 中，可使用 `$ENV:{VCPKG_ROOT}` 来引用该环境变量：
+
+```cmake
+message(STATUS "vcpkg root: $ENV{VCPKG_ROOT}")
+```
+
+为了让 CMake 能找到 vcpkg 安装的库，需要在 CMakeLists.txt 中添加以下行：
+
+```cmake
+# vcpkg toolchain must be specified before the first project()/enable_language so its hooks add the package paths
+set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "vcpkg toolchain file")
+```
+
+::: {.callout-important}
+工具链文件必须在 `project()` 或 `enable_language()` 之前指定，以便 CMake 的钩子能够正确添加 vcpkg 包的路径。
+:::
+
+::: {.callout-tip}
+**其他集成方案**
+
+除了在 CMakeLists.txt 中指定工具链文件外，还可以通过命令行参数 `-DCMAKE_TOOLCHAIN_FILE` 来指定 vcpkg 的工具链文件：
+
+```shell
+cmake -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake ..
+```
+
+CMake 3.19 之后，提供了预设（presets）功能，可以在 `CMakePresets.json` 中配置 vcpkg 的工具链文件：
+
+```json
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "gRPC-demo",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    }
+  ]
+}
+```
+
+使用预设 JSON 文件的方式更加简洁，且不需要修改 CMakeLists.txt 文件，在真实的项目中更推荐使用预设 JSON 文件的方式。
+:::
+
+随后，指定项目名称和使用的 C++ 标准：
+
+```cmake
+project(gRPC-demo LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+```
+
+现在，可以使用 `find_package` 来查找 vcpkg 安装的库了。
+
+```cmake
+find_package(gRPC CONFIG REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+```
+

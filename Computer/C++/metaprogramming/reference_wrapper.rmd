@@ -1,0 +1,96 @@
+---
+title: "`reference_wrapper` 与隐式转换操作符"
+---
+
+## 隐式转换操作符
+
+隐式转换操作符（implicit conversion operator）是 C++ 中的一种特殊成员函数，允许对象在需要特定类型时自动转换为该类型。隐式转换操作符的定义形式如下：
+
+```cpp
+class Position {
+public:
+    Position(int x, int y) : x(x), y(y) {}
+    operator std::string() const {
+        return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
+    }
+private:
+    int x;
+    int y;
+};
+```
+
+然后，我们可以直接将 `Position` 对象赋值给一个 `std::string` 变量：
+
+```cpp
+std::string str = Position(10, 20); // 隐式调用 operator std::string()
+```
+
+## `std::ref` 与 `std::cref`
+
+`std::ref` 和 `std::cref` 是 C++ 标准库中的函数模板，用于创建对对象的引用包装器。这两个函数意在解决引用无法原样传递的问题：
+
+```cpp
+void worker(const std::string& str) {
+    std::cout << &str << std::endl; // 输出 str 的地址
+}
+
+int main() {
+    std::string message = "Hello, World!";
+    std::cout << &message << std::endl; // 输出 message 的地址
+    std::thread t(worker, message);
+    t.join();
+    return 0;
+}
+```
+
+执行上述代码时，`worker` 函数中输出的地址与 `main` 函数中 `message` 的地址不同。这是因为 `std::thread` 在传递参数时会进行值传递，导致 `message` 被复制了一份。`std::thread` 实现中会使用 `std::decay` 来处理参数类型，结果是将 `message` 转换为 `std::string`，从而创建了一个新的对象。
+
+```cpp { code-line-numbers="15" }
+    template<typename _Callable, typename... _Args,
+	     typename = _Require<__not_same<_Callable>>>
+      explicit
+      thread(_Callable&& __f, _Args&&... __args)
+      {
+	static_assert( __is_invocable<typename decay<_Callable>::type,
+				      typename decay<_Args>::type...>::value,
+	  "std::thread arguments must be invocable after conversion to rvalues"
+	  );
+
+	using _Wrapper = _Call_wrapper<_Callable, _Args...>;
+	// Create a call wrapper with DECAY_COPY(__f) as its target object
+	// and DECAY_COPY(__args)... as its bound argument entities.
+	_M_start_thread(_State_ptr(new _State_impl<_Wrapper>(
+	      std::forward<_Callable>(__f), std::forward<_Args>(__args)...)),
+	    _M_thread_deps_never_run);
+      }
+```
+
+在标准库实现中，使用 `std::forward` 转发参数时，并未使用 `std::forward<_Args&&>` 进行完美转发，而是直接使用了 `std::forward<_Args>`，这导致了参数类型被转换为值类型，从而触发了复制构造函数。这是由于标准库规定所有传入的参数都必须存储在线程内部，其用意是避免悬空引用问题。
+
+在一些特殊的需求中，我们会希望将参数以引用的方式传递给线程函数，这时就可以使用 `std::ref` 和 `std::cref` 来创建引用包装器：
+
+```cpp
+std::thread t(worker, std::ref(message));
+```
+
+`std::ref` 和 `std::cref` 都采用了上面提到的隐式转换操作符。以 `std::ref` 为例，其内部存储了对象的指针，并通过隐式转换操作符转换为对原对象的引用。
+
+```cpp
+template<typename _Tp>
+class reference_wrapper {
+    _Tp* _M_data;
+public:
+    reference_wrapper(_Tp& __t) noexcept : _M_data(std::addressof(__t)) {}
+
+    operator _Tp&() const noexcept { return *_M_data; }
+    // ...
+          _GLIBCXX20_CONSTEXPR
+      operator _Tp&() const noexcept
+      { return this->get(); }
+
+      _GLIBCXX20_CONSTEXPR
+      _Tp&
+      get() const noexcept
+      { return *_M_data; }
+};
+```

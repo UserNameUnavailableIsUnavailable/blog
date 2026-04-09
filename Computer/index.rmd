@@ -4,18 +4,18 @@ title: 计算机
 
 ## 笔记
 
-- [C++](C++/)
-- [Rust](Rust/)
-- [x86_64 汇编](x86_64-assembly/)
-- [Java](Java/)
+- [C++](C++)
+- [Rust](Rust)
+- [x86_64 汇编](x86_64-assembly)
+- [Java](Java)
 - [前端](frontend/)
-- [操作系统](operating-system/)
-- [底层原理](underlying-stuff/)
-- [计算机中的数学](mathematics-in-computer/)
-- [深度学习](deep-learning/)
-- [Linux 开发](Linux-development//)
-- [Win32 开发](Win32-development/)
-- [琐碎](trivial/)
+- [操作系统](operating-system)
+- [底层原理](underlying-stuff)
+- [计算机中的数学](mathematics-in-computer)
+- [深度学习](deep-learning)
+- [Linux 开发](Linux)
+- [Win32 开发](Win32)
+- [琐碎](trivial)
 
 ## 实践
 

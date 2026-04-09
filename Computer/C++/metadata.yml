@@ -1,14 +1,14 @@
 tree:
   back: ..
   items:
-  - title: C++ 笔记
+  - title: C++
     href: index
     items:
-    - title: C++ 基础
+    - title: 基础
       href: basics
-    - title: C++ STL
+    - title: STL
       href: STL
-    - title: C++ 元编程
+    - title: 元编程
       href: metaprogramming
-    - title: C++ 琐碎问题记录
+    - title: 实践
       href: trivial

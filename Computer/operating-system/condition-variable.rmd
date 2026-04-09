@@ -2,4 +2,72 @@
 title: 条件变量
 ---
 
-互斥量的作用是确保上锁和解锁的原子性，进而实现了对共享数据的互斥访问。线程
+## 基本概念
+
+互斥体的作用是确保上锁和解锁的原子性，进而实现了对共享数据的互斥访问。互斥体的作用在于排他性地访问共享数据，但仅依靠互斥体并不能实现线程间的同步。考虑这样一个例子：
+
+```cpp
+bool ready = false;
+std::mutex mtx;
+
+void worker1() {
+    std::unique_lock<std::mutex> lock(mtx);
+    while (!ready) {
+        // 等待条件满足
+        // sleep
+        // 如何解除阻塞？
+    }
+}
+
+void worker2() {
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        ready = true; // 修改条件
+    }
+    // 此时 worker1 仍然在等待，如何通知它条件已经满足了呢？
+}
+```
+
+条件变量（condition variable）是一个同步原语，提供线程之间的条件等待和通知机制。一般地，我们将需要检查的条件称作谓词（predicate）。
+
+条件变量需要配合互斥体使用，其目的在于延长对谓词的锁定时间。要理解这一点，需要结合条件变量的工作流程来分析：
+
+```cpp
+std::condition_variable cv;
+std::mutex mtx;
+bool ready = false;
+
+void worker1() {
+    std::unique_lock<std::mutex> lock(mtx);
+    while (!ready) {
+        cv.wait(lock); // 释放锁并等待通知
+    }
+    // 条件满足，继续执行
+}
+
+void worker2() {
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        ready = true; // 修改条件
+    }
+    cv.notify_one(); // 通知等待的线程
+}
+```
+
+首先可以确定的一点是，互斥体首先保证了两个线程对谓词 `ready` 的互斥访问。在谓词不成立的情况下，线程需要阻塞。`worker1` 线程随后被添加到内核中的阻塞队列，`worker2` 在修改谓词后发出通知，内核会将 `worker1` 从阻塞队列中唤醒。考虑这样的情形，如果在条件检查后，`worker1` 线程直接将锁释放，随后 `worker2` 线程立即修改谓词，并发出通知，但此时 `worker1` 线程尚未进入阻塞状态，那么 `worker1` 线程就会错过这个通知，导致 `worker1` 永远等待下去。所以，互斥体的另一个作用是延长对谓词的锁定时间，确保线程阻塞后才释放锁，从而避免错过通知的情况发生。
+
+::: {.callout-important}
+线程在调用 `cv.wait(lock)` 之后陷入内核态，在内核中，线程将自身添加到条件变量的等待队列中，并直接在内核态释放互斥体锁。调度器随后将当前线程切换为其他线程，直到有线程调用 `cv.notify_one()` 或 `cv.notify_all()` 来唤醒等待的线程。
+:::
+
+线程在阻塞后不再返回用户态，因此当线程被唤醒后，仍处于内核态。从内核态返回到用户态后，需要指出的时 `lock` 并不处于锁定状态。`cv.wait(lock)` 会重新获取锁，然后返回用户态。
+
+::: {.callout-important}
+我们常常认为 `cv.wait(lock)` 仅仅意味着线程阻塞，实际上它还包含了唤醒后重新获取锁的过程。
+:::
+
+另一个问题是，为何我们需要将对谓词的检测放到循环中。这涉及到主流操作系统对条件变量的实现细节。简单来说，线程在阻塞在条件变量的等待队列中时，会出现所谓的虚假唤醒（spurious wakeup），即线程在没有收到通知的情况下被唤醒。
+
+## POSIX 条件变量
+
+Linux 的条件变量实现基于 futex（fast user-space mutex）机制。futex 是一种轻量级的用户态同步原语，允许线程在用户态进行快速的锁定和解锁操作。当线程需要阻塞时，futex 会将线程添加到内核中的等待队列中，并在条件满足时唤醒相应的线程。

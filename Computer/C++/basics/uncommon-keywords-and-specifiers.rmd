@@ -76,3 +76,39 @@ void memcpy(void* restrict dest, void const* restrict src, std::size_t n);
 ```c
 void memmove(void* dest, void const* src, std::size_t n);
 ```
+
+## `alignas`{.language-cpp}
+
+`alignas`{.language-cpp} **关键字符**用于指定类型或变量的对齐要求。它可以用于确保某个类型或变量按照特定的字节边界进行对齐，从而提高访问效率。例如，在 x86 体系结构下，cache line 的大小通常为 64 字节，因此对于频繁访问的数据结构，使用 `alignas(64)`{.language-cpp} 可以确保该数据结构在内存中按照 64 字节对齐，从而减少访问时的缓存行分割和伪共享问题。
+
+```cpp
+alignas(64) int64_t some_data;
+```
+
+::: {.callout-note}
+小于 64 字节的数据在非对齐的情况下被缓存时，可能被分散存放在两个不同的 cache line 中，导致访问时需要额外的内存访问，从而增加访问延迟。受到缓存一致性协议影响，访问非对齐的缓存数据会造成两个缓存行同时被锁定，占用更多时钟周期。
+
+对分散在两个 cache line 中的数据进行操作时，会引发伪共享（false sharing）问题，从而降低多线程程序的性能。所谓伪共享，是指多个线程访问同一 cache line 中的不同数据时，导致频繁的缓存行无效化和重新加载，从而降低性能。
+:::
+
+`alignas`{.language-cpp} 还可以用于定义具有特定对齐要求的类型：
+
+```cpp
+struct alignas(16) AlignedStruct {
+    int64_t a;
+    int64_t b;
+};
+```
+
+## `alignof`{.language-cpp}
+
+与 `alignas`{.language-cpp} 相对应的，`alignof`{.language-cpp} **关键字**用于查询类型的对齐要求。它返回一个 `std::size_t` 类型的值，表示该类型的对齐要求（以字节为单位）。例如：
+
+```cpp
+alignas(64) struct AlignedStruct {
+    int64_t a;
+    int64_t b;
+};
+std::cout << alignof(int) << std::endl; // 输出: 4
+std::cout << alignof(AlignedStruct) << std::endl; // 输出: 64
+```
