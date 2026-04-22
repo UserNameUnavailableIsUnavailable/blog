@@ -351,9 +351,12 @@ int main(int argc, char* argv[])
         }
     };
 
+    int err = 0;
+
     if (bind(serverfd, (struct sockaddr*)&addr, 16))
     {
         perror("Failed to bind.");
+        err = -1;
         goto serverfd_ok;
     }
     else
@@ -364,6 +367,7 @@ int main(int argc, char* argv[])
     if (listen(serverfd, 10) < 0)
     {
         perror("Failed to listen.");
+        err = -1;
         goto serverfd_ok;
     }
     else
@@ -378,6 +382,7 @@ int main(int argc, char* argv[])
     if (clientfd < 0)
     {
         perror("Failed to accept.");
+        err = -1;
         goto serverfd_ok;
     }
     else
@@ -389,6 +394,7 @@ int main(int argc, char* argv[])
     if (count < 0)
     {
         perror("Failed to read.");
+        err = -1;
         goto clientfd_ok;
     }
     else
@@ -403,7 +409,7 @@ clientfd_ok:
     close(clientfd);
 serverfd_ok:
     close(serverfd);
-    return 0;
+    return err;
 }
 ```
 
