@@ -269,8 +269,7 @@ int __sys_listen_socket(struct socket *sock, int backlog)
 }
 ```
 
-`somaxconn` 是系统允许的最大连接排队数量，默认为 4096，定义在 `/proc/sys/net/core/somaxconn
-`。
+`somaxconn` 是系统允许的最大连接排队数量，定义在 `/proc/sys/net/core/somaxconn`。
 
 Linux 内核中维护了两个队列来管理连接请求：半连接队列（half-open queue）和全连接队列（full-open queue）。当客户端发送 SYN 包请求连接时，服务器会将该连接请求放入半连接队列中，等待客户端完成三次握手。当三次握手完成后，服务器会将该连接从半连接队列移到全连接队列中，等待调用 `accept` 函数接受连接。如果半连接队列已满，新的连接请求将被拒绝。半连接队列的最大容量定义在 `/proc/sys/net/ipv4/tcp_max_syn_backlog` 中，默认为 1024。全连接队列的最大容量由 `listen` 函数的第二个参数 `n` 指定，且不能超过系统允许的最大连接排队数量 `somaxconn`。
 :::
