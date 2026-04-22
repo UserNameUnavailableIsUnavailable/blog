@@ -10,3 +10,5 @@ tree:
       href: read-only-data-section
     - title: 判断字节序
       href: endian
+    - title: vcpkg 与 CMake 集成
+      href: cmake-vcpkg

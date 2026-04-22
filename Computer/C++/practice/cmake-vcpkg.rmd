@@ -1,5 +1,5 @@
 ---
-title: vcpkg 与 CMake 集成实践
+title: vcpkg 与 CMake 集成
 ---
 
 本节以搭建一个迷你 gRPC 服务器为例，使用 vcpkg 管理依赖，基于 CMake 构建整个项目。
@@ -38,7 +38,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake ..
 
 CMake 3.19 之后，提供了预设（presets）功能，可以在 `CMakePresets.json` 中配置 vcpkg 的工具链文件：
 
-```json
+```json {data-filename="CMakePresets.json"}
 {
   "version": 3,
   "configurePresets": [

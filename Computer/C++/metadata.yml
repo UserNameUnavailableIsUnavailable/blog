@@ -11,4 +11,4 @@ tree:
     - title: 元编程
       href: metaprogramming
     - title: 实践
-      href: trivial
+      href: practice

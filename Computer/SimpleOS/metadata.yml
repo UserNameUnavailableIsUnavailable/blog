@@ -1,5 +1,5 @@
 tree:
-  back: index
+  back: ..
   items:
   - title: SimpleOS 设计与实现
     href: index

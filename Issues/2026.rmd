@@ -33,3 +33,19 @@ netsh int ipv6 set dynamicport tcp start=49152 num=16384
 ```
 
 随后，运行 `net stop winnat`{.language-shell} 和 `net start winnat`{.language-shell} 来重启 Windows NAT 服务，使更改生效。
+
+## clangd 用户配置路径
+
+Windows 下的 clangd 用户配置文件位于 `%APPDATA%\clangd\config.yaml`，类 Unix 系统下位于 `~/.config/clangd/config.yaml`。
+
+## Vim 剪切板相关
+
+- `unnamed`：对应于 `*` 寄存器，在 Linux 环境下对应于 X11 primary selection，在其余环境下对应于系统剪贴板。
+- `unnamedplus`：对应于 `+` 寄存器，在 Linux 环境下对应于 X11 clipboard selection，在其余环境下对应于系统剪贴板。
+
+::: {.callout-tip}
+**X11 剪贴板机制**
+
+X11 primary selection：当用户选择文本时，文本会被自动复制到 primary selection 中，可以通过鼠标中键粘贴。
+X11 clipboard selection：当用户使用 Ctrl+C 或右键菜单复制文本时，文本会被复制到 clipboard selection 中，可以通过 Ctrl+V 或右键菜单粘贴。
+:::
