@@ -63,7 +63,7 @@ typedef struct
 #include <sys/select.h>
 #include <fcntl.h>
 
-void writer(int fd) noexcept
+void writer(int fd)
 {
     // fd must be valid
     if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
@@ -88,7 +88,7 @@ void writer(int fd) noexcept
     close(fd);
 }
 
-void reader(int fd) noexcept
+void reader(int fd)
 {
     // fd must be valid
     if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
@@ -226,7 +226,7 @@ extern int poll (struct pollfd *__fds, nfds_t __nfds, int __timeout)
 使用 `poll` 可将 `reader` 改进如下：
 
 ```cpp
-void reader(int fd) noexcept
+void reader(int fd)
 {
     // fd must be valid
     if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
@@ -478,7 +478,7 @@ struct epitem {
 下面的例子展示了 `epoll` 的使用：
 
 ```cpp
-void reader(int fd) noexcept
+void reader(int fd)
 {
     // fd must be valid
     if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
