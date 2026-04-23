@@ -1,0 +1,25 @@
+---
+title: I/O 多路复用
+---
+
+在客户端尚未向服务器发送数据时，调用 `recv` 的线程会发生阻塞，即便通过线程池来处理连接请求，仍然无法避免线程资源的浪费。一个更好的思路是在数据就绪时，告知线程来读取数据，这就是 **I/O 多路复用（I/O multiplexing）** 的思想。I/O 多路复用的目标是让一个线程能够同时处理多个 I/O 源，具备在多个 I/O 源上阻塞等待的能力，进而实现对多个 I/O 源的响应能力，提高线程时间片的利用率。
+
+I/O 多路复用有两种实现模式：Reactor 模式和 Proactor 模式。二者都是事件驱动的设计模式，区别在于事件触发的时机不同。Reactor 模式在 I/O 就绪时触发事件，事件就绪后由内核唤醒阻塞线程，线程恢复后还需要读取数据（意味着需要陷入内核再执行若干次系统调用）；Proactor 模式在 I/O 操作完成时触发事件，事件就绪后，数据已经由内核读取完成。
+
+
+::: {.callout-note}
+
+这两种 I/O 多路复用模式也被称为同步 I/O 多路复用和异步 I/O 多路复用。
+
+:::
+
+
+Reactor 模式的优势在于实现简单，效率也不错，典型的代表是 epoll；Proactor 模式的优势在于性能更高，尤其是在高并发场景下，因为它减少了线程与内核之间的上下文切换次数，典型的代表是 Windows 的 IOCP（I/O Completion Ports）以及 Linux 5.1 引入的 io_uring（2019.3）。
+
+::: {.callout-important}
+
+**Reactor 与 Proactor 的来源**
+
+Reactor is akin to "reactive", meaning readily responding to a stimulus. Proactor is akin to "proactive", controlling a situation by making things happen rather than waiting for things to happen and then reacting to them.
+
+:::

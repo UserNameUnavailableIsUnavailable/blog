@@ -1,0 +1,531 @@
+---
+title: 同步 I/O 多路复用
+---
+
+## 概述
+
+Reactor 模型是 I/O 多路复用的一种实现方式，由内核告知线程 I/O 源就绪事件，线程获知事件后对就绪的 I/O 源发起系统调用，执行 I/O 操作。因此，这种 I/O 多路复用模式又被称为同步 I/O 多路复用。
+
+Linux 提供了 `select`、`poll`、`epoll` 三个 API 用于实现这种 I/O 多路复用模式。
+
+## `select`
+
+`select` 是 UNIX 的遗产，它使用一个固定大小的位图来表示文件描述符集合 `fd_set`。位图中每一位对应一个文件描述符（第 0 位对应文件描述符 0，第 1 位对应文件描述符 1，依此类推），因此存在文件描述符数量的限制（通常为 1024）。
+
+```c {data-filename="<sys/select.h>" code-line-numbers="4"}
+/* The fd_set member is required to be an array of longs.  */
+typedef long int __fd_mask;
+/* Number of descriptors that can fit in an `fd_set'.  */
+#define __FD_SETSIZE		1024
+#define __NFDBITS		(sizeof (__fd_mask) * 8) /* bits per mask */
+
+/* fd_set for select and pselect.  */
+typedef struct
+  {
+    /* XPG4.2 requires this member name.  Otherwise avoid the name
+       from the global namespace.  */
+#ifdef __USE_XOPEN
+    __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
+# define __FDS_BITS(set) ((set)->fds_bits)
+#else
+    __fd_mask __fds_bits[__FD_SETSIZE / __NFDBITS];
+# define __FDS_BITS(set) ((set)->__fds_bits)
+#endif
+  } fd_set;
+```
+
+在 `fd_set` 中，文件描述符从 `0` 开始编号到 `FD_SETSIZE - 1`。因此，`select` 最致命的缺陷就是无法监视大于 `FD_SETSIZE - 1` 的文件描述符。
+
+调用 `select` 后，当前线程陷入内核态，内核首先从 `fd_set` 创建文件描述符元组，并 **立即** 检查各个文件描述符的就绪状态。一旦存在就绪的文件描述符，则立即返回；否则，在各个文件描述符对应驱动的等待队列中注册回调函数。外部的 I/O 设备产生事件后，首先由驱动层捕获（此过程中，某个线程会因外部中断事件陷入内核态），驱动器线程会执行注册的回调函数唤醒 `select` 线程 [^select-thread]。`select` 线程恢复执行后，再次执行对文件描述符状态的检查。
+
+
+::: {.callout-important}
+
+线程的唤醒无法保证即时性，就绪的事件可能已经被其他线程所捕获，因此唤醒后需要重新检查。
+
+:::
+
+
+[^select-thread]: 后文用 `xxx` 线程代称调用 `xxx` 的线程。
+
+![`select`/`poll` 系统调用流程（不考虑超时时间）](select-poll.drawio.png){.center}
+
+下面的例子通过管道展示了 `select` 的使用：
+
+```cpp
+#include <cassert>
+#include <cerrno>
+#include <cstdio>
+#include <chrono>
+#include <string>
+#include <thread>
+#include <unistd.h>
+#include <sys/select.h>
+#include <fcntl.h>
+
+void writer(int fd) noexcept
+{
+    // fd must be valid
+    if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
+    {
+        perror("Invalid fd.");
+        return;
+    }
+    try
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            std::string s("hello");
+            write(fd, s.data(), s.length());
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+    catch (std::exception& e)
+    {
+        perror(e.what());
+    }
+    puts("Writer exited.");
+    close(fd);
+}
+
+void reader(int fd) noexcept
+{
+    // fd must be valid
+    if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
+    {
+        perror("Invalid fd.");
+        return;
+    }
+    fd_set crfds; // const after initialization
+    FD_ZERO(&crfds);
+    FD_SET(fd, &crfds); // add readerfd to set
+    while (true)
+    {
+        // select changes rfds after return
+        // so we cannot reuse rfds
+        fd_set rfds = crfds;
+        select(fd + 1, &rfds, nullptr, nullptr, nullptr);
+        if (FD_ISSET(fd, &rfds))
+        {
+            puts("The pipe ready for read.");
+            char buffer[16];
+            int count = read(fd, buffer, sizeof(buffer) - 1);
+            if (count < 0)
+            {
+                perror("Failed to read.");
+                break;
+            }
+            else if (count == 0)
+            {
+                puts("The writer closed the pipe.");
+                break;
+            }
+            buffer[count] = '\0';
+            printf("Read: %s\n", buffer);
+        }
+    }
+    puts("Reader exited.");
+    close(fd);
+}
+
+int main (int argc, char *argv[]) {
+    int fds[2];
+    int& readerfd = fds[0];
+    int& writerfd = fds[1];
+    if (pipe(fds) < 0)
+    {
+        return -1;
+    }
+    int err = 0;
+
+    int pid = fork();
+
+    if (pid < 0)
+    {
+        close(readerfd);
+        close(writerfd);
+        err = -1;
+    }
+    // NOTE: Child processes inherits all fds by default, causing the ref count to increment by one. We MUST close unused pipe ends, otherwise the both ends of the pipe will be open.
+    else if (pid == 0)
+    {
+        close(readerfd);
+        writer(writerfd);
+    }
+    else
+    {
+        close(writerfd);
+        reader(readerfd);
+    }
+
+    return err;
+}
+```
+
+
+::: {.callout-important}
+
+`select` 返回后，传入的 `fd_set` 会被内核修改，标记出就绪的文件描述符。因此，在每一轮循环中，我们都需要重新构造 `fd_set`，不能直接复用上一次的 `fd_set`。
+
+:::
+
+```c {data-filename="<sys/select.h>" }
+extern int select (int __nfds, fd_set *__restrict __readfds,
+		   fd_set *__restrict __writefds,
+		   fd_set *__restrict __exceptfds,
+		   struct timeval *__restrict __timeout);
+```
+
+`select` 接收三种不同的文件描述符集合：可读集合、可写集合和异常集合。并对集合中所有小于 `__nfds` 的文件描述符进行检查。每个集合都是一个 `fd_set` 位图，标记了需要监听的文件描述符。超时时间通过 `__timeout` 参数指定，单位为秒和微秒，置空表示无限等待。
+
+下面的宏提供了对 `fd_set` 的操作：
+
+- `FD_ZERO(fd_set *set)`{.language-cpp}：将 `fd_set` 中的所有位清零，表示不监听任何文件描述符。
+- `FD_SET(int fd, fd_set *set)`{.language-cpp}：将 `fd` 对应的位设置为 1，表示监听该文件描述符。
+- `FD_CLR(int fd, fd_set *set)`{.language-cpp}：将 `fd` 对应的位清零，表示不再监听该文件描述符。
+- `FD_ISSET(int fd, fd_set *set)`{.language-cpp}：检查 `fd` 对应的位是否为 1，返回非零值表示该文件描述符就绪。
+
+`select` 的缺陷主要体现在如下方面：
+
+- 无法监视大于 `FD_SETSIZE - 1` 的文件描述符。
+- 在调用 `select` 时，文件描述符集合会被复制到内核空间，并在 I/O 就绪时对 `__nfds` 范围内的文件描述符进行线性循环检查，时间复杂度为 $O(N)$，导致性能较差。
+- `select` 返回时，需要重新构造 `fd_set`，无法复用上一次的 `fd_set`。
+
+## `poll`
+
+`poll` 改进了 `select`，使用 一个 `pollfd` 结构体数组来表示需要监听的文件描述符集合，解决了 `select` 中无法监视大于 `FD_SETSIZE - 1` 的文件描述符的问题。
+
+`pollfd` 结构体定义如下：
+
+```c {data-filename="<sys/poll.h>"}
+/* Type used for the number of file descriptors.  */
+typedef unsigned long int nfds_t;
+
+/* Data structure describing a polling request.  */
+struct pollfd
+  {
+    int fd;			/* File descriptor to poll.  */
+    short int events;		/* Types of events poller cares about.  */
+    short int revents;		/* Types of events that actually occurred.  */
+  };
+```
+
+其中：
+
+- `fd`：监视的文件描述符。
+- `events`：注册的触发事件，如 `POLLIN`、`POLLOUT`，可按位组合使用。
+- `revents`：`poll` 返回时，通过该字段告知应用程序触发的事件类型。
+
+`poll` 接收长度为 `__nfds` 的 `pollfd` 元组 `__fds`，在事件触发后，唤醒阻塞线程，并在内核态对 `pollfd` 元组中的每个 `fd` 状态进行检查，然后设置 `revents` 字段。超时时间通过 `__timeout` 参数指定，单位为毫秒，置为 `-1` 表示无限等待。
+
+```c {data-file="<sys/poll.h>"}
+extern int poll (struct pollfd *__fds, nfds_t __nfds, int __timeout)
+    __fortified_attr_access (__write_only__, 1, 2);
+```
+
+使用 `poll` 可将 `reader` 改进如下：
+
+```cpp
+void reader(int fd) noexcept
+{
+    // fd must be valid
+    if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
+    {
+        perror("Invalid fd.");
+        return;
+    }
+    pollfd pfd = {
+        .fd = fd,
+        .events = POLLIN, // readable
+    };
+    while (true)
+    {
+        poll(&pfd, 1, -1);
+        printf("events: %x\n", pfd.revents);
+        if (pfd.revents & POLLIN)
+        {
+            puts("The pipe ready for read.");
+            char buffer[16];
+            int count = read(fd, buffer, sizeof(buffer) - 1);
+            if (count < 0)
+            {
+                perror("Failed to read.");
+                break;
+            }
+            else if (count == 0)
+            {
+                perror("Unexpectedly read 0 byte.");
+                break;
+            }
+            buffer[count] = '\0';
+            printf("Read: %s\n", buffer);
+        }
+        else if (pfd.revents & POLLHUP)
+        {
+            puts("The writer closed the pipe.");
+            break;
+        }
+    }
+    puts("Reader exited.");
+    close(fd);
+}
+```
+
+相较于 `select`，`poll` 的主要改进点如下：
+
+- 解除了对文件描述符大小和数量的限制。
+- `pollfd` 元组可以复用，无需重新初始化。
+
+如上文所述，`poll` 的缺陷在于它仍然需要在内核态对所有 `pollfd` 元组中的文件描述符进行线性循环检查，时间复杂度为 $O(N)$。并且，在每次调用时仍需要将 `pollfd` 元组从用户态复制到内核态，增加了系统调用的开销。
+
+
+:::: {.callout-note}
+
+在 Linux 内核中，`poll` 的实现基于等待队列（wait queue）。每个文件对象内部维护一个结构为双向链表的等待队列，当文件对象的状态发生变化时，内核会唤醒等待队列中的所有线程。在用户态发起对 `poll` 的系统调用后，`poll` 线程会先遍历 `pollfd` 元组中的每个文件描述符，并决定是否阻塞。
+
+若没有处于就绪状态的文件描述符，`poll` 线程会在每个文件描述符所对应的内核对象上注册自己（更确切地说是任务，即 `task_struct`），当文件对象的状态发生变化时，内核会唤醒等待队列中的所有线程。线程唤醒后，对 `pollfd` 元组中的每个 `fd` 状态进行检查，并设置 `revent`，然后返回用户态。
+
+
+```c
+static int __wake_up_common(struct wait_queue_head *wq_head, unsigned int mode,
+			int nr_exclusive, int wake_flags, void *key)
+{
+    // ...
+    list_for_each_entry_safe(wait, &q->head, entry) {
+        wake_function(wait, mode, wake_flags, key);
+    }
+}
+```
+
+在内核源码中，调用 `poll` 的任务（当前任务）上注册了名为 `__pollwait` 的回调。当网卡等设备接收到数据包后，会发送中断信号到 CPU 核心，进而触发设备驱动维护的等待队列 `wait_address` 内的中断回调，并唤醒 `poll` 线程。
+
+```c {data-filename="fs/select.c" code-line-numbers="26"}
+#define current get_current()
+
+void poll_initwait(struct poll_wqueues *pwq)
+{
+	init_poll_funcptr(&pwq->pt, __pollwait);
+	pwq->polling_task = current;
+	pwq->triggered = 0;
+	pwq->error = 0;
+	pwq->table = NULL;
+	pwq->inline_index = 0;
+}
+
+/* Add a new entry */
+static void __pollwait(struct file *filp, wait_queue_head_t *wait_address,
+				poll_table *p)
+{
+	struct poll_wqueues *pwq = container_of(p, struct poll_wqueues, pt);
+	struct poll_table_entry *entry = poll_get_entry(pwq);
+	if (!entry)
+		return;
+	entry->filp = get_file(filp);
+	entry->wait_address = wait_address;
+	entry->key = p->_key;
+	init_waitqueue_func_entry(&entry->wait, pollwake);
+	entry->wait.private = pwq;
+	add_wait_queue(wait_address, &entry->wait);
+}
+```
+
+::: {.callout-warning}
+
+这种实现方式会导致高并发场景下的惊群问题（thundering herd），即当大量线程等待同一个事件时，事件发生后所有线程都会被唤醒，导致系统资源的浪费。
+
+:::
+
+从内核源码来看，`poll` 实际上有更好的实现方式。内核完全可以将文件描述符和对应的事件类型直接告知被唤醒的线程，实现点到点的通知，这正是 `epoll` 的改进思路。
+
+::::
+
+`poll` 解除了 `select` 的文件描述符数量和范围限制，并且支持 `pollfd` 元组的复用，但它仍然需要在内核态对所有 `pollfd` 元组中的文件描述符进行线性循环检查，时间复杂度为 $O(N)$。并且，在每次调用时需要将 `pollfd` 元组从用户态复制到内核态，系统调用的开销并没有本质的改善。
+
+## `epoll`
+
+`epoll` 在 Linux 2.6 中引入，使用一个红黑树来管理所有注册的文件描述符，并使用一个就绪链表来管理就绪的文件描述符，解决了 `poll` 中线性循环检查的问题。
+
+
+::: {.callout-tip}
+
+`epoll` 实际上是 event poll 的缩写。
+
+:::
+
+要使用 `epoll`，首先要创建一个 `epollfd`。Linux 提供了 `epoll_create` 和 `epoll_create1` 两个函数来创建 `epollfd`。
+
+```c {data-filename="<sys/epoll.h>"}
+int epoll_create(int size);
+int epoll_create1(int flags);
+```
+
+```cpp
+int epollfd = epoll_create1(0);
+```
+
+::: {.callout-note}
+
+其中 `epoll_create1` 是 `epoll_create` 的增强版本，支持传入一个标志参数 `flags`，可以设置为 `EPOLL_CLOEXEC` 来在执行 `exec` 系统调用时自动关闭 `epollfd`。因此，推荐使用 `epoll_create1` 来创建 `epollfd`。
+
+`epoll_create` 中的 `size` 参数已经被废弃，传入任意正整数即可。该参数源于最初引入 `epoll` 时就绪的文件描述符列表所采用的元组存储结构。
+
+:::
+
+然后，创建 `epoll_event`。
+
+并使用 `epoll_ctl` 来注册、修改或删除需要监听的文件描述符，避免了 `poll` 中每次调用都需要将 `pollfd` 元组从用户态复制到内核态的问题。
+
+```c {data-filename="<sys/epoll.h>"}
+typedef union epoll_data
+{
+  void *ptr;
+  int fd;
+  uint32_t u32;
+  uint64_t u64;
+} epoll_data_t;
+
+struct epoll_event
+{
+  uint32_t events;	/* Epoll events */
+  epoll_data_t data;	/* User data variable */
+} __EPOLL_PACKED;
+```
+
+其中：
+
+- `events`：事件类型，如 `EPOLLIN`、`EPOLLOUT`，可按位组合。除了事件类型，此字段还可组合 `EPOLLET` 等标志位。
+- `data`：与 `epoll` 关联的数据，通常情况下，`data` 是一个文件描述符（即 `fd`），但也存在对应于其他数据类型的场景，具体取决于 `events` 指定的事件类型。
+
+
+::: {.callout-important}
+
+**电平触发与边沿触发**
+
+`epoll_event.events` 支持两种特殊的触发模式：电平触发（Level-Triggered, LT）和边沿触发（Edge-Triggered, ET）。默认情况下，触发模式为电平触发，可通过指定 `EPOLLET` 指定使用边沿触发模式。
+
+- 电平触发：只要事件已经就绪，就会造成事件触发。例如，只要文件处于有数据可读状态，就会一直返回该事件。
+- 边沿触发：与电平触发相对，只在事件从 **未就绪状态转入就绪状态** 时触发。
+
+:::
+
+
+```c {data-filename="<sys/epoll.h>"}
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+```
+
+`epoll_ctl` 支持的操作有 `EPOLL_CTL_ADD`、`EPOLL_CTL_MOD`、`EPOLL_CTL_DEL`，分别代表增加、修改、删除。
+
+要监听事件，调用 `epoll_wait` 来等待事件的发生。
+
+```c {data-filename="<sys/epoll.h>"}
+int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+```
+
+其中，`events` 是一个 `epoll_event` 数组，用于存储就绪的事件；`maxevents` 是 `events` 数组的大小，表示一次最多返回多少个就绪事件；`timeout` 是等待事件发生的超时时间，单位为毫秒，置为 `-1` 表示无限等待。
+
+::: {.callout-note}
+
+在内核中，调用 `epoll_create` 后，内核中会创建 `eventpoll` 对象。 `eventpoll` 是 `epoll` 的核心数据结构，它通过红黑树 `rbr` 来管理所有注册的文件描述符，并通过就绪链表 `rdllist` 来管理就绪的文件描述符。
+
+```c {data-filename="<fs/eventpoll.c>"}
+struct eventpoll {
+    // ...
+    /* Wait queue used by sys_epoll_wait() */
+	wait_queue_head_t wq;
+	/* Wait queue used by file->poll() */
+	wait_queue_head_t poll_wait;
+    /* RB tree root used to store monitored fd structs */
+	struct rb_root_cached rbr;
+    /* List of ready file descriptors */
+	struct list_head rdllist;
+    // ...
+};
+```
+
+红黑树中的每个节点是一个 `epitem` 结构体，包含了被监视的文件描述符、事件类型等信息。在调用 `epoll_ctl` 后，内核会创建/修改/删除对应的 `epitem` 结构体，并在相应的驱动中注册回调函数 。
+
+```c {data-filename="<fs/eventpoll.c>"}
+struct epitem {
+	union {
+		/* RB tree node links this structure to the eventpoll RB tree */
+		struct rb_node rbn;
+		/* Used to free the struct epitem */
+		struct rcu_head rcu;
+	};
+
+	/* List header used to link this structure to the eventpoll ready list */
+	struct list_head rdllink;
+
+	/*
+	 * Works together "struct eventpoll"->ovflist in keeping the
+	 * single linked chain of items.
+	 */
+	struct epitem *next;
+    // ...
+    /* The structure that describe the interested events and the source fd */
+	struct epoll_event event;
+};
+```
+
+线程调用 `epoll_wait` 后，内核会检查 `eventpoll` 对象的就绪链表 `rdllist`，如果链表不为空，则直接返回就绪的文件描述符；否则，将线程添加到 `eventpoll` 的等待队列 `wq` 中，并进入阻塞状态。当外部设备产生事件时，内核驱动会执行调用 `epoll_ctl` 时注册的回调函数。回调函数将文件描述符添加到就绪链表中，并唤醒等待队列中的一个 `epoll_wait` 线程。这一过程是点对点的通知，避免了 `poll` 中的惊群问题。
+
+取决于 `epoll_wait` 指定的最大事件数量，内核会将就绪链表中的文件描述符尽可能多的复制到用户态，并设置对应的事件类型。用户态线程恢复执行后，就可以直接处理就绪的文件描述符，无需再次进入内核态检查状态。
+
+:::
+
+![`epoll` 系统调用流程（不考虑超时时间）](epoll.drawio.png){.center}
+
+下面的例子展示了 `epoll` 的使用：
+
+```cpp
+void reader(int fd) noexcept
+{
+    // fd must be valid
+    if (fcntl(fd, F_GETFD) == -1 && errno == EBADF)
+    {
+        perror("Invalid fd.");
+        return;
+    }
+    int epollfd = epoll_create1(0);
+    epoll_event event = {
+        .events = EPOLLIN, // readable
+        .data.fd = fd,
+    };
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
+    while (true)
+    {
+        epoll_event events[16];
+        int count = epoll_wait(epollfd, events, 16, -1);
+        for (int i = 0; i < count; i++)
+        {
+            if (events[i].data.fd == fd)
+            {
+                puts("The pipe ready for read.");
+                char buffer[16];
+                int count = read(fd, buffer, sizeof(buffer) - 1);
+                if (count < 0)
+                {
+                    perror("Failed to read.");
+                    break;
+                }
+                else if (count == 0)
+                {
+                    puts("The writer closed the pipe.");
+                    break;
+                }
+                buffer[count] = '\0';
+                printf("Read: %s\n", buffer);
+            }
+        }
+    }
+    puts("Reader exited.");
+    close(fd);
+}
+```
+
+## 使用 `epoll` 实现 Reactor
+
+结合 Socket API 和 `epoll`，即可实现经典 Reactor TCP 服务器。
+
+```cpp
+```
