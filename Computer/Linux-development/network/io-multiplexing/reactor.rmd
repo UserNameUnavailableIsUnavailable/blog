@@ -758,9 +758,14 @@ void Server::Accept() {
 
 ::: {.callout-note}
 
-**EAGAIN or EWOULDBLOCK**
+**`EAGAIN` or `EWOULDBLOCK`**
 
-    The file descriptor fd refers to a socket and has been marked nonblocking (O_NONBLOCK), and the read would block.  POSIX.1-2001 allows either error to be returned for this case, and does  not  require  these  con‐ stants to have the same value, so a portable application should check for both possibilities.
+POSIX 标准中定义的 `EAGAIN` 和 `EWOULDBLOCK` 都表示没有更多数据可读，但它们的含义略有不同：
+
+- `EAGAIN`：表示当前没有数据可读，但套接字仍然处于连接状态，未来可能会有数据可读。
+- `EWOULDBLOCK`：表示套接字处于非阻塞模式，并且没有数据可读，通常发生在使用非阻塞套接字时。
+
+在 Linux 中，`EAGAIN` 和 `EWOULDBLOCK` 的值一般是是相同的，但是在其他操作系统中可能会有不同的值，因此在编写跨平台代码时，应该同时检查这两个错误码来判断是否没有更多数据可读。
 
 :::
 
