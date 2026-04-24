@@ -687,7 +687,7 @@ if (nready < 0) {
 
 ### 地址绑定与监听
 
-实现 `Bind` 和 ``Listen` 两个私有方法，在 `Run` 方法中调用它们来完成地址绑定和监听操作。
+实现 `Bind` 和 `Listen` 两个私有方法，在 `Run` 方法中调用它们来完成地址绑定和监听操作。
 
 ```cpp
 void Server::Bind()
