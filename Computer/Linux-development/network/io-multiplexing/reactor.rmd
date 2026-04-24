@@ -525,7 +525,329 @@ void reader(int fd)
 
 ## 使用 `epoll` 实现 Reactor
 
-结合 Socket API 和 `epoll`，即可实现经典 Reactor TCP 服务器。
+结合 Socket API 和 `epoll`，即可实现经典 Reactor TCP 服务器。本节设计一个 `Server` 类，实例化后使用 `epoll` 来监听服务器套接字和客户端套接字的就绪事件，并在事件就绪时进行相应的处理。
+
+### 接口设计
 
 ```cpp
+class Server
+{
+public:
+    Server(std::uint16_t port, std::int32_t backlog);
+    ~Server() noexcept;
+    void Run();
+private:
+    void Bind();
+    void Listen();
+    void Accept();
+    void Receive(int client_socket_fd);
+private:
+    int	server_socket_fd_ = -1;
+	int	epoll_fd_ = -1;
+	std::array<epoll_event, 1024> events_;
+	std::uint16_t port_;
+	std::int32_t backlog_;
+
+};
 ```
+
+为了处理系统调用失败的情况，定义一个 `ServerError` 异常类：
+
+```cpp
+class ServerError : public std::runtime_error
+{
+public:
+	ServerError(const std::string &s, const char *file, unsigned int line) : std::runtime_error(s)
+	{
+		std::stringstream ss;
+        ss << s << "(in "
+            << file << ':' << line << ')';
+		message_ = ss.str();
+	}
+	virtual const char *what() const noexcept override
+	{
+		return message_.c_str();
+	}
+
+private:
+	std::string message_;
+};
+```
+
+### 构造函数实现
+
+`Server` 采用延迟绑定和监听策略，即在构造函数中仅创建服务器套接字和 `epoll` 文件描述符，而不进行地址绑定和监听操作。地址绑定和监听操作将在 `Run` 方法中进行。
+
+```cpp{code-line-numbers="17"}
+Server::Server(std::uint16_t port, std::int32_t backlog) :
+    port_(port),
+    backlog_(backlog)
+{
+    server_socket_fd_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket_fd_ < 0)
+    {
+        throw ServerError("Failed to create socket", __FILE__, __LINE__);
+    }
+    // for non-blocking accept, we should make the socket non-blocking
+    int flags = fcntl(server_socket_fd_, F_GETFL, 0);
+    if (flags == -1)
+    {
+        close(server_socket_fd_);
+        throw ServerError("fcntl failed", __FILE__, __LINE__);
+    }
+    int status = fcntl(server_socket_fd_, F_SETFL, flags | O_NONBLOCK);
+    if (status == -1)
+    {
+        close(server_socket_fd_);
+        throw ServerError("fcntl failed", __FILE__, __LINE__);
+    }
+    epoll_fd_ = epoll_create1(0);
+    if (epoll_fd_ < 0)
+    {
+        close(server_socket_fd_);
+        throw ServerError("Failed to create epoll", __FILE__, __LINE__);
+    }
+}
+```
+
+::: {.callout-important}
+
+客户端向服务器发送连接请求，在该连接进入全连接队列后，`epoll` 文件管理的服务器套接字会转入就绪状态，`epoll_wait` 会返回该事件。服务器可调用 `accept` 或 `accept4` 来接受连接。
+
+需要特别指出的是，`accept` 在全连接队列为空的情况下会发生阻塞。`epoll_wait` 返回后，连接请求可能被其他任务所接受，因此在基于 `epoll` 的服务器中，应避免使用 `accept`，而是使用 `accept4` 来接受连接，并指定 `SOCK_NONBLOCK` 标志来创建非阻塞套接字。
+
+```cpp
+int client_socket_fd = accept4(server_socket_fd_, nullptr, nullptr, SOCK_NONBLOCK);
+```
+
+使用非阻塞的 `accept4` 之前，还需要先将服务器套接字设置为非阻塞，否则在全连接队列为空时，`accept4` 仍然会发生阻塞。
+
+```cpp
+int status = fcntl(server_socket_fd_, F_SETFL, flags | O_NONBLOCK);
+```
+
+:::
+
+
+### 事件循环
+
+在 `Run` 方法中，首先调用 `Bind` 和 `Listen` 来完成地址绑定和监听操作。然后，使用 `epoll_ctl` 将服务器套接字注册到 `epoll` 文件中，并进入事件循环来等待事件的发生。事件就绪时，若就绪的文件描述符对应服务器套接字，则调用 `Accept` 来接受连接；否则，调用 `Receive` 来处理客户端套接字的就绪事件。本节的 `Server` 不考虑发送数据的情况，因此不处理 `EPOLLOUT` 事件。
+
+```cpp
+void Server::Run() {
+  Bind();
+  Listen();
+  epoll_event connection_event{.events = EPOLLIN,
+                               .data = {.fd = server_socket_fd_}};
+  epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, server_socket_fd_, &connection_event);
+  while (true) {
+    auto nready = epoll_wait(epoll_fd_, events_.data(), events_.max_size(), -1);
+    if (nready < 0) {
+      if (errno == EINTR) // spurious wakeup
+      {
+        continue;
+      }
+      throw ServerError("epoll_wait failed", __FILE__, __LINE__);
+    }
+    for (int i = 0; i < nready; i++) {
+      int fd = events_[i].data.fd;
+      int ev = events_[i].events;
+      if (fd == server_socket_fd_) { // new connections
+        Accept();                    // accept connections
+        continue;
+      }
+      // client sockets ready
+      if (ev & EPOLLIN) {
+        Receive(fd);
+      }
+      if (ev & EPOLLOUT) {
+        throw ServerError("Not implemented", __FILE__, __LINE__);
+      }
+    }
+  }
+}
+```
+
+::: {.callout-important}
+
+**虚假唤醒**
+
+与条件变量类似，调用 `epoll_wait` 同样可能会发生虚假唤醒，即 `epoll_wait` 返回时，并没有任何事件就绪（此时 返回值为 `-1`，`errno` 置为 `EINTR`）。虚假唤醒不属于系统调用失败的情况，因此不应抛出异常，而是应该继续阻塞等待事件的发生。
+
+```cpp
+auto nready = epoll_wait(epoll_fd_, events_.data(), events_.max_size(), -1);
+if (nready < 0) {
+    if (errno == EINTR) { // spurious wakeup
+        continue;
+    }
+    throw ServerError("epoll_wait failed", __FILE__, __LINE__);
+}
+```
+
+:::
+
+### 地址绑定与监听
+
+实现 `Bind` 和 ``Listen` 两个私有方法，在 `Run` 方法中调用它们来完成地址绑定和监听操作。
+
+```cpp
+void Server::Bind()
+{
+    sockaddr_in addr{.sin_family = AF_INET, .sin_port = htons(port_), .sin_addr = {.s_addr = htonl(INADDR_ANY)}};
+    int			status = bind(server_socket_fd_, (sockaddr *)&addr, sizeof(addr));
+    if (status < 0)
+    {
+        throw ServerError("Failed to bind address", __FILE__, __LINE__);
+    }
+}
+```
+
+```cpp
+void Server::Listen()
+{
+    int status = listen(server_socket_fd_, backlog_);
+    if (status < 0)
+    {
+        throw ServerError("Failed to listen", __FILE__, __LINE__);
+    }
+    std::cout << "Server is listening on " << port_ << ".\n";
+}
+```
+
+### 接受连接
+
+如前所述，应该使用非阻塞的 `accept4` 来接受连接，并将新创建的客户端套接字注册到 `epoll` 文件中。
+
+另外，即便 `epoll_wait` 已经告知全连接队列中存在连接请求，但在调用 `accept4` 时，连接请求可能已经被其他线程所接受，因此 `accept4` 可能会返回 `EAGAIN` 或 `EWOULDBLOCK` 错误，此时应该直接返回，而不是抛出异常。
+
+```cpp
+void Server::Accept() {
+  while (true) {
+    int client_socket_fd =
+        accept4(server_socket_fd_, nullptr, nullptr, SOCK_NONBLOCK);
+    if (client_socket_fd < 0) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        return; // no pending connections
+      }
+      std::cerr << "Failed to accept connection." << '\n';
+      return;
+    }
+    std::cout << "Accept client fd " << client_socket_fd << '\n';
+    epoll_event ev{.events = EPOLLIN | EPOLLET, // trigger once when ready
+                   .data = {.fd = client_socket_fd}};
+    epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_socket_fd, &ev);
+  }
+}
+```
+
+### 接收数据
+
+在不使用 `recv` 特殊标志位的情况下，`read` 与 `recv` 都可用于读取客户端发送的数据。由于 `Accept` 方法中将客户端套接字注册为边沿触发模式，因此在数据就绪时，`EPOLLIN` 事件只会触发一次。因此，在使用边沿触发的情况下，`Receive` 方法需要使用循环来读取数据，直到 `read` 返回 `EAGAIN` 或 `EWOULDBLOCK` 错误，表示没有更多数据可读，这种情况不需要关闭套接字。
+
+当客户端调用 `close` 或 `shutdown` 来关闭连接时，服务器套接字会转入就绪状态，`read` 返回 `0`，表示客户端已经关闭连接，此时服务器也应该关闭套接字。
+
+
+::: {.callout-important}
+
+**关闭套接字**
+
+使用 `close` 或 `shutdown` 关闭套接字时，不需要手动调用 `epoll_ctl` 来删除套接字，因为关闭套接字会自动将其从 `epoll` 文件中注销。
+
+:::
+
+
+::: {.callout-note}
+
+**EAGAIN or EWOULDBLOCK**
+
+    The file descriptor fd refers to a socket and has been marked nonblocking (O_NONBLOCK), and the read would block.  POSIX.1-2001 allows either error to be returned for this case, and does  not  require  these  con‐ stants to have the same value, so a portable application should check for both possibilities.
+
+:::
+
+
+```cpp
+void Server::Receive(int client_fd) {
+  char buf[1024];
+  std::cout << "Receive: ";
+  while (true) {
+    std::ptrdiff_t count = read(client_fd, buf, sizeof(buf) - 1);
+    if (count > 0) {
+      buf[count] = '\0';
+      std::cout << buf;
+    } else if (count == 0) {
+      close(client_fd); // NOTE: closing an fd automatically deregister it
+                        // from epoll
+      std::cout << "<FIN>";
+      break;
+    } else {
+      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        break; // no more data, but do not close client_fd
+      }
+      close(client_fd);
+      break;
+    }
+  }
+  std::cout << '\n';
+}
+```
+
+### 压力测试
+
+移除 `Receive` 中的以下代码，让服务器在读取完客户端发送的数据后直接关闭连接。
+
+使用 PowerShell 并行执行以下命令来模拟大量客户端连接服务器，并发送数据：
+
+```powershell
+1..10000 | foreach -Parallel { echo "hello from client $_" | nc -q 1 127.0.0.1 8080 }
+```
+
+::: {.callout-important}
+
+在 `Receive` 方法中，当 `read` 产生 `EAGAIN` 或 `EWOULDBLOCK` 错误时，表示没有更多数据可读，此时不应该关闭套接字。
+但是 `nc` 程序在发送完数据后，默认会等待服务器发送数据后才退出。由于 `Server` 尚未实现发送数据的功能，因此服务器不会向客户端发送任何数据，导致客户端一直处于连接状态，无法退出。为了让客户端在发送完数据后直接退出，可以使用 `-q` 选项来指定在发送完数据后等待多少秒后退出，`-q N` 表示等待 N 秒后退出。
+
+:::
+
+
+:::: {.callout-important}
+
+**系统限制**
+
+在进行压力测试之前，应该先查看系统对文件描述符数量的限制，以确保服务器能够接受足够多的连接请求。可以使用 `ulimit -a`{.language-bash} 命令来查看当前用户的系统限制。
+
+```bash
+ulimit -a
+```
+
+::: {.callout-note}
+
+`ulimit`{.language-bash} 是 bash 特有的内置命令，在其他 Shell 中未必可用，这时可使用 `bash -c "ulimit -a"` 来查看系统限制。
+
+:::
+
+以下是 WSL2 Ubuntu 的结果：
+
+```plain
+real-time non-blocking time  (microseconds, -R) unlimited
+core file size              (blocks, -c) 0
+data seg size               (kbytes, -d) unlimited
+scheduling priority                 (-e) 0
+file size                   (blocks, -f) unlimited
+pending signals                     (-i) 63377
+max locked memory           (kbytes, -l) 65536
+max memory size             (kbytes, -m) unlimited
+open files                          (-n) 1048576
+pipe size                (512 bytes, -p) 8
+POSIX message queues         (bytes, -q) 819200
+real-time priority                  (-r) 0
+stack size                  (kbytes, -s) 8192
+cpu time                   (seconds, -t) unlimited
+max user processes                  (-u) 63377
+virtual memory              (kbytes, -v) unlimited
+file locks                          (-x) unlimited
+```
+
+::::
+
+
+![测试结果](reactor-test.avif){.center}
