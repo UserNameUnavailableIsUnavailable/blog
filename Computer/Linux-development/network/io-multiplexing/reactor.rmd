@@ -281,10 +281,9 @@ void reader(int fd)
 
 :::: {.callout-note}
 
-在 Linux 内核中，`poll` 的实现基于等待队列（wait queue）。每个文件对象内部维护一个结构为双向链表的等待队列，当文件对象的状态发生变化时，内核会唤醒等待队列中的所有线程。在用户态发起对 `poll` 的系统调用后，`poll` 线程会先遍历 `pollfd` 元组中的每个文件描述符，并决定是否阻塞。
+在 Linux 内核中，`poll` 的实现基于等待队列（wait queue）。每个文件的底层驱动内部维护一个等待队列（由回调函数构成），当驱动检测到外部事件变化时时，会通过回调唤醒阻塞的所有线程。
 
-若没有处于就绪状态的文件描述符，`poll` 线程会在每个文件描述符所对应的内核对象上注册自己（更确切地说是任务，即 `task_struct`），当文件对象的状态发生变化时，内核会唤醒等待队列中的所有线程。线程唤醒后，对 `pollfd` 元组中的每个 `fd` 状态进行检查，并设置 `revent`，然后返回用户态。
-
+在用户态发起对 `poll` 的系统调用后，`poll` 线程会先遍历 `pollfd` 元组中的每个文件描述符，并决定是否阻塞。若没有处于就绪状态的文件描述符，`poll` 线程会在回调队列中添加回调函数。当网卡等外围设备的外部中断到来时，驱动线程会通过回调唤醒阻塞的所有线程。`poll` 线程恢复执行后，再次对 `pollfd` 元组中的每个 `fd` 状态进行检查，并设置 `revent`，然后返回用户态。
 
 ```c
 static int __wake_up_common(struct wait_queue_head *wq_head, unsigned int mode,
@@ -373,8 +372,6 @@ int epollfd = epoll_create1(0);
 
 然后，创建 `epoll_event`。
 
-并使用 `epoll_ctl` 来注册、修改或删除需要监听的文件描述符，避免了 `poll` 中每次调用都需要将 `pollfd` 元组从用户态复制到内核态的问题。
-
 ```c {data-filename="<sys/epoll.h>"}
 typedef union epoll_data
 {
@@ -408,6 +405,8 @@ struct epoll_event
 
 :::
 
+
+然后，使用 `epoll_ctl` 来注册、修改或删除需要监听的文件描述符，避免了 `poll` 中每次调用都需要将 `pollfd` 元组从用户态复制到内核态的问题。
 
 ```c {data-filename="<sys/epoll.h>"}
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
@@ -796,7 +795,7 @@ void Server::Receive(int client_fd) {
 }
 ```
 
-### 压力测试
+### 测试
 
 移除 `Receive` 中的以下代码，让服务器在读取完客户端发送的数据后直接关闭连接。
 
@@ -818,7 +817,7 @@ void Server::Receive(int client_fd) {
 
 **系统限制**
 
-在进行压力测试之前，应该先查看系统对文件描述符数量的限制，以确保服务器能够接受足够多的连接请求。可以使用 `ulimit -a`{.language-bash} 命令来查看当前用户的系统限制。
+在进行测试之前，应该先查看系统对文件描述符数量的限制，以确保服务器能够接受足够多的连接请求。可以使用 `ulimit -a`{.language-bash} 命令来查看当前用户的系统限制。
 
 ```bash
 ulimit -a
