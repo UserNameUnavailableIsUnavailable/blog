@@ -1,0 +1,10 @@
+tree:
+  back: ..
+  items:
+  - title: 陷阱
+    href: null
+    items:
+    - title: "close on `exec`"
+      href: close-on-exec
+    - title: 缓冲模式
+      href: setvbuf

@@ -1,0 +1,97 @@
+---
+title: "close on `exec`"
+---
+
+在类 Unix 操作系统中，`fork` 后一个很重要的细节是子进程会默认地继承父进程所有打开的文件描述符。并且，在 `exec` 加载另一个新程序映像后，这些文件描述符仍然会保留在新进程的文件描述符表中。一旦不注意，就会造成资源泄露。
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+int main() {
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("socket");
+        return -1;
+    }
+    struct sockaddr_in server_addr = {
+        .sin_family = AF_INET,
+        .sin_port = htons(8080),
+        .sin_addr.s_addr = htonl(INADDR_ANY)
+    };
+
+    int status = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
+    if (-1 == listen(sockfd, 5)) {
+        perror("listen");
+        return -1;
+    }
+
+    if (status == -1) {
+        perror("bind");
+        return -1;
+    }
+
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        return -1;
+    } else if (pid == 0) {
+        execve("/bin/sleep", (char*[]){"sleep", "10", NULL}, NULL);
+        perror("execve");
+        return -1;
+    }
+
+    close(sockfd);
+
+    return 0;
+}
+```
+
+编译运行上面的程序，进程在 `fork` 后立即退出，`sleep` 进程会被 `init` 或 `systemd` 进程收养。`sleep` 进程会运行 10 秒钟，在这期间，`netstat -anp` 命令会显示 `sleep` 进程占用了 8080 端口。等 `sleep` 进程退出后，8080 端口才会被释放。
+
+```plain
+netstat -tulpn | grep 8080
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      10842/sleep
+```
+
+::: {.callout-note}
+
+在较早版本的 Linux 内核中，由 `init` 进程负责收养孤儿进程，而在较新的 Linux 内核中，`systemd` 进程负责收养孤儿进程。
+
+:::
+
+针对这类问题，Linux 提供了 `FD_CLOEXEC` 文件描述符标志。设置了 `FD_CLOEXEC` 标志的文件描述符在 `exec` 加载新程序映像时会被自动关闭。可以使用 `fcntl` 系统调用来设置这个标志：
+
+```c
+#include <fcntl.h>
+
+int flags = fcntl(sockfd, F_GETFD);
+if (flags == -1) {
+    perror("fcntl F_GETFD");
+    return -1;
+}
+flags |= FD_CLOEXEC;
+if (fcntl(sockfd, F_SETFD, flags) == -1) {
+    perror("fcntl F_SETFD");
+    return -1;
+}
+```
+
+但是，使用 `fcntl` 来设置 `FD_CLOEXEC` 并不是线程安全的，在此期间一旦有其他线程修改了文件描述符的标志或调用了 `fork`，就可能导致无法预知的问题。为了避免这个问题，Linux 提供了 `O_CLOEXEC`（普通文件）和 `SOCK_CLOEXEC`（套接字）标志，可以在创建文件描述符时直接设置 `FD_CLOEXEC` 标志：
+
+```c
+int filefd = open("file.txt", O_RDONLY | O_CLOEXEC);
+int sockfd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
+```
+
+
+::: {.callout-tip}
+
+在 Windows 中，创建新的进程时顾虑要少得多，子进程默认不会继承父进程的句柄。只有父进程显式地指定了 `bInheritHandles` 参数为 `TRUE`，并且句柄本身的继承标志被设置为可继承，子进程才会继承父进程的句柄。因此，在 Windows 中不需要像在类 Unix 操作系统中那样担心资源泄露的问题。
+
+:::

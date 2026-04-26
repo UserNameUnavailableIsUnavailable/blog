@@ -1,0 +1,59 @@
+---
+title: 函子
+---
+
+> The following entities are not objects: value, reference, function, enumerator, type, non-static class member, template, class or function template specialization, namespace, parameter pack, and this.
+
+## 函数类型和函数指针类型
+
+在纯 C 中，有如下的定义“函数类型”的方式：
+
+```c
+typedef void function_t(int);
+typedef void (*function_ptr_t)(int);
+```
+
+在 C++ 中，在继承上面两种定义方式的基础上，使用 `using` 关键字也可以定义函数类型和函数指针类型：
+
+```cpp
+using function_t = void(int);
+using function_ptr_t = void (*)(int);
+```
+
+二者的区别在于，`function_t` 是一个函数类型，而 `function_ptr_t` 是一个指向函数的指针类型。函数类型不能作为对象的类型，因为它没有大小和对齐要求，而函数指针类型可以作为对象的类型，因为它有大小和对齐要求。
+
+`function_t` 类型的变量定义后不允许被赋值，因为它不是一个对象类型。
+
+```c
+void foo(int) {}
+function_t f; // OK
+f = foo; // Error: function type is not an object type
+```
+
+而指针类型是对象类型，可以被赋值。在赋值时，函数名 `foo` 会被隐式转换为指向函数的指针，因此 `fp = foo` 和 `fp = &foo` 都是合法的：
+
+```c
+function_ptr_t fp; // OK
+fp = foo; // OK
+fp = &foo; // OK
+```
+
+函数指针本质上是指向函数的指针，所以下面的定义方式也是正确的：
+
+```cpp
+function_t* pf; // OK
+pf = foo; // OK
+pf = &foo; // OK
+```
+
+## 函子
+
+在继承 C 语言函数语义的基础上，C++ 引入了函子的概念。所有可调用对象的类型都被称为函子（functor）。可调用对象包括函数、函数指针、函数对象（即重载了 `operator()` 的类的对象）。Lambda 表达式本质是一个匿名的函数对象，因此也是函子。
+
+C++ 中的 `std::function` 模板类是一个通用的可调用对象包装器，可以存储任何类型的可调用对象，并提供统一的调用接口。
+
+```cpp
+std::function<void(int)> f;
+```
+
+只要函子能够以 `f(int)` 的形式被调用，就可以被 `std::function<void(int)>` 存储和调用。

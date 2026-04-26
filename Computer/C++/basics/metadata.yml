@@ -30,3 +30,5 @@ tree:
       href: uncommon-keywords-and-specifiers
     - title: 类型转换
       href: casting
+    - title: 函子
+      href: functor
