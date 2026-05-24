@@ -1,0 +1,16 @@
+---
+title: Miscellaneous C++ Problems
+---
+
+## How to get the **writeable** underlying buffer of `std::string` before C++ 17?
+
+Since C++ 17 `std::string::data()` returns `char*` buffer, which is writeable.
+Before C++ 17, we have the following workarounds:
+
+```cpp
+const char foo[] = "1145141919810";
+std::string s;
+s.resize(sizeof(foo));
+memcpy(&str[0], foo, sizeof(foo));
+memcpy(&str.front(), foo, sizeof(foo));
+```
