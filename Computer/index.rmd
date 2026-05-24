@@ -6,15 +6,17 @@ title: 计算机
 
 - [C++](C++)
 - [Rust](Rust)
+- [Golang](Golang)
 - [x86_64 汇编](x86_64-assembly)
 - [Java](Java)
-- [前端](frontend/)
+- [前端](frontend)
 - [操作系统](operating-system)
 - [底层原理](underlying-stuff)
 - [计算机中的数学](mathematics-in-computer)
 - [深度学习](deep-learning)
 - [Unix 开发](Unix-development)
 - [Win32 开发](Win32-development)
+- [CUDA](CUDA)
 - [琐碎](trivial)
 
 ## 实践

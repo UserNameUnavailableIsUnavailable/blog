@@ -1,0 +1,155 @@
+---
+title: 优雅退出
+---
+
+在控制台收到退出信号时，我们需要正确地释放资源并优雅地退出程序。
+
+## 传统方案
+
+在 Go v1.16 之前，Go 语言没有提供官方的优雅退出方案。通常的做法是使用 `os.Signal`{.language-go} 来监听系统信号，并在收到退出信号时执行清理工作并退出程序。
+
+### 取消 Goroutine
+
+收到退出信号时，需要取消正在运行的 Goroutine，以便它们能够及时地释放资源并退出。Go 语言提供了 `context` 包来实现 Goroutine 的取消机制。
+
+```go
+ctx, cancel := context.WithCancel(context.Background())
+```
+
+其中，`ctx` 传递给后续创建的 Goroutines。Goroutines 通过监听 `ctx.Done()`{.language-go} 来判断是否需要退出。当收到退出信号时，调用 `cancel()` 来取消 Goroutine。
+
+### `os.Signal`{.language-go}
+
+`os.Signal`{.language-go} 是系统信号接口，Go 语言通过 `os/signal` 包提供了对系统信号的支持。我们可以使用 `signal.Notify`{.language-go} 函数来监听特定的系统信号。
+
+首先，创建一个通道来接收系统信号：
+
+```go
+quit := make(chan os.Signal, 1)
+```
+
+然后，使用 `signal.Notify`{.language-go} 函数来监听特定的系统信号：
+
+```go
+signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+```
+
+这是约定俗成的写法。其中，`os.Interrupt`{.language-go} 代表用户发出的中断信号，`syscall.SIGTERM`{.language-go} 代表系统发送的终止信号。在 Windows 平台下，`os.Interrupt`{.language-go} 被映射到 `CTRL_C_EVENT`{.language-c} 和 `CTRL_BREAK_EVENT`{.language-c}，而 `syscall.SIGTERM`{.language-go} 则没有对应的信号。在 Unix 平台下，`os.Interrupt`{.language-go} 被映射到 `SIGINT`{.language-c}，而 `syscall.SIGTERM`{.language-go} 则被映射到 `SIGTERM`{.language-c}。`sysall.SIGTERM`{.language-go} 用于保证对 Unix 平台的兼容性。
+
+
+::: {.callout-tip}
+
+在 Unix 平台下，调用 `kill(2)` 会向指定的进程发送信号，其中：
+
+- `SIGINT`：Ctrl+C 产生的中断信号，默认行为是终止进程。
+- `SIGTERM`：默认行为是终止进程，但可以被捕获和处理，允许程序进行清理工作后再退出。
+- `SIGKILL`：强制终止进程，无法被捕获或处理，程序无法进行任何清理工作。
+
+Windows 平台下的程序是事件/消息驱动的，没有实现 Unix 那样的信号机制。但是对于控制台程序，Windows 提供了 `CTRL_C_EVENT` 和 `CTRL_BREAK_EVENT` 等事件来模拟 Unix 的 信号机制。当用户按下 Ctrl+C 或 Ctrl+Break 时，系统会向程序发送相应的事件，程序可以通过注册控制台事件处理函数来捕获这些事件并进行处理。
+调用 `TerminateProcess` 终止进程时，不会产生任何信号，因此无法被捕获或处理，程序无法进行任何清理工作，其行为类似于 `SIGKILL`。
+
+:::
+
+
+### 等待退出信号
+
+我们可以使用 `<-quit`{.language-go} 接收退出信号：
+
+```go
+sig := <-quit
+```
+
+需要注意的是，`<-quit`{.language-go} 是一个阻塞操作，直到收到退出信号才会继续执行。
+
+在未收到退出信号之前，当前 Goroutine 会一直阻塞在 `<-quit`{.language-go} 这一行，等待退出信号的到来。一旦收到退出信号，程序就会继续执行后续的代码来取消 Goroutine 并优雅地退出。为了确保所有的 Goroutine 都能够正确地退出，我们可以使用 `sync.WaitGroup`{.language-go} 来等待所有的 Goroutine 退出：
+
+```go
+var wg sync.WaitGroup
+wg.Add(1) // call wg.Add() for each goroutine
+```
+
+在每次创建 Goroutine 之前，调用 `wg.Add(1)` 来增加等待计数器。在 Goroutine 中，使用 `defer wg.Done()` 来确保 Goroutine 退出时能够正确地减少等待计数器：
+
+### 释放资源并退出
+
+将 `ctx` 传入 Goroutine，当收到退出信号时，调用 `cancel()` 来取消 Goroutine：
+
+```go
+go func (ctx context.Context) {
+    defer wg.Done()
+    for {
+        select {
+        case <-ctx.Done():
+            fmt.Println("Goroutine exiting...")
+            return
+        default:
+            fmt.Println("Goroutine running...")
+            time.Sleep(1 * time.Second)
+        }
+    }
+    time.Sleep(5 * time.Second)
+    fmt.Println("Goroutine exiting...")
+}(ctx)
+```
+
+在 Goroutine 中，监听 `ctx.Done()`{.language-go} 来判断是否需要退出。使用 `defer wg.Done()` 来确保 Goroutine 退出时能够正确地减少等待计数器。
+
+### 完整示例
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    "os/signal"
+    "syscall"
+    "time"
+)
+
+func main() {
+    ctx, cancel := context.WithCancel(context.Background())
+
+    var wg sync.WaitGroup
+    wg.Add(1)
+
+    go func (ctx context.Context) {
+        defer wg.Done()
+        for {
+            select {
+            case <-ctx.Done():
+                fmt.Println("Goroutine exiting...")
+                time.Sleep(2 * time.Second)
+                return
+            default:
+                fmt.Println("Goroutine running...")
+                time.Sleep(2 * time.Second)
+            }
+        }
+    }(ctx)
+
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+    sig := <-quit
+    fmt.Printf("Received signal: %s\n", sig)
+
+    cancel() // call cancel explicitly to cancel the goroutine
+    wg.Wait() // wait for all goroutines to finish
+}
+```
+
+## 最新方案
+
+Go v1.16 后引入了 `os/signal.NotifyContext`{.language-go} 函数，提供了一个更简洁的优雅退出方案。`NotifyContext`{.language-go} 函数会返回一个 `context.Context`{.language-go}，当收到指定的系统信号时，该 `Context`{.language-go} 会被取消。
+
+```go
+ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+defer stop()
+
+// ...
+
+<-ctx.Done() // wait for the context to be cancelled
+wg.Wait() // wait for all goroutines to finish
+```

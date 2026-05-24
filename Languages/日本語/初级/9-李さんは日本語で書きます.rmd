@@ -1,0 +1,27 @@
+---
+title: 9_李さんは日本語で書きます
+---
+
+## Verbs
+
+[会][う]^(あ)(う)
+
+[送][る]^(おく)(る)
+
+[作][る]^(つく)(る)
+
+## Examples
+
+1. - What do we use to make noodles?
+   - 何でうどんを作りますか？
+2. - I made paper airplanes with newspapers.
+   - 私は新聞紙で紙飛行機を作りました。
+3. - I sent a letter  to my friend by express mail.
+   - 私は手紙を速達で友達に送りました。
+     
+
+::: {.callout-note}
+
+The order of “手紙を” and “速達で” does not matter gramatically. The difference lies in what we want to emphasize.
+
+:::

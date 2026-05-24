@@ -1,0 +1,62 @@
+---
+title: 异步任务
+---
+
+C++ 11 引入了 `<future>` 头文件，提供了 `std::async`、`std::future`、`std::promise` 等工具来支持异步编程。
+
+`<packaged_task>` 则是一个可调用对象包装器，可以将任何可调用对象包装成一个异步任务，与 `<future>` 联系紧密。
+
+## `std::future` 和 `std::promise`
+
+`std::future` 和 `std::promise` 是一对用于异步任务结果传递的工具。`std::future` 相当于消费者，读取一个异步任务的执行结果。`std::promise` 相当于生产者，设置一个异步任务的执行结果。
+
+```cpp
+std::promise<int> p;
+std::future<int> f = p.get_future();
+std::thread t([&p]() {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    p.set_value(42);
+});
+std::cout << f.get() << std::endl; // 输出 42
+```
+
+在异步任务执行过程中，若果消费者调用 `f.get()` 时，生产者还没有设置结果，那么消费者会被阻塞，直到生产者调用 `p.set_value()` 设置结果后，消费者才会继续执行。
+
+## `std::async`
+
+`std::async` 则是一个工厂函数，同时创建 `std::promise` 和 `std::future`，并且在后台执行一个异步任务，最终将结果传递给 `std::future`。
+
+```cpp
+std::future<int> f = std::async([]() {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    return 42;
+});
+std::cout << f.get() << std::endl; // 输出 42
+```
+
+`std::async` 提供了两种执行策略：
+
+- `std::launch::async`：立即创建一个新的线程来执行异步任务。
+- `std::launch::deferred`：异步任务并不立即执行，而是推迟到 `f.get()`{.language-cpp} 被调用时，并且异步任务会在调用 `f.get()` 的线程中执行。
+
+在不指定执行策略的情况下，`std::async` 会根据系统资源和实现来决定使用哪种策略。
+
+## `std::packaged_task`
+
+`std::packaged_task` 是一个可调用对象包装器，可以将任何可调用对象包装成一个异步任务。
+`std::packaged_task` 与 `std::function` 具有相似的功能，但是 `std::packaged_task` 还包含一个 `std::future` 成员，可以通过 `get_future()` 方法获取 `std::future`，从而获取异步任务的执行结果。
+
+```cpp
+std::packaged_task<int()> task([]() {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    return 42;
+});
+
+std::future<int> f = task.get_future();
+
+std::thread t(std::move(task));
+
+std::cout << f.get() << std::endl; // 输出 42
+```
+
+`std::packaged_task` 适用于需要更灵活地控制异步任务执行的场景，最典型的场景是实现线程池，线程池需要将任务封装成一个可调用对象，并且需要在不同的线程中执行这些任务，同时还需要获取这些任务的执行结果。

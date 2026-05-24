@@ -1,0 +1,37 @@
+---
+title: "`defer` 关键字"
+---
+
+Go 语言中的 `defer` 关键字用于在函数返回之前执行一些清理操作。`defer` 语句会将一个函数调用推迟到包含它的函数返回时执行，无论是正常返回还是由于 panic 导致的异常返回。这一特性与 C++ 的 RAII 类似。
+
+```go
+func foo() {
+    f, _ := os.Open("file")
+    defer f.Close()
+    // ...
+}
+```
+
+在上面的例子中，`defer f.Close()` 会在 `foo` 函数返回时自动调用 `f.Close()` 来关闭文件，无论 `foo` 函数是正常返回还是由于 panic 导致的异常返回。
+
+`defer` 语句的执行顺序是后进先出（LIFO）的，这意味着如果在一个函数中有多个 `defer` 语句，它们会按照相反的顺序执行。
+
+与 C++ 的 RAII 不同，Go 语言中的 `defer` 语句不会在作用域结束时自动调用，而是在函数返回时调用。这意味着如果在一个循环中使用 `defer`，它们会在每次迭代结束时被调用，而不是在循环结束时被调用。
+
+```cpp
+void foo() {
+    if (condition) {
+        std::lock_guard<std::mutex> lock(mutex);
+        // lock released when lock goes out of scope
+    }
+}
+```
+
+```go
+func foo() {
+    if condition {
+        mutex.Lock()
+        defer mutex.Unlock() // lock released when function returns
+    }
+}
+```
