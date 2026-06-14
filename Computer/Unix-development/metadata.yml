@@ -6,7 +6,5 @@ tree:
     items:
     - title: 内存管理
       href: memory
-    - title: 网络
-      href: network
     - title: 陷阱
       href: traps

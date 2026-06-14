@@ -461,22 +461,22 @@ $$
 
 ## 传送
 
-本扩展支持传送（Teleport）功能，即将一个元素的内容传送到另一个位置进行显示。使用传送功能时，需要通过指定 `data-teleport-to` 属性指定传送的目标容器，文档加载后，传送源会作为整体被移动到传送目标容器内进行显示。
+本扩展支持传送（Teleport）功能，即将一个元素的内容传送到另一个位置进行显示。使用传送功能时，需要通过指定 `teleport` 属性指定传送的目标容器，文档加载后，传送源会作为整体被移动到传送目标容器内进行显示。
 
 例如，标准 Markdown 语法无法在表格内嵌入复杂元素（比如列表、代码块等），但通过传送功能可以实现这一点。下面的代码展示了如何使用传送功能将复杂元素放置在表格中：
 
 ```plain
-:::{data-teleport-to="strong-ordering"}
+:::{teleport="strong-ordering"}
 - `a == b` $\Rightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{data-teleport-to="weak-ordering"}
+:::{teleport="weak-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{data-teleport-to="partial-ordering"}
+:::{teleport="partial-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
 :::
@@ -490,17 +490,17 @@ $$
 
 这会产生如下效果：
 
-:::{data-teleport-to="strong-ordering"}
+:::{teleport="strong-ordering"}
 - `a == b` $\Rightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{data-teleport-to="weak-ordering"}
+:::{teleport="weak-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{data-teleport-to="partial-ordering"}
+:::{teleport="partial-ordering"}
 - `a == b` $\nRightarrow$ `f(a) == f(b)`。
 - 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
 :::
@@ -738,9 +738,9 @@ graph TD
 
 会产生如下效果：
 
-- [明日]^(あした)
-- [明][日]^(míng)(rì)
-- [郵][便][局]^(ゆう)(びん)(きょく)
+- (明日)^(あした)
+- (明)(日)^(míng)(rì)
+- (郵)(便)(局)^(ゆう)(びん)(きょく)
 
 在将一个词拆分注音时，注音的数量必须与文字块的数量一致，否则该注音将不会被渲染。鼠标光标悬停在注音文字上方时，会弹窗显示放大的注音效果以提升可读性。在拆分注音的情况下，可以点击弹窗中的按钮切换文字块单独注音和词语整体注音两种显示模式。
 

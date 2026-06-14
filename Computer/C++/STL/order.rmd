@@ -54,17 +54,17 @@ int main() {
 
 `<compare>` 中定义了 `std::strong_ordering`、`std::weak_ordering` 和 `std::partial_ordering` 三种顺序类型，其定义如下：
 
-:::{data-teleport-to="strong-ordering"}
+:::{teleport="strong-ordering"}
 - $a \equiv b \Rightarrow f(a) \equiv f(b)$。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{data-teleport-to="weak-ordering"}
+:::{teleport="weak-ordering"}
 - $a \equiv b \nRightarrow f(a) \equiv f(b)$。
 - 关系 $a < b$、$a = b$、$a > b$ 有且仅有一个成立。
 :::
 
-:::{data-teleport-to="partial-ordering"}
+:::{teleport="partial-ordering"}
 - $a \equiv b \nRightarrow f(a) \equiv f(b)$。
 - 关系 $a < b$、$a = b$、$a > b$ 可能都不成立。
 :::

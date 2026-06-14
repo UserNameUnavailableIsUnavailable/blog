@@ -13,12 +13,14 @@ title: 第 8 课 - 李さんは日本語で書きます
 ## Examples
 
 1. - What do we use to make noodles?
-   - 何でうどんを作りますか？
+
+     何でうどんを作りますか？
 2. - I made paper airplanes with newspapers.
-   - 私は新聞紙で紙飛行機を作りました。
+
+     私は新聞紙で紙飛行機を作りました。
 3. - I sent a letter  to my friend by express mail.
-   - 私は手紙を速達で友達に送りました。
-     
+
+     私は手紙を速達で友達に送りました。
 
 ::: {.callout-note}
 

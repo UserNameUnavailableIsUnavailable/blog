@@ -194,7 +194,7 @@ if (bind(serverfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
 
 - `sin_family`：指定地址协议族。
 - `sin_port`：指定端口号。
-- `sin_addr`：指定 IP 地址。
+- `sin_addr`：指定 IP 地址。以 IPv4 为例，该字段是 32 位的无符号整数。
 
 
 ::: {.callout-important}
@@ -481,3 +481,18 @@ int main()
         return err;
 }
 ```
+
+## Q&A
+
+- 半连接队列和全连接队列是什么？
+  - 半连接队列：收到 SYN 但尚未完成三次握手的连接称为半连接，OS 将其添加到半连接队列；
+  - 全连接队列：完成三次握手，但服务器尚未调用 `accept` 接受的连接是全连接，OS 将其添加到全连接队列，大小对应于 `listen` 中传入的 `backlog` 参数。
+
+- `shutdown` 和 `close` 的区别是什么？
+  - `shutdown`
+    - 允许 `SHUT_RD` / `SHUT_WR` / `SHUT_RDWR`，维护完整的 TCP 四次挥手；
+    - 不影响 socket 生命周期，调用后 socket 仍然可用。
+  - `close`
+    - 发送 FIN，由 `FIN_WAIT` 转入 `TIME_WAIT` ；
+    - 若接收缓冲区仍有数据，发送 RST 重置连接状态；
+    - 减少 socket 引用计数。
