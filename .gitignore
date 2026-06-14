@@ -11,3 +11,6 @@
 /.luarc.json
 sidebar.json
 test/
+
+Thumbs.db
+.DS_Store
