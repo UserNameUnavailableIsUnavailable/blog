@@ -1,0 +1,194 @@
+---
+title: 协程
+---
+
+## 什么是协程，为什么需要它？
+
+假设一个单线程程序要执行多个耗时任务，每个任务的处理流程如下。
+
+```c
+task_t task;
+create_task(&task); // 受理任务
+handle_task(&task); // 处理任务（耗时）
+notify_task(&task); // 将处理结果告知任务发布者
+```
+
+其中，`handle()` 是耗时很长的操作（如网络 I/O）。在单线程模型中，其他的任务会由于 `handle()` 被阻塞而无法得到及时响应。
+
+一个优化思路是创建多个线程，在每个线程中执行上述流程。但系统支持的线程数量是有限的，不可能开大量的线程执行相同的请求。另外，在 `handle()` 对应于 I/O 密集型任务时，线程数量的增加并不会显著提升相应处理的效率。究其原因，I/O 密集型任务本身大部分时候并不在 CPU 干预下完成。例如，磁盘读写操作除了任务开始和完成需要 CPU 的干预，其余时候都是由 DMA 硬件与内存直接交互。在 CPU 向硬件下发任务后，当前线程就陷入阻塞，直到任务完成。
+整个过程中线程的 CPU 时间片资源并未得到充分利用。
+
+更好的思路是将同步的 `handle(){.language-cpp}` 改造一个异步的、非阻塞的调用。等待任务完成的过程中，当前线程可以继续处理其他任务。在任务完成后，通过回调的方式进行任务完成时的通知。这样，当前线程可以专注于主流程的处理，而无需关心 I/O 密集型任务的执行过程。
+
+```c
+create_task();
+async_handle_task(notify_task);
+```
+
+但是，上面的方式在实际开发中存在一定的问题。当回调函数 `notify_task()`{.language-cpp} 的逻辑不仅仅是“告知”这样简单，而是转而执行另外一批复杂的 I/O 耗时操作时，回调的嵌套就会变得非常复杂。
+
+```c
+void async_notify_task(feedback_callback_t feedback)
+{
+    // notify
+    feedback();
+}
+
+task_t task;
+create_task(&task);
+async_handle(&task, async_notify_task, feedback);
+```
+
+如果 `feedback()`{.language-cpp} 也是 I/O 密集型操作呢？很显然，回调的层级就会不可控地增加，造成 **回调地狱（callback hell）**。
+
+我们可以考虑采用下面的方式解决上述问题。在代码中，`create_task(){.language-cpp}` 创建一个新任务或返回一个已有任务。`progressively_handle_task()`{.language-cpp} 和 `progressively_notify_task()`{.language-cpp} 会在每一轮循环内尝试推进任务执行流程，一旦任务需要阻塞才能完成，则立即返回 `false`。这样，在单线程情形下，每个任务都可以得到及时响应。
+
+```c
+void task_loop()
+{
+    task_t task;
+    while (1)
+    {
+        bool valid = create_task(&task);
+        bool handled = false;
+        bool notified = false;
+        if (valid)
+        {
+            handled = progressively_handle_task(task);
+        }
+        if (task.handled)
+        {
+            notified = progressively_notify_task(task);
+        }
+        if (task.notified)
+        {
+            destroy_task(&task);
+        }
+    }
+}
+```
+
+上面的方式存在的问题是无法记忆每个任务的执行状态，导致在检测任务当前状态上浪费了大量时间。在形式化的视角下，每个任务实际上都可以抽象成一个状态，进一步地，也就可以针对每个任务构造一个有限自动状态就来管理。当某个任务的执行陷入阻塞时，就暂存该任务的状态，并恢复另一个任务的状态。例如，在某一时刻，任务 A 和 B 具有如下的执行情况：
+
+```c
+void task_A()
+{
+    // 当前正在执行任务 A
+    while (true)
+    {
+        /* PC -> */ notified = progressively_notify_task();
+        if (!notified)
+        {
+            suspend();
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
+void task_B()
+{
+    while (true)
+    {
+        /* PC -> */ handled = progressively_handle_task();
+        if (!handled)
+        {
+            suspend();
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+```
+
+如果我们感知到任务 A 即将阻塞，就立即在 `task_A()` 中执行一个名为 `suspend()` 的调用，保存任务 A 此时的调用堆栈、通用寄存器、程序计数器 [^context]（相当于保存了 A 的完整状态），然后切换到任务 B 执行。这样，执行流在 A 与 B 之间反复切换，并且切换回某一任务时能够直接在上次执行中断处恢复执行。
+
+[context]: 在操作系统中，线程的调用栈、通用寄存器、程序计数器三者统称为上下文。
+
+:::{.callout-note}
+完整保存上下文可以完整地保留整个任务的信息，但是这种做法会带来一定的存储开销。很多时候，只需要选取几个关键的变量就可以唯一标识某个状态。在下面的例子中，显然只需要暂存 `task` 和 `state` 即可唯一标识某个任务。
+
+```c {#state}
+typedef enum
+{
+    kCreated,
+    kHandled,
+    kNotified
+} state_t;
+
+void task_loop()
+{
+    task_t task;
+    state_t state;
+    while (true)
+    {
+        task_create(&task);
+        bool need_suspend = false;
+        switch (state)
+        {
+            kCreated:
+            {
+                need_suspend = true;
+            }
+            kHandled:
+                need_suspend = true;
+            {
+            }
+            kNotified:
+            {
+                need_suspend = true;
+            }
+        }
+        if (need_suspend)
+        {
+            suspend();
+        }
+    }
+}
+```
+:::
+
+在这样的背景下，就可以引出 **协程（coroutine）** 的概念。协程的设计思路与线程相似，如果将要执行一项 I/O 密集型任务，那么就让出当前 CPU 时间片，执行其他任务。二者的最主要的区别在于线程的调度发生在操作系统内核态，线程切换具有更高的开销，并且任务控制的粒度更粗。一个线程能够处理多个不同类型的任务，但是在操作系统内核看来，这些任务都只表现为一个线程，一旦线程被调离 CPU，所有任务都无法执行。而协程则可在不出让当前线程 CPU 时间片的前提下，灵活地指定要将 CPU 时间片交给另一项非阻塞的任务使用。
+
+在状态机的语境下，切换协程，本质上是完成两个操作：
+
+- 存档当前协程；
+- 取出另一协程的存档，恢复其执行状态。
+
+依据存档方式的不同，协程可分为两类：
+
+- 有栈协程（stackful coroutine）：暂存协程的完整上下文；
+- 无栈协程（stackless coroutine）：只保存关键信息，相当于对上下文中冗余内容进行了删减。
+
+:::{.callout-note}
+
+**有栈协程 vs. 无栈协程**
+
+有栈协程需要完整保存协程的上下文，除了更大的存储开销外，还涉及到不同平台的 ABI 规范，因此其 API 更难实现并且具有更大的开销，但是对 API 使用者而言更加方便。
+
+无栈协程则需要使用者手动指定关键的状态，具有更小的存储开销。在协程切换时，只需要暂存相关状态即可，实现相应的 API 时无需过多考虑不同平台的 ABI 问题。但是，对于使用者而言，无栈协程的使用远不像有栈协程方便（尤其在涉及到递归调用的场景）。
+
+:::
+
+## 协程调度
+
+协程切换依赖于当前正在执行的协程主动出让执行权给其他协程，在这一过程中，有两种设计思路：
+
+- 所有协程对等，协程之间可以任意指定切换（switch）的下一个协程；
+- 设定一个主协程，子协程出让（yield）执行权给主协程，再由主协程将执行权派发给子协程，并恢复（resume）指定子协程的执行。
+
+可以看出，第二种方案实际上是第一种方案的特例。 但从解耦的角度看，协程之间应该保持“最小知道原则”，即协程之间最好不要感知到彼此的存在，这样程序能具备更好的可扩展性。因此，在实际开发中，一般采用第二种方案。
+
+协程的调度本质上就是状态的切换，但在调度过程中，切换的动作又可被细分为如下两类：
+
+- 出让（yield）：子协程将执行权交还给主协程；
+- 恢复（resume）：主协程恢复某个子协程的执行。
+
+## 有栈协程
+
+## 无栈协程
+
