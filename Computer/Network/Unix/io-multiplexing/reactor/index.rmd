@@ -12,7 +12,7 @@ Linux 提供了 `select`、`poll`、`epoll` 三个 API 用于实现这种 I/O �
 
 `select` 是 UNIX 的遗产，它使用一个固定大小的位图来表示文件描述符集合 `fd_set`。位图中每一位对应一个文件描述符（第 0 位对应文件描述符 0，第 1 位对应文件描述符 1，依此类推），因此存在文件描述符数量的限制（通常为 1024）。
 
-```c {data-filename="<sys/select.h>" code-line-numbers="4"}
+```c {filename="<sys/select.h>" code-line-numbers="4"}
 /* The fd_set member is required to be an array of longs.  */
 typedef long int __fd_mask;
 /* Number of descriptors that can fit in an `fd_set'.  */
@@ -169,7 +169,7 @@ int main (int argc, char *argv[]) {
 
 :::
 
-```c {data-filename="<sys/select.h>" }
+```c {filename="<sys/select.h>" }
 extern int select (int __nfds, fd_set *__restrict __readfds,
 		   fd_set *__restrict __writefds,
 		   fd_set *__restrict __exceptfds,
@@ -197,7 +197,7 @@ extern int select (int __nfds, fd_set *__restrict __readfds,
 
 `pollfd` 结构体定义如下：
 
-```c {data-filename="<sys/poll.h>"}
+```c {filename="<sys/poll.h>"}
 /* Type used for the number of file descriptors.  */
 typedef unsigned long int nfds_t;
 
@@ -298,7 +298,7 @@ static int __wake_up_common(struct wait_queue_head *wq_head, unsigned int mode,
 
 在内核源码中，调用 `poll` 的任务（当前任务）上注册了名为 `__pollwait` 的回调。当网卡等设备接收到数据包后，会发送中断信号到 CPU 核心，进而触发设备驱动维护的等待队列 `wait_address` 内的中断回调，并唤醒 `poll` 线程。
 
-```c {data-filename="fs/select.c" code-line-numbers="26"}
+```c {filename="fs/select.c" code-line-numbers="26"}
 #define current get_current()
 
 void poll_initwait(struct poll_wqueues *pwq)
@@ -353,7 +353,7 @@ static void __pollwait(struct file *filp, wait_queue_head_t *wait_address,
 
 要使用 `epoll`，首先要创建一个 `epollfd`。Linux 提供了 `epoll_create` 和 `epoll_create1` 两个函数来创建 `epollfd`。
 
-```c {data-filename="<sys/epoll.h>"}
+```c {filename="<sys/epoll.h>"}
 int epoll_create(int size);
 int epoll_create1(int flags);
 ```
@@ -372,7 +372,7 @@ int epollfd = epoll_create1(0);
 
 然后，创建 `epoll_event`。
 
-```c {data-filename="<sys/epoll.h>"}
+```c {filename="<sys/epoll.h>"}
 typedef union epoll_data
 {
   void *ptr;
@@ -408,7 +408,7 @@ struct epoll_event
 
 然后，使用 `epoll_ctl` 来注册、修改或删除需要监听的文件描述符，避免了 `poll` 中每次调用都需要将 `pollfd` 元组从用户态复制到内核态的问题。
 
-```c {data-filename="<sys/epoll.h>"}
+```c {filename="<sys/epoll.h>"}
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 ```
 
@@ -416,7 +416,7 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 
 要监听事件，调用 `epoll_wait` 来等待事件的发生。
 
-```c {data-filename="<sys/epoll.h>"}
+```c {filename="<sys/epoll.h>"}
 int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
 ```
 
@@ -426,7 +426,7 @@ int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout)
 
 在内核中，调用 `epoll_create` 后，内核中会创建 `eventpoll` 对象。 `eventpoll` 是 `epoll` 的核心数据结构，它通过红黑树 `rbr` 来管理所有注册的文件描述符，并通过就绪链表 `rdllist` 来管理就绪的文件描述符。
 
-```c {data-filename="<fs/eventpoll.c>"}
+```c {filename="<fs/eventpoll.c>"}
 struct eventpoll {
     // ...
     /* Wait queue used by sys_epoll_wait() */
@@ -443,7 +443,7 @@ struct eventpoll {
 
 红黑树中的每个节点是一个 `epitem` 结构体，包含了被监视的文件描述符、事件类型等信息。在调用 `epoll_ctl` 后，内核会创建/修改/删除对应的 `epitem` 结构体，并在相应的驱动中注册回调函数 。
 
-```c {data-filename="<fs/eventpoll.c>"}
+```c {filename="<fs/eventpoll.c>"}
 struct epitem {
 	union {
 		/* RB tree node links this structure to the eventpoll RB tree */

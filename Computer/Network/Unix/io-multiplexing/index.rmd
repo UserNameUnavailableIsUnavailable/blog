@@ -2,19 +2,64 @@
 title: I/O 多路复用
 ---
 
-在客户端尚未向服务器发送数据时，调用 `recv` 的线程会发生阻塞，即便通过线程池来处理连接请求，仍然无法避免线程资源的浪费。一个更好的思路是在数据就绪时，告知线程来读取数据，这就是 **I/O 多路复用（I/O multiplexing）** 的思想。I/O 多路复用的目标是让一个线程能够同时处理多个 I/O 源，具备在多个 I/O 源上阻塞等待的能力，进而实现对多个 I/O 源的响应能力，提高线程时间片的利用率。
+在客户端尚未向服务器发送数据时，调用 `recv` 的线程会发生阻塞，即便通过线程池来处理连接请求，仍然无法避免线程资源的浪费。一个更好的思路是在数据就绪时，告知线程来读取数据，这就是 **I/O 多路复用（I/O multiplexing）** 的思想。I/O 多路复用的目标是让一个线程能够同时处理多个 I/O 源，进而实现对多个 I/O 源的响应能力，提高线程时间片的利用率。要做到这一点，比较好的思路是由内核告知用户态进程某个 I/O 事件的产生，然后由用户态进程决定如何处理。
 
-I/O 多路复用有两种实现模式：Reactor 模式和 Proactor 模式。二者都是事件驱动的设计模式，区别在于事件触发的时机不同。Reactor 模式在 I/O 就绪时触发事件，事件就绪后由内核唤醒阻塞线程，线程恢复后还需要读取数据（意味着需要陷入内核再执行若干次系统调用）；Proactor 模式在 I/O 操作完成时触发事件，事件就绪后，数据已经由内核读取完成。
+以网络 I/O 为例，内核可以告知用户态进程数据可接收（即内核接收缓冲区非空）、数据可发送（内核发送缓冲区未满）这类事件**就绪**信号，然后由用户态进程决定是否发起接收、发送的系统调用。
+这种模式被称为同步 I/O 多路复用，其含义是 I/O 操作的发起和 I/O 操作完成是同步的。
+举例来说，用户态进程收到可接收事件后，调用 `recv` 从接收缓冲区读取数据，这个过程本质上是从内核的接收缓冲区把数据“搬”到用户态，函数调用返回时，I/O 操作已经完成。
+在这种模式下，用户态进程只需要创建一个线程，即可实现单线程对多个 I/O 源的响应。在整个事件处理循环中，I/O 操作是由一系列的就绪事件驱动的，一个就绪事件对应于一套 I/O 系统调用，调用结束后，对该事件的处理就完成了。
 
+```{mermaid}
+sequenceDiagram
+    participant App as Application
+    participant Demux as Reactor Demultiplexer<br/>
+    participant IO as I/O Resource<br/>(sockets, files)
 
-::: {.callout-note}
+    Note over App,IO: 🔁 Reactor event loop iteration
 
-这两种 I/O 多路复用模式也被称为同步 I/O 多路复用和异步 I/O 多路复用。
+    App->>Demux: 1️⃣ Wait for readiness events<br/>
+    Demux-->>App: FD is ready (read/write)
+    Note right of App: Event readiness
 
-:::
+    App->>IO: 2️⃣ Initiate synchronous syscall(s)<br/>(read / write / accept)
+    Note right of App: Syscall does not block<br/>because data is already available
+    IO-->>App: Data transferred / connection accepted
 
+    App->>App: 3️⃣ Process result, update application state
+    Note right of App: Event handling completion
+```
 
-Reactor 模式的优势在于实现简单，效率也不错，典型的代表是 epoll；Proactor 模式的优势在于性能更高，尤其是在高并发场景下，因为它减少了线程与内核之间的上下文切换次数，典型的代表是 Windows 的 IOCP（I/O Completion Ports）以及 Linux 5.1 引入的 io_uring（2019.3）。
+Reactor 模式的优势在于思路简单，维护方便，但缺点也是很明显的——额外的系统调用和数据拷贝。
+用户态首先需要发起一次系统调用，告知内核其所关心的事件。事件就绪后，还需要发起多次系统调用执行 I/O 操作。而这些 I/O 操作的本质仅仅是把一些已经由内核接收完成的数据“搬”到用户态，或者把是已经存在于用户空间的数据“搬”到内核态。
+
+优化的思路很明显，对于读操作，内核直接把数据写进用户空间；对于写操作，内核直接使用用户空间提供的数据。
+这种模式被称为异步 I/O 多路复用，在这种新的模式下，用户不再主动地执行 I/O 操作，而是注册对某类事件应该执行的 I/O 操作，这项操作并不会立即就绪或完成。内核收到 I/O 事件后，会自动执行相应的 I/O 操作，数据直通用户空间。操作完成后，内核才向用户进程发送事件信号，这时的事件信号的语义也从事件就绪转为事件**完成**。
+
+```{mermaid}
+sequenceDiagram
+    participant App as Application
+    participant Proactor as Proactor Demultiplexer<br/>(io_uring / IOCP)
+    participant Kernel as Kernel / I/O Subsystem
+
+    Note over App,Kernel: 🔁 Proactor event loop iteration
+
+    App->>Proactor: 1️⃣ Submit async operation(s)<br/>(SQE with buffer, offset, opcode)
+    Proactor->>Kernel: Forward operation<br/>(io_uring_enter / IOCP submit)
+    Note right of Kernel: Kernel performs I/O<br/>asynchronously (non-blocking)
+
+    App->>Proactor: 2️⃣ Retrieve completions<br/>(peek_batch_cqe / GetQueuedCompletionStatus)
+    Proactor-->>App: Completion event(s) (CQE)<br/>- result code<br/>- bytes transferred<br/>- user_data
+    Note right of App: I/O has already finished –<br/>no synchronous syscall needed
+
+    App->>App: 3️⃣ Process results directly<br/>(data already in buffer)
+    Note right of App: Event handling completion
+```
+
+同步 I/O 多路复用模式也被称为 Reactor 模式，异步 I/O 多路复用模式也被称为 Proactor 模式。
+二者都是事件驱动的设计模式，区别在于事件触发的时机不同。Reactor 模式在 I/O 就绪时触发事件，事件就绪后由内核唤醒阻塞线程，线程恢复后还需要读取数据（意味着需要陷入内核再执行若干次系统调用）；Proactor 模式在 I/O 操作完成时触发事件，事件就绪后，数据已经由内核读取完成。
+
+Reactor 模式的优势在于实现简单，效率也不错，典型代表是 Linux 下的 `select` / `poll` / `epoll`；
+Proactor 模式的优势在于性能更高，尤其是在高并发场景下，因为它减少了线程与内核之间的上下文切换次数，典型的代表是 Windows 的 IOCP（I/O Completion Ports）以及 Linux 5.1 引入的 io_uring（2019.3）。
 
 ::: {.callout-important}
 

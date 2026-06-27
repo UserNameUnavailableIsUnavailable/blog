@@ -24,6 +24,20 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CAC
 ```
 
 ::: {.callout-important}
+
+vcpkg 基于源码构建依赖，首次构建非常耗时。
+默认情况下，vcpkg 会在 `CMAKE_BINARY_DIR` 目录下创建 `vcpkg_installed` 目录，所有的构建产物放到此目录下。
+考虑到构建耗时问题，如果删除了构建目录（如 `build`），再次构建又需要重新从源码构建依赖。
+因此，我个人习惯重新定义 `VCPKG_INSTALLED_DIR`，将 vcpkg 构建的依赖放到源码目录下，并在 `.gitignore` 中忽略 `vcpkg_installed`。
+
+```cmake
+# Keep manifest-installed packages outside the build tree so deleting build/ does not force reinstall.
+set(VCPKG_INSTALLED_DIR "${CMAKE_SOURCE_DIR}/vcpkg_installed" CACHE PATH "vcpkg installed tree" FORCE)
+```
+
+:::
+
+::: {.callout-important}
 工具链文件必须在 `project()` 或 `enable_language()` 之前指定，以便 CMake 的钩子能够正确添加 vcpkg 包的路径。
 :::
 
@@ -38,7 +52,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake ..
 
 CMake 3.19 之后，提供了预设（presets）功能，可以在 `CMakePresets.json` 中配置 vcpkg 的工具链文件：
 
-```json {data-filename="CMakePresets.json"}
+```json {filename="CMakePresets.json"}
 {
   "version": 3,
   "configurePresets": [

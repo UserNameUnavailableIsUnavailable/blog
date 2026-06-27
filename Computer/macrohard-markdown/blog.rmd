@@ -86,7 +86,7 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 要指定复杂属性，如样式属性 `style`，可以使用下面的语法：
 
 ```plain
-## Bar {data-style-display="block" data-style-text-align="center"}
+## Bar {style-display="block" style-text-align="center"}
 ```
 
 这将产生如下的 HTML 标记：
@@ -96,14 +96,14 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 ```
 
 ::: {.callout-note}
-以 `data-` 开头的属性是本扩展特有的属性前缀，表示该属性需要经过解析器的特殊处理后才能生效。在后面还会介绍更多类似的属性前缀。
+以 `` 开头的属性是本扩展特有的属性前缀，表示该属性需要经过解析器的特殊处理后才能生效。在后面还会介绍更多类似的属性前缀。
 :::
 
 下面的常用的样式属性已经被预定义为简化形式：
 
-- `width`：与 `data-style-width` 等价。
-- `height`： 与 `data-style-height` 等价。
-- `color`：与 `data-style-color` 等价。
+- `width`：与 `style-width` 等价。
+- `height`： 与 `style-height` 等价。
+- `color`：与 `style-color` 等价。
 
 此特性还有一种常见的使用场景，比如下面的这个例子就可以实现在新页面打开链接：
 
@@ -251,20 +251,20 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 除了默认的 `<div>`{.language-html} 容器外，还可以通过 `is` 属性指定使用其他类型的容器，例如：
 
 ```markdown
-:::{ .right data-is="figure" }
+:::{ .right is="figure" }
 ![](./doro-maodie.gif)
 :::
 ```
 
 这会产生如下效果：
 
-:::{ .right data-is="figure" }
+:::{ .right is="figure" }
 ![](./doro-maodie.gif)
 :::
 
 :::: {.callout-important}
-当图片没有标题时，图片将被 **直接** 渲染为 `<img>`{.language-html} 元素。可以使用 `::: { data-is="figure" } :::` 来定义一个图片容器，并为容器指定一些属性来实现特定的排版效果。
-当为图片指定标题时，图片本身会被渲染为 `<img>`{.language-html} 元素，标题会被渲染为 `<figcaption>`{.language-html} 元素，二者会被包含在一个 **自动创建** 的 `<figure>`{.language-html} 元素内，指定的属性将应用于该 `<figure>` 元素，此时不应该再对图片使用 `::: { data-is="figure" } :::`。
+当图片没有标题时，图片将被 **直接** 渲染为 `<img>`{.language-html} 元素。可以使用 `::: { is="figure" } :::` 来定义一个图片容器，并为容器指定一些属性来实现特定的排版效果。
+当为图片指定标题时，图片本身会被渲染为 `<img>`{.language-html} 元素，标题会被渲染为 `<figcaption>`{.language-html} 元素，二者会被包含在一个 **自动创建** 的 `<figure>`{.language-html} 元素内，指定的属性将应用于该 `<figure>` 元素，此时不应该再对图片使用 `::: { is="figure" } :::`。
 
 例如，直接对无标题的图片添加居中属性将不会产生任何效果，因为 `<img>`{.language-html} 元素是行内元素，行内元素无法被居中对齐：
 
@@ -275,7 +275,7 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 会产生如下 HTML 标记：
 
 ```html
-<img src="doro-maodie.gif" class="center" data-viewable />
+<img src="doro-maodie.gif" class="center" viewable />
 ```
 
 ![](./doro-maodie.gif){.center}
@@ -290,7 +290,7 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 
 ```html
 <figure class="center">
-  <img src="doro-maodie.gif" data-viewable />
+  <img src="doro-maodie.gif" viewable />
   <figcaption>Doro 💖 耄耋</figcaption>
 </figure>
 ```
@@ -298,7 +298,7 @@ title: '`std::cout << "Hello, world!" << std::endl;`'
 ![Doro 💖 耄耋](doro-maodie.gif){.center}
 
 ::: {.callout-tip}
-你可能注意到了 `data-viewable` 属性，该属性用于指示图片是可查看的（viewable），即点击图片后会弹出查看器 [^viewerjs]，在查看器中可以进行拖拽、旋转、镜像、放大、缩小等操作。
+你可能注意到了 `viewable` 属性，该属性用于指示图片是可查看的（viewable），即点击图片后会弹出查看器 [^viewerjs]，在查看器中可以进行拖拽、旋转、镜像、放大、缩小等操作。
 
 [^viewerjs]: 该查看器基于 [fengyuanchen/viewerjs](https://github.com/fengyuanchen/viewerjs){target="_blank"} 实现。
 :::
@@ -550,7 +550,7 @@ graph TD
 
 ````markdown
 [//]: # 使用 .center 居中
-::::{data-is="figure" .center}
+::::{is="figure" .center}
 ```{mermaid}
 graph TD
     A[开始] --> B{是否满足条件？}
@@ -558,14 +558,15 @@ graph TD
     B -- 否 --> D[结束]
     C --> D
 ```
-::: {data-is="figcaption"}
-`mermaid` flowchart
+::: {is="figcaption"}
+::mermaid flowchart::
 :::
 ::::
 ````
 :::::
+
 ::::: { .column width="50%" }
-:::: {data-is="figure" .center}
+:::: {is="figure" .center}
 ```{mermaid}
 graph TD
     A[开始] --> B{是否满足条件？}
@@ -573,8 +574,9 @@ graph TD
     B -- 否 --> D[结束]
     C --> D
 ```
-:::{data-is="figcaption"}
-`mermaid` flowchart
+
+:::{is="figcaption"}
+::mermaid flowchart::
 :::
 ::::
 :::::
@@ -588,114 +590,145 @@ graph TD
 - 仅支持水平表格（记录按行显示），无法创建垂直表格（记录按列显示）以及复合表格（记录按行和列混合显示）。
 - 无法实现复杂的单元格合并效果。
 
-通过使用容器语法结合属性语法，可以创建复杂的表格。例如，下面的代码创建了一个垂直表格：
+### 表头样式
 
-```plain
-::::{data-as="table" data-type="grid-vertical"}
-:::{data-type="properties"}
-- 属性 A{color="red"}
-- 属性 B{color="green"}
-- 属性 C{color="blue"}
-:::
-:::{data-type="properties"}
-- 属性 1{color="#123456"}
-- 属性 2{color="#789abc"}
-- 属性 3{color="#def012"}
-- 属性 4{color="#345678"}
-:::
-:::{data-type="record"}
-- A1
-- B1
-- C1
-:::
-:::{data-type="record"}
-- A2
-- B2
-- C2
-:::
-:::{data-type="record"}
-- A3
-- B3
-- C3
-:::
-:::{data-type="record"}
-- A4
-- B4
-- C4
-:::
-:::{data-type="caption"}
-`grid-vertical` 表格
-:::
-::::
+Markdown 表格要求必须指定表头，在扩展的 Markdown 表格中，支持如下表头样式（`head-style`）：
+
+- 缺省：如果所有表头为空，则此表格被视作不含表头的表格；
+- `horizontal`：表头位于表格的第一行，表头的内容为该行的单元格内容，即使所有表头元素为空，表头也仍会被显示；
+- `vertical`：表头位于表格的第一列，表头的内容为该列的单元格内容；
+- `both`：表头位于表格的第一行和第一列，表头的内容为该行和该列的单元格内容。
+
+::::{.columns}
+:::{.column width="50%"}
+```markdown
+|   |   |   |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
 ```
-
-::::{data-as="table" data-type="grid-vertical"}
-:::{data-type="properties"}
-- 属性 A{color="red"}
-- 属性 B{color="green"}
-- 属性 C{color="blue"}
 :::
-:::{data-type="properties"}
-- 属性 1{color="#123456"}
-- 属性 2{color="#789abc"}
-- 属性 3{color="#def012"}
-- 属性 4{color="#345678"}
-:::
-:::{data-type="record"}
-- A1
-- B1
-- C1
-:::
-:::{data-type="record"}
-- A2
-- B2
-- C2
-:::
-:::{data-type="record"}
-- A3
-- B3
-- C3
-:::
-:::{data-type="record"}
-- A4
-- B4
-- C4
-:::
-:::{data-type="caption"}
-`grid-vertical` 表格
+:::{.column width="50%"}
+|   |   |   |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
 :::
 ::::
 
-外层容器字段说明：
+::::{.columns}
+:::{.column width="50%"}
+```markdown
+|   |   |   |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
 
-- `data-as="table"`：指示该容器应被渲染为表格。
-- `data-type`：表格类型，可选值包括：
-    - `plain-horizontal`: 不包含属性标题的普通表格。
-    - `plain-vertical`: 不包含属性标题的普通垂直表格。
-    - `horizontal`: 包含属性标题的水平表格。
-    - `vertical`: 包含属性标题的垂直表格。
-    - `grid-horizontal`: 包含属性标题的复合水平表格。
-    - `grid-vertical`: 包含属性标题的复合垂直表格。
+{ head-style="horizontal" }
+```
+:::
+:::{.column width="50%"}
+|   |   |   |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
 
-内层容器字段说明：
+{ head-style="horizontal" }
+:::
+::::
 
-- `data-type`
-    - `properties`：用于标识表格属性字段：
-        - 当表格类型为 `plain-horizontal` 或 `plain-vertical` 时，忽略该容器；
-        - 当表格类型为 `horizontal` 时，表示属性标题行；
-        - 当表格类型为 `vertical` 表示属性标题列;
-        - 当表格类型为 `grid-horizontal` 时，第一个 `properties` 容器表示属性标题行，第二个 `properties` 容器表示属性标题列；
-        - 当表格类型为 `grid-vertical` 时，第一个 `properties` 容器表示属性标题列，第二个 `properties` 容器表示属性标题行。
-    - `record`：表格的记录字段， 每个 `record` 容器表示表格中的一行或一列，具体取决于表格类型：
-        - 当表格类型为 `plain-horizontal` 或 `horizontal` 时，一条记录代表表示表格中的一行；
-        - 当表格类型为 `plain-vertical` 或 `vertical` 时，一条记录表示表格中的一列；
-        - 当表格类型为 `grid-horizontal` 时，一条记录表示表格中的一行；
-        - 当表格类型为 `grid-vertical` 时，一条记录表示表格中的一列。
-    - `caption`：表格标题容器，**可选**，表示表格的标题。可以通过属性语法为标题容器指定属性，例如 `data-style-caption-side="top"` 或 `data-style-caption-side="bottom"` 来指定标题显示在表格的上方或下方，默认情况下，标题显示在表格的下方。
+::::{.columns}
+:::{.column width="50%"}
+```markdown
+|   |   |   |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
 
-从本质上讲，上述语法是对容器按行或列进行展开。
+{ head-style="vertical" }
+```
+:::
+:::{.column width="50%"}
+|   |   |   |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
 
-定义在容器中的所有元素最终会被转换为 `<th>`{.language-html} 或 `<td>`{.language-html} 元素，具体取决于其在表格中的位置。另外，可通过属性语法定义 `rowspan` 和 `colspan` 属性来实现复杂的单元格合并效果。
+{ head-style="vertical" }
+:::
+::::
+
+::::{.columns}
+:::{.column width="50%"}
+```markdown
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+{ head-style="both" }
+```
+:::
+:::{.column width="50%"}
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+{ head-style="both" }
+:::
+::::
+
+### 合并
+
+当某个单元格的邻近单元格为空时，可通过指定 `merge` 属性将该单元格与邻近单元格合并。例如：
+
+::::{.columns}
+:::{.column width="50%"}
+```markdown
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 |   | 6 |
+
+{merge}
+```
+:::
+
+:::{.column width="50%"}
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 |   | 6 |
+
+{merge}
+:::
+::::
+
+### 转置
+
+通过指定 `transpose` 属性可以将表格进行转置。例如：
+
+::::{.columns}
+:::{.column width="50%"}
+```markdown
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+{transpose}
+```
+:::
+:::{.column width="50%"}
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+{transpose}
+:::
+::::
 
 ## 图片增强
 
@@ -773,14 +806,14 @@ footnote-container: footnotes
 为防止 XSS 攻击，本扩展默认不渲染 HTML 标记。但有时我们确实需要在文档中嵌入 HTML 代码，这时可以使用下面的语法：
 
 ````plain
-```{data-html}
+```{html}
 <iframe src="presentation.html" width="100%" height=800px"></iframe>
 ```
 ````
 
 这会产生如下效果：
 
-```{data-html}
+```{html}
 <iframe src="presentation.html" width="100%" height=800px"></iframe>
 ```
 

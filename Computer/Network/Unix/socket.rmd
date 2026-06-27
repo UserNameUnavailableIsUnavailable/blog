@@ -15,7 +15,7 @@ Linux 将网络协议分为多个地址协议族（protocol family），每个�
 
 IP 地址是网络中设备的唯一标识符，分为 IPv4 和 IPv6 两种格式，对应类型 `in_addr` 和 `in6_addr`，前缀 `in` 代表 Internet：
 
-```c {data-filename="<netinet/in.h>"}
+```c {filename="<netinet/in.h>"}
 /* Internet address.  */
 typedef uint32_t in_addr_t;
 struct in_addr
@@ -136,7 +136,7 @@ int serverfd = socket(AF_INET, SOCK_STREAM, 0);
 
 完整的地址由 IP 地址（网络层）和端口（传输层）构成。 `sockaddr` 结构体用于标识套接字的地址信息。`sockaddr` 是一个通用的套接字地址结构体，其中 `sa_data` 的具体内容取决于地址协议族，并且受历史遗留因素影响，其定义的长度为 14 字节，但实际上长度并不止 14 字节。
 
-```c{data-filename="<bits/socket.h>"}
+```c{filename="<bits/socket.h>"}
 /* Structure describing a generic socket address.  */
 struct sockaddr
   {
@@ -147,7 +147,7 @@ struct sockaddr
 
 对于不同的地址协议族，Linux 定义了不同的套接字地址结构体：
 
-```c{data-filename="<netinet/in.h>"}
+```c{filename="<netinet/in.h>"}
 /* Structure describing an Internet socket address.  */
 struct sockaddr_in
   {
@@ -218,7 +218,7 @@ if (listen(serverfd, 1) < 0)
 
 `listen` 的原型如下：
 
-```c{data-filename="<sys/socket.h>"}
+```c{filename="<sys/socket.h>"}
 /* Prepare to accept connections on socket FD.
    N connection requests will be queued before further requests are refused.
    Returns 0 on success, -1 for errors.  */
@@ -234,7 +234,7 @@ extern int listen (int __fd, int __n) __THROW;
 
 Linux 内核源码中，系统调用 `listen` 调用情况如下：
 
-```c{data-filename="<net/socket.c>"}
+```c{filename="<net/socket.c>"}
 SYSCALL_DEFINE2(listen, int, fd, int, backlog)
 {
 	return __sys_listen(fd, backlog);
