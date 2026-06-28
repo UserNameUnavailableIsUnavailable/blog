@@ -6,7 +6,7 @@ title: 异步 I/O 多路复用
 
 Proactor 是 I/O 多路复用的另一种实现方式。在 Reactor 模式中，内核将就绪的事件通知上层应用，应用得知事件就绪后，需要根据具体的事件类型再次发起收发数据的系统调用。在这个过程中，涉及多次内核态和用户态之间的数据移动操作，产生了额外的系统调用和数据移动开销。一种更高效的方案是直接由内核负责将数据定向到用户态的地址空间，避免多余的系统调用和数据拷贝。数据操作完成后，内核将操作完成的事件告知用户态，因此在 Proactor 模式中，用户态收到的是操作完成的事件。处理事件的整个过程是由内核完成的，用户态进程只需要通过系统调用注册需要处理的事件类型（接受请求、收发数据），随后就可以转而处理其他事项。整个过程中，数据操作的发起和数据操作的完成是异步进行的。
 
-Windows 很早就支持了异步 I/O 多路复用，而 Linux 直到 2019 年 `io_uring` 的加入才提供了异步 I/O 多路复用的支持。Windows NT 的 I/O 框架的设计本身就同时考虑了同步 I/O 和异步 I/O [^overlapped-io]，因此在 Windows平台下，天然就有 同步 I/O 接口（如`ReadFile` / `WriteFile`）和异步 I/O 接口（如  `ReadFileEx` / `WriteFileEx` ）可用。
+Windows 很早就支持了异步 I/O 多路复用，而 Linux 直到 2019 年 `io_uring` 的加入才提供了异步 I/O 多路复用的支持。Windows NT 的 I/O 框架的设计本身就同时考虑了同步 I/O 和异步 I/O [^overlapped-io]，因此在 Windows平台下，天然就有同步 I/O 接口（如`ReadFile` / `WriteFile`）和异步 I/O 接口（如  `ReadFileEx` / `WriteFileEx` ）可用。
 
 [^overlapped-io]: 在 Windows 平台下，异步 I/O 又被称为重叠 I/O （overlapped I/O）。可参考 [Synchronization and Overlapped Input and Output](https://learn.microsoft.com/en-us/windows/win32/sync/synchronization-and-overlapped-input-and-output)。
 
@@ -28,32 +28,32 @@ Linux 在早期并充分考虑提供异步 I/O 的支持，这一点从 API 层�
 
 ### 概览
 
-io_uring 在 Linux 5.1 内核中引入，实现了真正的异步 I/O。uring 中的 “u” 是指 user，ring 指环形缓冲区。io_uring 定义了如下概念：
+`io_uring` 在 Linux 5.1 内核中引入，实现了真正的异步 I/O。uring 中的 “u” 是指 user，ring 指环形缓冲区，其含义是将内核空间的环形缓冲区映射到用户空间。`io_uring` 定义了如下概念：
 
 - 提交队列（Submission Queue, abbr. SQ）：用户用过提交 I/O 请求的方式将 I/O 请求对象添加到提交队列中，由内核负责完成 I/O 操作。提交的 I/O 请求对应于 SQ 中的表项，即 SQE（Submission Queue Entry）。
 - 完成队列（Completion Queue, abbr. CQ）：内核完成 I/O 操作后，将完成的请求添加到完成队列中供用户获取。完成的结果对应于 CQ 中的表项，即 CQE（Completion Queue Entry）。
 
-io_uring 的设计类似于生产者-消费者模型，其中，SQ 和 CQ 都是环形缓冲区，为了减少系统调用次数和冗余拷贝，两个队列都采用无锁队列实现，通过 `mmap` 映射到用户空间，由用户态和内核态共享。
+`io_uring` 的设计类似于生产者-消费者模型，其中，SQ 和 CQ 都是环形缓冲区，为了减少系统调用次数和冗余拷贝，两个队列都采用无锁队列实现，通过 `mmap` 映射到用户空间，由用户态和内核态共享。
 
 ![`io_uring` 设计](io_uring-design.drawio.png){.center}
 
 :::{.callout-important}
 **异步 I/O 多路复用采用的生产者-消费者模型**
 
-io_uring 的两个环形缓冲区都采用了单生产者-单消费者（single-producer / single-consumer, abbr. SPSC）设计，仅对于当前进程可见。SPSC 所带来的好处是可以极大简化无锁队列的实现，仅需使用简单的内存屏障即可确保线程安全。需要指出的是，SPSC 是针对其中一个环形缓冲区而言的。也就是说，可以创建用户线程 A 向 SQ 生产，内核负责从 SQ 消费；创建线程 B 从 CQ 消费，内核负责向 CQ 生产。
+`io_uring` 的两个环形缓冲区都采用了单生产者-单消费者（single-producer / single-consumer, abbr. SPSC）设计，仅对于当前进程可见。SPSC 所带来的好处是可以极大简化无锁队列的实现，仅需使用简单的内存屏障即可确保线程安全。需要指出的是，SPSC 是针对其中一个环形缓冲区而言的。也就是说，可以创建用户线程 A 向 SQ 生产，内核负责从 SQ 消费；创建线程 B 从 CQ 消费，内核负责向 CQ 生产。
 
 Windows IOCP 则采用了不同的设计。用户进程仍然通过普通的 I/O API 发起 I/O 操作。创建 IOCP 创建后，可以在任意线程中获取 I/O 完成包。因此对于发起请求而言，采用的是 MPSC 模型；对于完成请求而言，采用的是 SPMC 模型。
 :::
 
 ### 系统调用
 
-io_uring 在内核层面提供了三个系统调用：
+`io_uring` 在内核层面提供了三个系统调用：
 
 - `io_uring_setup`：创建 io_uring 对象，分配 SQ 和 CQ。
 - `io_uring_register`：将资源与 io_uring 资源。
 - `io_uring_enter`：将 SQE 提交到 SQ 中。
 
-调用 `io_uring_setup` 会在内核中创建 io_uring 对象，并返回文件描述符。此时的 io_uring 对象仍然处在内核态，需要在用户态连续调用三个 `mmap` 将 SQ 和 CQ 映射到用户空间。
+调用 `io_uring_setup` 会在内核中创建 `io_uring` 对象，并返回文件描述符。此时的 io_uring 对象仍然处在内核态，需要在用户态连续调用三个 `mmap` 将 SQ 和 CQ 映射到用户空间。
 
 ```cpp
 int io_uring_fd = io_uring_setup(entries, &params);
@@ -94,7 +94,7 @@ SQ 和 CQ 的索引和实际数据是分开存储的。SQ 实际数据置于结�
 
 ### liburing
 
-由于 io_uring 系统调用接口过于原始，io_uring 作者 Jens Axboe 在系统调用的基础上封装了 [liburing](https://github.com/axboe/liburing){target="_blank"}。
+由于 `io_uring` 系统调用接口过于原始，io_uring 作者 Jens Axboe 在系统调用的基础上封装了 [liburing](https://github.com/axboe/liburing){target="_blank"}。
 
 :::{.callout-note}
 对于 Ubuntu 操作系统，需要先执行 `sudo apt-get install liburing-dev`{.language-bash} 安装这个库及其文档（库文档位于第 3 节）。
