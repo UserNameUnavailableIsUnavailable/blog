@@ -53,6 +53,8 @@ Windows IOCP 则采用了不同的设计。用户进程仍然通过普通的 I/O
 - `io_uring_register`：将资源与 io_uring 资源。
 - `io_uring_enter`：将 SQE 提交到 SQ 中。
 
+### `io_uring_setup`
+
 调用 `io_uring_setup` 会在内核中创建 `io_uring` 对象，并返回文件描述符。此时的 io_uring 对象仍然处在内核态，需要在用户态连续调用三个 `mmap` 将 SQ 和 CQ 映射到用户空间。
 
 ```cpp
@@ -92,6 +94,18 @@ void *cq_ring = mmap(0, params.cq_off.cqes + params.cq_entries * sizeof(struct i
 SQ 和 CQ 的索引和实际数据是分开存储的。SQ 实际数据置于结构末尾的原因在于 SQE 很大（64 字节），若将其存储在紧靠 SQ 的位置，受限于 SQ 索引必须连续存储的特性，整个队列将占用过多的连续内存页。
 :::
 
+### `io_uring_register`
+
+### `io_uring_enter`
+
+```c
+int io_uring_enter(unsigned int fd, unsigned int to_submit,
+                   unsigned int min_complete, unsigned int flags,
+                   sigset_t *sig);
+```
+
+`io_uring_enter` 向内核提交 I/O 操作请求（submit），也可用于等待 I/O 操作完成（wait），或同时提交和等待（submit and wait）。其中，`to_submit` 指定提交的 SQE 数量，`min_complete` 指定要等待的 CQE 数量。
+
 ### liburing
 
 由于 `io_uring` 系统调用接口过于原始，io_uring 作者 Jens Axboe 在系统调用的基础上封装了 [liburing](https://github.com/axboe/liburing){target="_blank"}。
@@ -102,10 +116,10 @@ SQ 和 CQ 的索引和实际数据是分开存储的。SQ 实际数据置于结�
 
 liburing 简化了 io_uring 使用的流程：
 
-- `io_uring_queue_init_params`：创建并初始化 io_uring。
+- `io_uring_queue_init_params`：创建并初始化 io_uring，本质是对 `io_uring_setup` 的封装。
 - `io_uring_get_sqe`：在 SQ 中创建新的 SQE。
 - `io_uring_prep_{op}`：针对不同的 IO 操作类型设置指定 SQE 的标志位，`{op}` 支持的操作有 `accept`、`read`、`recv`、`write`、`send` 等。
-- `io_uring_submit`：向内核提交 SQE，调用 `io_uring_enter`。
+- `io_uring_submit`：向内核提交 SQE，是对系统调用 `io_uring_enter` 的封装。
 - `io_uring_wait_cqe`：等待一个 CQE 返回并取出，**取出后前移 CQ 头指针**，若当前没有 CQE 返回，则阻塞。
 - `io_uring_peek_batch_cqe`：非阻塞检查并获取一批 CQEs，不操作队头指针，如果没有可用 CQE 也立即返回。
 - `io_uring_cqe_seen`：将指定的 CQE 标记为已处理。

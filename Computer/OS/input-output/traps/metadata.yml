@@ -2,9 +2,9 @@ tree:
   back: ..
   items:
   - title: 陷阱
-    href: null
+    path: null
     items:
     - title: "close on `exec`"
-      href: close-on-exec
+      path: close-on-exec
     - title: 缓冲模式
-      href: setvbuf
+      path: setvbuf

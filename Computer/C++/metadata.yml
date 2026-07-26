@@ -2,15 +2,14 @@ tree:
   back: ..
   items:
   - title: C++
-    href: index
     items:
     - title: 基础
-      href: basics
+      path: basics
     - title: STL
-      href: STL
+      path: STL
     - title: 元编程
-      href: metaprogramming
+      path: metaprogramming
     - title: 实践
-      href: practice
+      path: practice
     - title: 杂项
-      href: miscellaneous
+      path: miscellaneous

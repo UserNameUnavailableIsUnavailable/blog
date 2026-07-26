@@ -2,11 +2,10 @@ tree:
   back: ..
   items:
   - title: Java Web 开发
-    href: index
     items:
-      - title: 环境准备
-        href: environment
-      - title: 深入理解 Servlet
-        href: understanding-servlet
-      - title: Web 应用的目录结构
-        href: directory-structure
+    - title: 环境准备
+      path: environment
+    - title: 深入理解 Servlet
+      path: understanding-servlet
+    - title: Web 应用的目录结构
+      path: directory-structure

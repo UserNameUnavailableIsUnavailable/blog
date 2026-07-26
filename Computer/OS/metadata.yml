@@ -2,22 +2,24 @@ tree:
   back: ..
   items:
   - title: 操作系统
-    href: index
     items:
-    - title: 线程
-      href: thread
-    - title: 协程
-      href: coroutine
+    - title: 并发
+      path: concurrency
+      items:
+      - title: 线程
+        path: thread
+      - title: 进程
+        path: process
     - title: Unix 中的僵尸进程
-      href: defunct-process
+      path: defunct-process
     - title: Shell 重定向实现原理详解
-      href: redirection-expatiation
+      path: redirection-expatiation
     - title: 对虚拟化技术的小结——为何 Linux 下用不了 Virtual Box 了？
-      href: why-vbox-fails-in-linux
+      path: why-vbox-fails-in-linux
     - title: 内存管理
-      href: memory
+      path: memory
       items:
       - title: 概览
-        href: memory/introduction
+        path: introduction
       - title: 分页
-        href: memory/paging
+        path: paging

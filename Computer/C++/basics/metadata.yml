@@ -2,33 +2,33 @@ tree:
   back: ..
   items:
   - title: C++ 基础
-    href: ""
+    path: ""
     items:
     - title: Value Categories
-      href: value-categories
+      path: value-categories
     - title: 初始化列表
-      href: initializer-list
+      path: initializer-list
     - title: 面向对象基础
-      href: class
+      path: class
       items:
       - title: "`struct`{.language-cpp} 与 `class`{.language-cpp} 的区别"
-        href: class/struct_class
+        path: struct_class
       - title: 构造函数与析构函数
-        href: class/constructor_and_destructor
+        path: constructor_and_destructor
       - title: 赋值
-        href: class/assignment
+        path: assignment
       - title: 继承
-        href: class/inheritance
+        path: inheritance
         items:
         - title: 虚函数与多态
-          href: class/inheritance/polymorphism
+          path: polymorphism
         - title: 虚表剖析
-          href: class/inheritance/vtable
+          path: vtable
         - title: 多继承
-          href: class/inheritance/multi-inheritance
+          path: multi-inheritance
     - title: C/C++ 不常用关键字/说明符汇总
-      href: uncommon-keywords-and-specifiers
+      path: uncommon-keywords-and-specifiers
     - title: 类型转换
-      href: casting
+      path: casting
     - title: 函子
-      href: functor
+      path: functor

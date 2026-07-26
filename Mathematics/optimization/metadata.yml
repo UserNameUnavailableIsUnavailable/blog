@@ -1,13 +1,12 @@
-  tree:
-    back: ..
-    items:
-      - title: 最优化
-        href: index
-        items:
-        - title: 基本概念
-          href: basic-concepts
-        - title: 常用定理、结论
-          href: useful-tools
-        - title: Lagrange 法
-          href: lagrangian-methods
+tree:
+  back: ..
+  items:
+    - title: 最优化
+      items:
+      - title: 基本概念
+        path: basic-concepts
+      - title: 常用定理、结论
+        path: useful-tools
+      - title: Lagrange 法
+        path: lagrangian-methods
 

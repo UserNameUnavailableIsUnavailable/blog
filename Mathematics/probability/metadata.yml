@@ -2,7 +2,6 @@ tree:
   back: ..
   items:
   - title: Probability Theory
-    href: index
     items:
     - title: Conditions
-      href: conditions
+      path: conditions

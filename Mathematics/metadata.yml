@@ -2,8 +2,8 @@ tree:
   back: ..
   items:
   - title: 最优化
-    href: optimization
+    path: optimization
   - title: 概率论
-    href: probability
+    path: probability
   - title: 向量微积分
-    href: vector-calculus
+    path: vector-calculus

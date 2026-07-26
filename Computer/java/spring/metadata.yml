@@ -2,16 +2,15 @@ tree:
   back: ..
   items:
   - title: Spring 框架
-    href: index
     items:
     - title: 最小 Spring 框架示例
-      href: minimal
+      path: minimal
     - title: IoC 容器
-      href: IoC
+      path: IoC
       items:
       - title: 初探 IoC
-        href: IoC/introduction-to-IoC
+        path: IoC/introduction-to-IoC
       - title: 使用注解配置 IoC 容器
-        href: IoC/annotation-based-configuration
+        path: IoC/annotation-based-configuration
       - title: Bean 的重要性质
-        href: IoC/bean-nature
+        path: IoC/bean-nature

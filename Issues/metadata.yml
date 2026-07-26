@@ -2,7 +2,6 @@ tree:
   back: ..
   items:
   - title: 问题汇总
-    href: index
     items:
     - title: "2026 年问题汇总"
-      href: "2026"
+      path: "2026"

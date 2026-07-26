@@ -2,13 +2,12 @@ tree:
   back: ..
   items:
   - title: Golang 速通
-    href: index
     items:
     - title: Golang 项目结构
-      href: project
+      path: project
     - title: 优雅退出
-      href: graceful-shutdown
+      path: graceful-shutdown
     - title: "`go run` 命令终止的细节"
-      href: go-run-termination
+      path: go-run-termination
     - title: "`defer` 关键字"
-      href: defer
+      path: defer

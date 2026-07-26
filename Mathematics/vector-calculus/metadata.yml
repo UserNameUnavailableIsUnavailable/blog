@@ -1,12 +1,11 @@
-  tree:
-    back: ..
+tree:
+  back: ..
+  items:
+  - title: Vector Calculus
     items:
-    - title: Vector Calculus
-      href: index
-      items:
-      - title: Basics
-        href: basic-concepts
-      - title: Five Big Theorems
-        href: five-big-theorems
-      - title: Derivatives
-        href: derivatives
+    - title: Basics
+      path: basic-concepts
+    - title: Five Big Theorems
+      path: five-big-theorems
+    - title: Derivatives
+      path: derivatives

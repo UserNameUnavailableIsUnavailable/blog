@@ -2,9 +2,8 @@ tree:
   back: ..
   items:
   - title: 底层知识
-    href: index
     items:
     - title: 第二章笔记
-      href: ch02
+      path: ch02
     - title: 第三章笔记
-      href: ch03
+      path: ch03

@@ -2,7 +2,6 @@ tree:
   back: ..
   items:
   - title: 前端
-    href: index
     items:
     - title: 跨域问题
-      href: cross-origin
+      path: cross-origin

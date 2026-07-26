@@ -1,10 +1,9 @@
 tree:
   back: ..
   items:
-    - title: Macrohard Markdown 博客/幻灯片生成工具
-      href: index
-      items:
-      - title: Macrohard Markdown 博客/幻灯片生成工具介绍
-        href: blog
-      - title: 双栏排版示例
-        href: double-column
+  - title: Macrohard Markdown 博客/幻灯片生成工具
+    items:
+    - title: Macrohard Markdown 博客/幻灯片生成工具介绍
+      path: blog
+    - title: 双栏排版示例
+      path: double-column

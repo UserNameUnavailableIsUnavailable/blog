@@ -2,14 +2,16 @@ tree:
   back: ..
   items:
   - title: 思考
-    href: index
-  - title: "2025"
     items:
-    - title: 关于重构博客网站的一些想法
-      href: "2025/0520"
-    - title: 最近的一些计划
-      href: "2025/0830"
-  - title: "2026"
-    items:
-    - title: 2026 年一些计划
-      href: "2026/0213"
+    - title: "2025"
+      path: "2025"
+      items:
+      - title: 关于重构博客网站的一些想法
+        path: "0520"
+      - title: 最近的一些计划
+        path: "0830"
+    - title: "2026"
+      path: "2026"
+      items:
+      - title: 2026 年一些计划
+        path: "0213"

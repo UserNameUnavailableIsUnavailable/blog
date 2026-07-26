@@ -2,13 +2,12 @@ tree:
   back: ..
   items:
   - title: 基础
-    href: index
     items:
     - title: PyTorch 环境搭建
-      href: pytorch-setup
+      path: pytorch-setup
     - title: 张量
-      href: tensor
+      path: tensor
     - title: 变换
-      href: transform
+      path: transform
     - title: 上采样
-      href: upsample
+      path: upsample

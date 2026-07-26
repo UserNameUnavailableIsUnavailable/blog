@@ -2,9 +2,8 @@ tree:
   back: ..
   items:
   - title: 计算机中的数学
-    href: index
     items:
     - title: 递归问题
-      href: recurrent-problems
+      path: recurrent-problems
     - title: 整数除法优化
-      href: integer-division-optimization
+      path: integer-division-optimization

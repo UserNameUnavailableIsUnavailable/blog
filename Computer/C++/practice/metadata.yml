@@ -2,13 +2,12 @@ tree:
   back: ..
   items:
   - title: 实践
-    href: 
     items:
     - title: A `Translate` Example
-      href: a-translate-example
+      path: a-translate-example
     - title: 只读数据段
-      href: read-only-data-section
+      path: read-only-data-section
     - title: 判断字节序
-      href: endian
+      path: endian
     - title: vcpkg 与 CMake 集成
-      href: cmake-vcpkg
+      path: cmake-vcpkg

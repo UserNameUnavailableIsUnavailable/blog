@@ -2,7 +2,6 @@ tree:
   back: ..
   items:
   - title: Rust
-    href: index
     items:
     - title: 所有权
-      href: ownership
+      path: ownership

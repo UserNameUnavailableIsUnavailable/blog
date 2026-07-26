@@ -2,8 +2,8 @@ tree:
   back: ..
   items:
   - title: Java
-    href: index
-  - title: Java Web
-    href: web
-  - title: Spring 框架
-    href: spring
+    items:
+    - title: Java Web
+      path: web
+    - title: Spring 框架
+      path: spring
