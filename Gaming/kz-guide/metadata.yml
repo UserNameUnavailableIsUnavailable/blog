@@ -2,7 +2,7 @@ tree:
   back: ..
   items:
   - title: KZ 教程
-      - title: 准备工作
+  - title: 准备工作
     path: prepare
   - title: RUSH 插件
     path: rush-addon

@@ -1,0 +1,30 @@
+---
+title: 类型推导
+---
+
+## 模板类型推导
+
+类型推导同时取决于模板参数类型和表达式类型。
+
+### 引用丢弃
+
+```cpp
+template <typename T>
+void f(T t) {}
+
+int x = 10;
+int& rx = x;
+f(rx); // T = int
+```
+
+### CV 限定符保留
+
+```cpp
+template <typename T>
+void f(T t) {}
+
+int x = 10;
+const int& cx = x;
+f(cx); // T = const int
+```
+
