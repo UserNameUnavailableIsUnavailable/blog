@@ -14,7 +14,6 @@ title: 计算机
 - [底层原理](underlying-stuff)
 - [计算机中的数学](mathematics-in-computer)
 - [深度学习](deep-learning)
-- [网络](Network)
 - [Unix 开发](Unix-development)
 - [Win32 开发](Win32-development)
 - [CUDA](CUDA)

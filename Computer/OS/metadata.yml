@@ -6,10 +6,12 @@ tree:
     - title: 并发
       path: concurrency
       items:
-      - title: 线程
-        path: thread
       - title: 进程
         path: process
+      - title: 线程
+        path: thread
+      - title: 协程
+        path: coroutine
     - title: IO
       path: input-output
       items:
