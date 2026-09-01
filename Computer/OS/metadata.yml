@@ -10,6 +10,23 @@ tree:
         path: thread
       - title: 进程
         path: process
+    - title: IO
+      path: input-output
+      items:
+      - title: socket 网络编程
+        path: socket
+        items:
+        - title: UNIX 平台
+          path: UNIX
+        - title: Windows 平台
+          path: Windows
+      - title: IO 多路复用
+        path: multiplexing
+        items:
+        - title: Reactor
+          path: reactor
+        - title: Proactor
+          path: proactor
     - title: Unix 中的僵尸进程
       path: defunct-process
     - title: Shell 重定向实现原理详解
@@ -23,3 +40,10 @@ tree:
         path: introduction
       - title: 分页
         path: paging
+    - title: 陷阱
+      path: traps
+      items:
+      - title: "`setvbuf`"
+        path: setvbuf
+      - title: close on `exec`
+        path: close-on-exec
