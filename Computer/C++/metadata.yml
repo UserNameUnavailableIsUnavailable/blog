@@ -11,5 +11,5 @@ tree:
       path: metaprogramming
     - title: 实践
       path: practice
-    - title: 杂项
-      path: miscellaneous
+    - title: traps
+      path: 陷阱

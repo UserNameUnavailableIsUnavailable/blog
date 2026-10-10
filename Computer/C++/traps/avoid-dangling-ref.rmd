@@ -1,0 +1,45 @@
+---
+title: dangling references in coroutine
+---
+
+Given an `Object` class, which allows implicit conversion from classes like `String`.
+
+```cpp
+class Object
+{
+	Object(String s);
+};
+```
+
+Implicit construction is allowed by design, since a `String` is also a valid `Object`. We don't want to write stuff like `Object(String("foo"));`{.language-cpp} to create a string object.
+
+However, this can cause trouble is the following example.
+
+```cpp
+Task CreateTask(const Object& object);
+
+Task<void> OK()
+{
+	Object object;
+	Task task = CreateTask(object);
+	co_await task(); // OK, object lives in the coroutine frame
+}
+
+Task<void> Error()
+{
+	String s;
+	Task task = CreateTask(s); // creates a temporary object
+	co_await task(); // FATAL ERROR: the temporary object is destroyed
+}
+```
+
+`CreateTask()` creates a coroutine, which can be `co_await`ed. The const reference to `Object` is stored in the coroutine frame. The trap here is if we pass a `String`, which will be implicitly converted to a temporary `Object`, then the task will hold a dangling reference to the temporary `Object`. The temporary object is valid inside the `CreateTask()` function call and is destroyed once the function returns.
+
+To keep benefits of implicit conversion and avoid the above trap:
+
+```cpp
+Task CreateTask(Object&&) = delete;
+```
+
+In C++, xvalues belong to rvalue category. By marking the the rvalue version of CreateTask as delete, the compiler will not create a temporary instance of `Object.`
+

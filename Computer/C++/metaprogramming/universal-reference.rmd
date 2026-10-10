@@ -110,3 +110,31 @@ T* construct(VA&&... va)
     return new T(std::forward<VA>(va)...);
 }
 ```
+
+:::{.callout-note}
+
+**When is `&&` a Universal Reference?**
+
+Universal references (now formally called forwarding references) only occur when:
+
+- Type deduction is involved.
+- The form is `T&&` where `T` is a deduced template parameter or `auto&&`.
+
+A forwarding reference must be exactly `T&&` where `T` is a deduced template parameter. Any additional qualifiers break the special rule.
+
+```cpp
+// Universal reference (type deduction)
+template<typename T>
+void func(T&& param);  // T is deduced
+
+// Universal reference (auto&&)
+auto&& var = something;
+
+// NOT universal reference (named type)
+void func(Object&& param);  // Object is explicit → rvalue reference
+
+// NOT universal reference (const/volatile qualified)
+template<typename T>
+void func(const T&& param);  // const prevents forwarding reference
+```
+:::

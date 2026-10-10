@@ -1,0 +1,20 @@
+---
+title: 视图
+---
+
+视图用来代替大段的查询语句，创建后可作为普通的表使用，方便复用和重构。
+
+## 语法
+
+```sql
+create view StudentInfo as
+select student_id, student_name from student_table
+where ...;
+```
+
+通常来说，视图只使用 `select`。`update`、`delete` 等限制非常多。
+
+## 作用
+
+- 方便复用和重构。
+- 权限控制。某些用户不具有某些敏感表的访问权限，通过视图包装后可以访问，同时可以限制用户对表的写操作。

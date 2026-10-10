@@ -1,5 +1,5 @@
 ---
-title: Miscellaneous C++ Problems
+title: "`std::string`'s underlying buffer"
 ---
 
 ## How to get the **writeable** underlying buffer of `std::string` before C++ 17?

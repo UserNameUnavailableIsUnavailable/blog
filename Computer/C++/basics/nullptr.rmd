@@ -1,0 +1,34 @@
+---
+title: Why do we need `nullptr`?
+---
+
+In C/C++, it is legal to convert `0` to any pointer:
+
+```cpp
+int* p = 0; // OK
+int* q = '\0'; // OK
+int* q = 0L; // OK
+int* r = 1; // ERR
+```
+
+`NULL`{.language-c} can be defined as `(0)` or `((void*)0)` depending on implementation.
+Typically, most C compilers define `NULL`{.language-c} as `((void*)0)` in C, and `(0)` in C++, since C++ does not allow implicit conversion between `void*` and other pointer types:
+
+```cpp
+char* bar = malloc(114514); // OK in C, ERR in C++
+```
+
+Such implicit conversion may cause issues, especially in function overload.
+
+```cpp
+function foo(int x);
+funtion foo(int* x);
+
+foo(0); // undefined behavior
+```
+
+You may ask C does not support overloading, then why does C23 introduce `nullptr`{.language-cpp}?
+
+C actually has [`_Generic`](https://en.cppreference.com/c/language/generic), though not used very often, to provide something like generic. It basically dispatches parameters to different functions with different identifiers based on the detected parameter types, this may cause the same issue with C++ overloading, see also [Predefined null pointer constant (since C23)](https://en.cppreference.com/c/language/nullptr).
+
+Anyways, `nullptr`{.language-cpp} has cleaner semantics than `((void*)0)` or `(0)`.

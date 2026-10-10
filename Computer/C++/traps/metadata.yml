@@ -1,0 +1,7 @@
+tree:
+  back: ..
+  items:
+  - title: "`std::string`'s underlying buffer"
+    path: string-underlying-buffer
+  - title: Avoid dangling references
+    path: avoid-dangling-ref
